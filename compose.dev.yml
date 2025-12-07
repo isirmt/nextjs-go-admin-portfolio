@@ -27,7 +27,7 @@ services:
       PORT: "3000"
       DATABASE_URL: "postgresql://app:app_password@db:5432/appdb"
     volumes:
-      - ./:/app
+      - ./frontend:/app
       - node_modules_dev:/app/node_modules
     depends_on:
       db:
