@@ -3,5 +3,8 @@
   "editor.formatOnSave": true,
   "prettier.prettierPath": "./frontend/node_modules/prettier",
   "prettier.configPath": "./frontend/prettier.config.mjs",
-  "prettier.ignorePath": "./frontend/.prettierignore"
+  "prettier.ignorePath": "./frontend/.prettierignore",
+  "[go]": {
+    "editor.defaultFormatter": "golang.go"
+  }
 }
