@@ -29,6 +29,7 @@ CREATE TABLE
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW (),
         accent_color CHAR(7) NOT NULL DEFAULT '#000000',
         description TEXT,
+        is_public BOOLEAN NOT NULL DEFAULT FALSE,
         thumbnail_image_id UUID REFERENCES common_images (id) ON DELETE SET NULL
     );
 
