@@ -2,13 +2,12 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"realtime/internal/query"
-	"time"
 
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	gormlog "gorm.io/gorm/logger"
@@ -63,22 +62,54 @@ func main() {
 		maxUploadSize: 20 << 20, // 20 MiB
 	}
 
-	mux := http.NewServeMux()
-	// todo:write handle here.
-	mux.HandleFunc("GET /healthz", pSrv.handleHealth)
+	router := echo.New()
+	router.HideBanner = true
+	router.Use(middleware.Logger())
+	router.Use(middleware.Recover())
+	router.Use(middleware.CORSWithConfig(corsConfig(pSrv.allowedOrigin)))
 
-	addr := fmt.Sprintf("%s:%s", getEnv("HOST", "0.0.0.0"), getEnv("PORT", "4000"))
+	router.GET("/healthz", pSrv.handleHealth)
+	epImages := router.Group("/images")
+	epImages.GET("", pSrv.handleGetImages)
+	epImages.POST("", pSrv.handleUploadImage)
+	epImages.GET("/:id", pSrv.handleServeImage)
+	epImages.DELETE("/:id", pSrv.handleDeleteImage)
+	epImages.PUT("/:id", pSrv.handleUpdateImage)
+
+	addr := getEnv("HOST", "0.0.0.0") + ":" + getEnv("PORT", "4000")
 	log.Printf("backend listening on %s", addr)
 
-	handler := pSrv.withCORS(logRequests(mux))
-	if err := http.ListenAndServe(addr, handler); err != nil {
+	if err := router.Start(addr); err != nil {
 		log.Fatalf("[server error] %v", err)
 	}
 }
 
-func (pSrv *server) handleHealth(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-	_, _ = w.Write([]byte("ok"))
+func (pSrv *server) handleHealth(c echo.Context) error {
+	return c.String(200, "ok")
+}
+
+func (pSrv *server) handleGetImages(c echo.Context) error {
+	images, err := pSrv.q.CommonImage.WithContext(c.Request().Context()).Find()
+	if err != nil {
+		return c.String(500, "internal server error")
+	}
+	return c.JSON(200, images)
+}
+
+func (pSrv *server) handleUploadImage(c echo.Context) error {
+	return c.String(200, "ok")
+}
+
+func (pSrv *server) handleServeImage(c echo.Context) error {
+	return c.String(200, "ok")
+}
+
+func (pSrv *server) handleDeleteImage(c echo.Context) error {
+	return c.String(200, "ok")
+}
+
+func (pSrv *server) handleUpdateImage(c echo.Context) error {
+	return c.String(200, "ok")
 }
 
 func getEnv(key string, fallback string) string {
@@ -88,32 +119,16 @@ func getEnv(key string, fallback string) string {
 	return fallback
 }
 
-// ログ出力
-func logRequests(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-		next.ServeHTTP(w, r)
-		log.Printf("%s %s %s", r.Method, r.URL.Path, time.Since(start))
-	})
-}
+func corsConfig(allowedOrigin string) middleware.CORSConfig {
+	cfg := middleware.CORSConfig{
+		AllowOrigins: []string{"*"},
+		AllowMethods: []string{echo.GET, echo.POST, echo.PUT, echo.DELETE, echo.OPTIONS},
+		AllowHeaders: []string{"Content-Type", "Authorization"},
+	}
 
-// CORS設定
-func (s *server) withCORS(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		origin := s.allowedOrigin
-		if origin != "" {
-			origin = "*"
-		}
+	if allowedOrigin != "" {
+		cfg.AllowOrigins = []string{allowedOrigin}
+	}
 
-		w.Header().Set("Access-Control-Allow-Origin", origin)
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Credentials", "true")
-
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-		}
-
-		next.ServeHTTP(w, r)
-	})
+	return cfg
 }
