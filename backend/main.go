@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"realtime/internal/query"
 	"time"
 
 	"gorm.io/driver/postgres"
@@ -15,6 +16,7 @@ import (
 
 type server struct {
 	db            *gorm.DB
+	q             *query.Query
 	uploadDir     string
 	allowedOrigin string
 	maxUploadSize uint32
@@ -55,6 +57,7 @@ func main() {
 
 	pSrv := &server{
 		db:            gormDb,
+		q:             query.Use(gormDb),
 		uploadDir:     uploadDir,
 		allowedOrigin: os.Getenv("ALLOWED_ORIGIN"),
 		maxUploadSize: 20 << 20, // 20 MiB
