@@ -2,9 +2,15 @@
 
 import React, { useCallback, useRef, useState } from "react";
 
+type FileUploadingState = {
+  file: File,
+  status: "pending" | "uploading" | "success" | "error"
+}
+
 export default function DAndDContentBox() {
   const inputtingFileButtonRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [fileUploadingStates, setFileUploadingStates] = useState<FileUploadingState[]>([]);
 
   const handleDragOver = useCallback((e: React.DragEvent<HTMLInputElement>) => {
     e.preventDefault();
@@ -17,8 +23,15 @@ export default function DAndDContentBox() {
   }, [])
 
   const handleFiles = useCallback((files: FileList | File[]) => {
-    console.log(files);
-  }, [])
+    const additionalFileUploadingStates: FileUploadingState[] = []
+    Array.from(files).forEach((item) => {
+      additionalFileUploadingStates.push({
+        file: item,
+        status: "pending"
+      })
+    });
+    setFileUploadingStates([...fileUploadingStates, ...additionalFileUploadingStates]);
+  }, [fileUploadingStates])
 
   const handleDrop = useCallback((e: React.DragEvent<HTMLInputElement>) => {
     e.preventDefault();
