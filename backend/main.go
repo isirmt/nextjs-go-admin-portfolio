@@ -2,12 +2,16 @@ package main
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"io"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
 	"realtime/internal/query"
 	"realtime/internal/query/model"
+	"strconv"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -153,7 +157,41 @@ func (pSrv *server) handleUploadImage(c echo.Context) error {
 }
 
 func (pSrv *server) handleServeImage(c echo.Context) error {
-	return c.String(200, "ok")
+	imageID := c.Param("id")
+	if imageID == "" {
+		return c.String(400, "image id is required")
+	}
+	fmt.Println("Serving image ID:", imageID)
+
+	ctx := c.Request().Context()
+	image, err := pSrv.q.CommonImage.WithContext(ctx).Where(pSrv.q.CommonImage.ID.Eq(imageID)).First()
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return c.String(404, "image not found")
+		}
+		return c.String(500, "failed to fetch image")
+	}
+
+	filePath := filepath.Join(pSrv.uploadDir, image.FilePath)
+	file, err := os.Open(filePath)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return c.String(404, "image file missing")
+		}
+		return c.String(500, "failed to open image")
+	}
+	defer file.Close()
+
+	fileInfo, err := file.Stat()
+	if err != nil {
+		return c.String(500, "failed to read image info")
+	}
+
+	c.Response().Header().Set(echo.HeaderContentType, image.MimeType)
+	c.Response().Header().Set(echo.HeaderContentLength, strconv.FormatInt(image.FileSize, 10))
+
+	http.ServeContent(c.Response(), c.Request(), image.FileName, fileInfo.ModTime(), file)
+	return nil
 }
 
 func (pSrv *server) handleDeleteImage(c echo.Context) error {

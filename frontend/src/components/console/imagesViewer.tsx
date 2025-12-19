@@ -1,8 +1,8 @@
+/* eslint-disable @next/next/no-img-element */
 'use client';
 
 import { CommonImage } from "@/types/images/common";
 import { useEffect, useState } from "react";
-import Image from "next/image";
 
 
 export default function ImagesViewer() {
@@ -26,9 +26,9 @@ export default function ImagesViewer() {
     <div className="flex flex-wrap gap-4">
       {images.map((image, imageIdx) => (
         <button
-        className="size-36 bg-white relative" 
-        key={imageIdx}>
-          <Image src={`/api/${image.id}`} alt={image.file_name} fill objectFit="contain" />
+          className="size-48 bg-white relative"
+          key={imageIdx}>
+          <img src={`/api/images/${image.id}`} alt={image.file_name} className="size-full object-contain" />
         </button>))}
     </div>
   </section>
