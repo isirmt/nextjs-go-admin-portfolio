@@ -56,10 +56,10 @@ export default function ImageSelectingBox({
               className={`absolute top-0 left-0 z-1 flex size-full items-center justify-center transition-all duration-200 ${selectedIds.includes(image.id) ? "bg-[#65a6df]/75" : "bg-transparent hover:bg-[#65a6df]/75"}`}
             >
               <div
-                className={`flex size-16 items-center justify-center rounded-full border-4 border-white transition-all duration-200 ${selectedIds.includes(image.id) ? "opacity-100" : "opacity-0"}`}
+                className={`font-dot flex size-16 items-center justify-center rounded-full border-4 border-white drop-shadow transition-all duration-200 ${selectedIds.includes(image.id) ? "opacity-100" : "opacity-0"}`}
               >
                 {multiple && selectedIds.includes(image.id) && (
-                  <div className="text-4xl leading-none font-black whitespace-nowrap text-white">
+                  <div className="text-4xl leading-none font-semibold whitespace-nowrap text-white">
                     {selectedIds.findIndex((id) => image.id === id) + 1}
                   </div>
                 )}
