@@ -15,12 +15,8 @@ export default function ImageSelectingBox({
   multiple,
 }: ImageSelectingBoxProps) {
   const { images, refreshImages } = useImagesContext();
-  const {
-    isDragging,
-    dragProps,
-    fileInputProps,
-    openFileDialog,
-  } = useDragAndDropUploader({ onUploadSuccess: refreshImages });
+  const { isDragging, dragProps, fileInputProps, openFileDialog } =
+    useDragAndDropUploader({ onUploadSuccess: refreshImages });
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   useEffect(() => {
@@ -32,12 +28,18 @@ export default function ImageSelectingBox({
       {...dragProps}
       className={`relative flex w-full flex-col gap-4 bg-[#f8f8f8] p-4`}
     >
-      <div className={`pointer-events-none absolute z-10 flex items-center justify-center size-full top-0 left-0 border-2 border-dotted transition-all bg-[#dcbff3]/80 border-[#7e11d1] duration-200 ${isDragging ? "opacity-100" : "opacity-0"}`}>
-        <p className="text-[#7e11d1] text-4xl font-black">ドロップしてアップロード</p>
+      <div
+        className={`pointer-events-none absolute top-0 left-0 z-10 flex size-full items-center justify-center border-2 border-dotted border-[#7e11d1] bg-[#dcbff3]/80 transition-all duration-200 ${isDragging ? "opacity-100" : "opacity-0"}`}
+      >
+        <p className="text-4xl font-black text-[#7e11d1]">
+          ドロップしてアップロード
+        </p>
       </div>
       <div className="flex justify-between">
-        <div className="bg-[#054a5c] text-[#c6f4ff] px-2 py-0.5 font-bold rounded">{multiple ? "複数選択可能" : "一つを選択"}</div>
-        <div className="text-sm select-none flex gap-2 leading-none items-center">
+        <div className="rounded bg-[#054a5c] px-2 py-0.5 font-bold text-[#c6f4ff]">
+          {multiple ? "複数選択可能" : "一つを選択"}
+        </div>
+        <div className="flex items-center gap-2 text-sm leading-none select-none">
           <div>ドラッグ&ドロップでアップロード</div>
           <div>または</div>
           <button
@@ -45,7 +47,7 @@ export default function ImageSelectingBox({
               e.preventDefault();
               openFileDialog();
             }}
-            className="border-b hover:border-[#7e11d1] hover:text-[#7e11d1] cursor-pointer"
+            className="cursor-pointer border-b hover:border-[#7e11d1] hover:text-[#7e11d1]"
           >
             ファイルを選択
           </button>

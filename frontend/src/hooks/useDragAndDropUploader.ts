@@ -35,47 +35,52 @@ export function useDragAndDropUploader({
     setIsDragging(false);
   }, []);
 
-  const uploadFile = useCallback(async (id: string, file: File) => {
-    setFileUploadingStates((prev) =>
-      prev.map((state) =>
-        state.id === id ? { ...state, status: "uploading" } : state,
-      ),
-    );
+  const uploadFile = useCallback(
+    async (id: string, file: File) => {
+      setFileUploadingStates((prev) =>
+        prev.map((state) =>
+          state.id === id ? { ...state, status: "uploading" } : state,
+        ),
+      );
 
-    const formData = new FormData();
-    formData.append("file", file);
+      const formData = new FormData();
+      formData.append("file", file);
 
-    try {
-      const response = await backendApi("/images", {
-        method: "POST",
-        body: formData,
-      });
+      try {
+        const response = await backendApi("/images", {
+          method: "POST",
+          body: formData,
+        });
 
-      if (!response.ok) {
-        throw new Error("アップロードに失敗");
+        if (!response.ok) {
+          throw new Error("アップロードに失敗");
+        }
+
+        setFileUploadingStates((prev) =>
+          prev.map((state) =>
+            state.id === id ? { ...state, status: "success" } : state,
+          ),
+        );
+        await onUploadSuccess?.();
+      } catch (error) {
+        setFileUploadingStates((prev) =>
+          prev.map((state) =>
+            state.id === id
+              ? {
+                  ...state,
+                  status: "error",
+                  errorMessage:
+                    error instanceof Error
+                      ? error.message
+                      : "アップロードに失敗",
+                }
+              : state,
+          ),
+        );
       }
-
-      setFileUploadingStates((prev) =>
-        prev.map((state) =>
-          state.id === id ? { ...state, status: "success" } : state,
-        ),
-      );
-      await onUploadSuccess?.();
-    } catch (error) {
-      setFileUploadingStates((prev) =>
-        prev.map((state) =>
-          state.id === id
-            ? {
-              ...state,
-              status: "error",
-              errorMessage:
-                error instanceof Error ? error.message : "アップロードに失敗",
-            }
-            : state,
-        ),
-      );
-    }
-  }, [onUploadSuccess]);
+    },
+    [onUploadSuccess],
+  );
 
   const enqueueUploads = useCallback(
     (files: FileList | File[]) => {

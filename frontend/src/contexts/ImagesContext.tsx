@@ -1,7 +1,14 @@
 "use client";
 
 import { CommonImage } from "@/types/images/common";
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 type ImagesContextValue = {
   images: CommonImage[];
@@ -26,7 +33,9 @@ export function ImagesProvider({ children }: { children: React.ReactNode }) {
       const parsedImages = (await response.json()) as CommonImage[];
       setImages(parsedImages);
     } catch (error) {
-      setError(error instanceof Error ? error.message : "画像の取得に失敗しました");
+      setError(
+        error instanceof Error ? error.message : "画像の取得に失敗しました",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -41,11 +50,14 @@ export function ImagesProvider({ children }: { children: React.ReactNode }) {
     [images, isLoading, error, fetchImages],
   );
 
-  return <ImagesContext.Provider value={value}>{children}</ImagesContext.Provider>;
+  return (
+    <ImagesContext.Provider value={value}>{children}</ImagesContext.Provider>
+  );
 }
 
 export function useImagesContext() {
   const context = useContext(ImagesContext);
-  if (!context) throw new Error("useImagesContext must be used within ImagesProvider");
+  if (!context)
+    throw new Error("useImagesContext must be used within ImagesProvider");
   return context;
 }
