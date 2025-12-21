@@ -12,6 +12,7 @@ import (
 	"realtime/internal/query"
 	"realtime/internal/query/model"
 	"strconv"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -83,6 +84,9 @@ func main() {
 	epImages.GET("/:id", pSrv.handleServeImage)
 	epImages.DELETE("/:id", pSrv.handleDeleteImage)
 	epImages.PUT("/:id", pSrv.handleUpdateImage)
+	epTechStacks := router.Group("/tech-stacks")
+	epTechStacks.GET("", pSrv.handleGetTechStacks)
+	epTechStacks.POST("", pSrv.handleCreateTechStack)
 
 	addr := getEnv("HOST", "0.0.0.0") + ":" + getEnv("PORT", "4000")
 	log.Printf("backend listening on %s", addr)
@@ -200,6 +204,58 @@ func (pSrv *server) handleDeleteImage(c echo.Context) error {
 
 func (pSrv *server) handleUpdateImage(c echo.Context) error {
 	return c.String(200, "ok")
+}
+
+func (pSrv *server) handleGetTechStacks(c echo.Context) error {
+	ctx := c.Request().Context()
+	stacks, err := pSrv.q.CommonTechStack.WithContext(ctx).Order(pSrv.q.CommonTechStack.Name).Find()
+	if err != nil {
+		return c.String(500, "failed to fetch tech stacks")
+	}
+
+	return c.JSON(200, stacks)
+}
+
+func (pSrv *server) handleCreateTechStack(c echo.Context) error {
+	req := c.Request()
+	if err := req.ParseMultipartForm(int64(pSrv.maxUploadSize)); err != nil {
+		return c.String(400, "invalid form data")
+	}
+
+	name := strings.TrimSpace(c.FormValue("name"))
+	if name == "" {
+		return c.String(400, "name is required")
+	}
+
+	var logoImageID *string
+	logoVal := strings.TrimSpace(c.FormValue("logo_image_id"))
+	if logoVal != "" {
+		logoImageID = &logoVal
+	}
+
+	ctx := c.Request().Context()
+	if logoImageID != nil {
+		_, err := pSrv.q.CommonImage.WithContext(ctx).
+			Where(pSrv.q.CommonImage.ID.Eq(*logoImageID)).
+			First()
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return c.String(400, "logo image not found")
+			}
+			return c.String(500, "failed to validate logo image")
+		}
+	}
+
+	newStack := &model.CommonTechStack{
+		Name:        name,
+		LogoImageID: logoImageID,
+	}
+
+	if err := pSrv.q.CommonTechStack.WithContext(ctx).Create(newStack); err != nil {
+		return c.String(500, "failed to create tech stack")
+	}
+
+	return c.JSON(http.StatusCreated, newStack)
 }
 
 func getEnv(key string, fallback string) string {

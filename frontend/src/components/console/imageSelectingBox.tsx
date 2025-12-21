@@ -55,44 +55,47 @@ export default function ImageSelectingBox({
         </div>
       </div>
       <div className="flex w-full flex-wrap gap-4">
-        {images.map((image, imageIdx) => (
-          <button
-            key={imageIdx}
-            className={`relative aspect-square size-24 cursor-pointer overflow-hidden rounded border-2 bg-white shadow-[.25rem_.25rem_0_0_#67c8e6] ${selectedIds.includes(image.id) ? "border-[#65a6df]" : "border-[#67c8e6]"}`}
-            onClick={(e) => {
-              e.preventDefault();
-              setSelectedIds((prev) => {
-                if (multiple) {
+        {images.map((image, imageIdx) => {
+          const isSelected = selectedIds.includes(image.id);
+          return (
+            <button
+              key={imageIdx}
+              className={`relative aspect-square size-24 cursor-pointer overflow-hidden rounded border-2 bg-white shadow-[.25rem_.25rem_0_0_#67c8e6] ${isSelected ? "border-[#65a6df]" : "border-[#67c8e6]"}`}
+              onClick={(e) => {
+                e.preventDefault();
+                setSelectedIds((prev) => {
                   const exists = prev.includes(image.id);
-                  return exists
-                    ? prev.filter((id) => id !== image.id)
-                    : [...prev, image.id];
-                }
-
-                return [image.id];
-              });
-            }}
-          >
-            <div
-              className={`absolute top-0 left-0 z-1 flex size-full items-center justify-center transition-all duration-200 ${selectedIds.includes(image.id) ? "bg-[#65a6df]/75" : "bg-transparent hover:bg-[#65a6df]/75"}`}
+                  if (multiple) {
+                    return exists
+                      ? prev.filter((id) => id !== image.id)
+                      : [...prev, image.id];
+                  } else {
+                    return exists ? [] : [image.id];
+                  }
+                });
+              }}
             >
               <div
-                className={`font-dot flex size-16 items-center justify-center rounded-full border-4 border-white drop-shadow transition-all duration-200 ${selectedIds.includes(image.id) ? "opacity-100" : "opacity-0"}`}
+                className={`absolute top-0 left-0 z-1 flex size-full items-center justify-center transition-all duration-200 ${isSelected ? "bg-[#65a6df]/75" : "bg-transparent hover:bg-[#65a6df]/75"}`}
               >
-                {multiple && selectedIds.includes(image.id) && (
-                  <div className="text-4xl leading-none font-semibold whitespace-nowrap text-white">
-                    {selectedIds.findIndex((id) => image.id === id) + 1}
-                  </div>
-                )}
+                <div
+                  className={`font-dot flex size-16 items-center justify-center rounded-full border-4 border-white drop-shadow transition-all duration-200 ${isSelected ? "opacity-100" : "opacity-0"}`}
+                >
+                  {multiple && isSelected && (
+                    <div className="text-4xl leading-none font-semibold whitespace-nowrap text-white">
+                      {selectedIds.findIndex((id) => image.id === id) + 1}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-            <img
-              className="pointer-events-none relative object-contain"
-              src={`/api/images/${image.id}`}
-              alt={image.file_name}
-            />
-          </button>
-        ))}
+              <img
+                className="pointer-events-none relative object-contain"
+                src={`/api/images/${image.id}`}
+                alt={image.file_name}
+              />
+            </button>
+          );
+        })}
       </div>
     </div>
   );

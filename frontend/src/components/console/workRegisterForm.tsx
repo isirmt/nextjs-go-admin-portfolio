@@ -2,55 +2,33 @@
 
 import React, { useCallback, useState } from "react";
 import ImageSelectingBox from "./imageSelectingBox";
-
-type LabelBoxProps = {
-  children: React.ReactNode;
-  isLong?: boolean;
-};
-
-type LabelTextProps = {
-  children: React.ReactNode;
-  required?: boolean;
-};
-
-const LabelBox = ({ children, isLong }: LabelBoxProps) => {
-  return (
-    <div
-      className={`flex flex-col gap-2 px-2 ${isLong ? "col-span-2" : "col-span-1"}`}
-    >
-      {children}
-    </div>
-  );
-};
-
-const LabelText = ({ children, required }: LabelTextProps) => {
-  return (
-    <p className="flex gap-0.5 text-sm font-bold text-[#7e11d1]">
-      {children}
-      {required && <span className="text-[#e04787]">*</span>}
-    </p>
-  );
-};
+import StackSelectingBox from "./stackSelectingBox";
+import { LabelBox, LabelText } from "./labelBlock";
 
 export default function WorkRegisterForm() {
   const [inputSlug, setInputSlug] = useState<string>("");
   const [inputTitle, setInputTitle] = useState<string>("");
   const [inputComment, setInputComment] = useState<string>("");
   const [inputPublishedDate, setInputPublishedDate] = useState<string>("");
-  const [inputAccentColor, setInputAccentColor] = useState<string>("");
+  const [inputAccentColor, setInputAccentColor] = useState<string>("#000000");
   const [inputThumbnailImage, setInputThumbnailImage] = useState<string>("");
   const [inputWorkImages, setInputWorkImages] = useState<string[]>([]);
+  const [inputTechStacks, setInputTechStacks] = useState<string[]>([]);
 
   const handleSubmit = useCallback((e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
   }, []);
 
   const handleThumbnailSelected = useCallback((id: string[]) => {
-    setInputThumbnailImage(id.length ? id[0] : "");
+    setInputThumbnailImage(id[0] ?? "");
   }, []);
 
-  const handleWorkImagesSelected = useCallback((id: string[]) => {
-    setInputWorkImages(id);
+  const handleWorkImagesSelected = useCallback((ids: string[]) => {
+    setInputWorkImages(ids);
+  }, []);
+
+  const handleTechStacksSelected = useCallback((ids: string[]) => {
+    setInputTechStacks(ids);
   }, []);
 
   return (
@@ -90,6 +68,13 @@ export default function WorkRegisterForm() {
               className="w-full border-b-2 border-[#c68ef0] px-4 py-2 outline-none focus:border-[#7e11d1]"
             />
           </LabelBox>
+          <LabelBox isLong>
+            <LabelText required>技術構成</LabelText>
+            <StackSelectingBox onChange={handleTechStacksSelected} />
+          </LabelBox>
+          <LabelBox isLong>
+            <LabelText required>関連リンク</LabelText>
+          </LabelBox>
           <LabelBox>
             <LabelText required>作成日</LabelText>
             <input
@@ -106,7 +91,7 @@ export default function WorkRegisterForm() {
             <input
               name="accent_color"
               value={inputAccentColor}
-              onChange={(e) => setInputAccentColor(e.target.value)}
+              onChange={(e) => setInputAccentColor(e.target.value || "#000000")}
               type="color"
               required
               className="w-full"
@@ -119,6 +104,9 @@ export default function WorkRegisterForm() {
           <LabelBox isLong>
             <LabelText required>参考画像</LabelText>
             <ImageSelectingBox multiple onChange={handleWorkImagesSelected} />
+          </LabelBox>
+          <LabelBox isLong>
+            <LabelText required>説明</LabelText>
           </LabelBox>
           <LabelBox isLong>
             <input
