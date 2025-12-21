@@ -37,6 +37,11 @@ type createWorkURL struct {
 	URL   string `json:"url"`
 }
 
+type createTechStackRequest struct {
+	Name        string  `json:"name"`
+	LogoImageID *string `json:"logo_image_id"`
+}
+
 type createWorkRequest struct {
 	Slug             string          `json:"slug"`
 	Title            string          `json:"title"`
@@ -241,23 +246,24 @@ func (pSrv *server) handleGetTechStacks(c echo.Context) error {
 }
 
 func (pSrv *server) handleCreateTechStack(c echo.Context) error {
-	req := c.Request()
-	if err := req.ParseMultipartForm(int64(pSrv.maxUploadSize)); err != nil {
-		return c.String(400, "invalid form data")
+	var req createTechStackRequest
+	if err := c.Bind(&req); err != nil {
+		return c.String(400, "invalid request body")
 	}
 
-	name := strings.TrimSpace(c.FormValue("name"))
+	name := strings.TrimSpace(req.Name)
 	if name == "" {
 		return c.String(400, "name is required")
 	}
 
-	var logoImageID *string
-	logoVal := strings.TrimSpace(c.FormValue("logo_image_id"))
-	if logoVal != "" {
-		logoImageID = &logoVal
-	}
-
 	ctx := c.Request().Context()
+	var logoImageID *string
+	if req.LogoImageID != nil {
+		trimmed := strings.TrimSpace(*req.LogoImageID)
+		if trimmed != "" {
+			logoImageID = &trimmed
+		}
+	}
 	if logoImageID != nil {
 		_, err := pSrv.q.CommonImage.WithContext(ctx).
 			Where(pSrv.q.CommonImage.ID.Eq(*logoImageID)).

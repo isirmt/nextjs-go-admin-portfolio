@@ -69,14 +69,15 @@ export default function StackSelectingBox({
     setSubmitError(null);
 
     try {
-      const formData = new FormData();
-      formData.append("name", trimmedName);
-      if (logoImageId) {
-        formData.append("logo_image_id", logoImageId);
-      }
       const response = await backendApi("/tech-stacks", {
         method: "POST",
-        body: formData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: trimmedName,
+          logo_image_id: logoImageId || undefined,
+        }),
       });
 
       if (!response.ok) {
