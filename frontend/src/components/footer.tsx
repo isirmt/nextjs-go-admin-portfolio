@@ -5,8 +5,6 @@ import { InformationSite } from "./latestNews";
 import { useEffect, useRef } from "react";
 import type p5 from "p5";
 
-const CANVAS_BG = [103, 200, 230] as const;
-
 export default function Footer() {
   const footerRef = useRef<HTMLElement | null>(null);
   const sketchContainerRef = useRef<HTMLDivElement | null>(null);
@@ -41,15 +39,25 @@ export default function Footer() {
           canvasSizeRef.current.height = rect.height;
 
           p.createCanvas(rect.width, rect.height);
-          p.background(...CANVAS_BG);
-          p.noLoop();
+          p.background(0, 0);
+          p.frameRate(30);
         };
 
         p.draw = () => {
+          p.background("#3e5289");
+          p.noStroke();
+          p.fill("#e7c127");
+          p.beginShape();
+          p.vertex(p.width / 2, p.height);
+          p.vertex(p.width / 2 - 50, 0);
+          p.vertex(0, 0);
+          p.vertex(0, p.height / 2);
+          p.endShape();
+
           p.textAlign(p.CENTER, p.CENTER);
           p.textSize(20);
           p.fill(255);
-          p.text(`(${p.width},${p.height})`, p.width / 2, p.height / 2 /*20*/);
+          p.text(`(${p.width},${p.height})`, p.width / 2, p.height / 2);
         };
       };
 
@@ -85,7 +93,6 @@ export default function Footer() {
           canvasSizeRef.current.width,
           canvasSizeRef.current.height,
         );
-        p5InstanceRef.current.background(...CANVAS_BG);
       }
     };
 
