@@ -3,23 +3,20 @@
 import { useCallback, useEffect, useRef } from "react";
 import type p5 from "p5";
 import {
-  linearTimeBasedMapping,
-  quadraticTimeBasedMapping,
+  colorQuadraticTimeBasedMapping,
+  vertex2DLinearTimeBasedMapping,
 } from "@/lib/sketch/timeBasedMapping";
+import { useTransitionState } from "./useTransitionState";
+import type { ColorRGB, Vertex2D } from "@/types/sketch/common";
 
 export type SpotlightSide = "left" | "right" | "none";
 
-type Vertex = {
-  x: number;
-  y: number;
-};
-
-const BG_IDLE: [number, number, number] = [0x67, 0xc8, 0xe6];
-const BG_ACTIVE: [number, number, number] = [0x3e, 0x52, 0x89];
+const BG_IDLE: ColorRGB = [0x67, 0xc8, 0xe6];
+const BG_ACTIVE: ColorRGB = [0x3e, 0x52, 0x89];
 const SPOTLIGHT_COLOR = "#e7c127";
 const TRANSITION_DURATION_MS = 150;
 
-const NORMALIZED_VERTICES: Record<SpotlightSide, Vertex[]> = {
+const NORMALIZED_VERTICES: Record<SpotlightSide, Vertex2D[]> = {
   left: [
     { x: 0.5, y: 1 },
     { x: 0.45, y: 0 },
@@ -46,28 +43,30 @@ const createVertices = (side: SpotlightSide, width: number, height: number) =>
     y: point.y * height,
   }));
 
-const cloneVertices = (vertices: Vertex[]): Vertex[] =>
-  vertices.map((vertex) => ({ ...vertex }));
-
 export function useSpotlightSketch() {
   const footerRef = useRef<HTMLElement | null>(null);
   const sketchContainerRef = useRef<HTMLDivElement | null>(null);
   const p5InstanceRef = useRef<p5 | null>(null);
   const canvasSizeRef = useRef({ width: 0, height: 0 });
   const spotlightTargetRef = useRef<SpotlightSide>("none");
-  const currentVerticesRef = useRef<Vertex[]>([]);
-  const currentColorRef = useRef<[number, number, number]>([...BG_IDLE]);
-  const transitionRef = useRef({
-    fromVertices: createVertices("none", 0, 0),
-    toVertices: createVertices("none", 0, 0),
-    fromColor: [...BG_IDLE] as [number, number, number],
-    toColor: [...BG_IDLE] as [number, number, number],
-    progress: 1,
-    toSide: "none" as SpotlightSide,
-    duration: TRANSITION_DURATION_MS,
-    width: 0,
-    height: 0,
-  });
+  const activeSpotlightRef = useRef<SpotlightSide>("none");
+  const appliedSizeRef = useRef({ width: 0, height: 0 });
+
+  const vertexTransition = useTransitionState<Vertex2D[]>(
+    createVertices("none", 0, 0),
+    (from, to, progress) =>
+      from.map((fromVertex, index) => {
+        const target = to[index] ?? to[to.length - 1] ?? fromVertex;
+        return vertex2DLinearTimeBasedMapping(fromVertex, target, progress);
+      }),
+    TRANSITION_DURATION_MS,
+  );
+
+  const colorTransition = useTransitionState<ColorRGB>(
+    [...BG_IDLE],
+    colorQuadraticTimeBasedMapping,
+    TRANSITION_DURATION_MS,
+  );
 
   useEffect(() => {
     let isMounted = true;
@@ -93,76 +92,42 @@ export function useSpotlightSketch() {
           canvasSizeRef.current.height = rect.height;
 
           p.createCanvas(rect.width, rect.height);
-          currentVerticesRef.current = createVertices(
-            "none",
-            rect.width,
-            rect.height,
+          appliedSizeRef.current = { width: rect.width, height: rect.height };
+          vertexTransition.jumpTo(
+            createVertices("none", rect.width, rect.height),
           );
-          currentColorRef.current = [...BG_IDLE];
-          transitionRef.current = {
-            ...transitionRef.current,
-            fromVertices: cloneVertices(currentVerticesRef.current),
-            toVertices: cloneVertices(currentVerticesRef.current),
-            fromColor: [...BG_IDLE],
-            toColor: [...BG_IDLE],
-            progress: 1,
-            toSide: "none",
-            width: rect.width,
-            height: rect.height,
-          };
+          colorTransition.jumpTo([...BG_IDLE]);
+          activeSpotlightRef.current = "none";
           p.frameRate(60);
         };
 
         p.draw = () => {
-          const transition = transitionRef.current;
           const targetSide = spotlightTargetRef.current;
           const sizeChanged =
-            transition.width !== p.width || transition.height !== p.height;
+            appliedSizeRef.current.width !== p.width ||
+            appliedSizeRef.current.height !== p.height;
 
-          if (targetSide !== transition.toSide || sizeChanged) {
-            transition.fromVertices = currentVerticesRef.current.length
-              ? cloneVertices(currentVerticesRef.current)
-              : createVertices(transition.toSide, p.width, p.height);
-            transition.toVertices = createVertices(
-              targetSide,
-              p.width,
-              p.height,
+          if (targetSide !== activeSpotlightRef.current || sizeChanged) {
+            vertexTransition.startTransition(
+              createVertices(targetSide, p.width, p.height),
             );
-            transition.fromColor = [...currentColorRef.current];
-            transition.toColor =
-              targetSide === "none" ? [...BG_IDLE] : [...BG_ACTIVE];
-            transition.progress = 0;
-            transition.toSide = targetSide;
-            transition.width = p.width;
-            transition.height = p.height;
+            const nextColor =
+              targetSide === "none"
+                ? ([...BG_IDLE] as ColorRGB)
+                : ([...BG_ACTIVE] as ColorRGB);
+            colorTransition.startTransition(nextColor);
+            activeSpotlightRef.current = targetSide;
+            appliedSizeRef.current = { width: p.width, height: p.height };
           }
 
-          if (transition.progress < 1) {
-            transition.progress = Math.min(
-              1,
-              transition.progress + p.deltaTime / transition.duration,
-            );
-          }
-
-          const rate = transition.progress;
-          const interpolatedVertices = transition.fromVertices.map(
-            (fromVertex, index) => {
-              const toVertex = transition.toVertices[index];
-              return {
-                x: linearTimeBasedMapping(fromVertex.x, toVertex.x, rate),
-                y: linearTimeBasedMapping(fromVertex.y, toVertex.y, rate),
-              };
-            },
-          );
-          currentVerticesRef.current = interpolatedVertices;
-
-          const interpolatedColor = transition.fromColor.map((start, index) =>
-            quadraticTimeBasedMapping(start, transition.toColor[index], rate),
-          ) as [number, number, number];
-          currentColorRef.current = interpolatedColor;
+          const interpolatedVertices = vertexTransition.step(p.deltaTime);
+          const interpolatedColor = colorTransition.step(p.deltaTime);
+          const isAnimating =
+            vertexTransition.getProgress() < 1 ||
+            colorTransition.getProgress() < 1;
 
           p.background(...interpolatedColor);
-          if (targetSide !== "none" || transition.progress < 1) {
+          if (targetSide !== "none" || isAnimating) {
             p.noStroke();
             p.fill(SPOTLIGHT_COLOR);
             p.beginShape();
@@ -186,7 +151,7 @@ export function useSpotlightSketch() {
         p5InstanceRef.current = null;
       }
     };
-  }, []);
+  }, [colorTransition, vertexTransition]);
 
   useEffect(() => {
     const footerElement = footerRef.current;
