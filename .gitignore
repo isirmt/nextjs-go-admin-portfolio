@@ -44,5 +44,11 @@ next-env.d.ts
 
 .pnpm-store
 /frontend/.pnpm-store
+/backend/tmp
 
 Caddyfile
+
+.gopath
+.gocache
+
+uploads

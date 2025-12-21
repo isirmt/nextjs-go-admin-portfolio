@@ -1,4 +1,4 @@
-example.com {
+http://localhost:3000 {
   @nextauth path /api/auth*
   handle @nextauth {
     reverse_proxy web:3000
