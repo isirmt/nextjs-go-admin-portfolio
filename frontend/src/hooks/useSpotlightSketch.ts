@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef } from "react";
-import type p5 from "p5";
 import {
   colorQuadraticTimeBasedMapping,
   vertex2DLinearTimeBasedMapping,
@@ -13,8 +12,23 @@ export type SpotlightSide = "left" | "right" | "none";
 
 const BG_IDLE: ColorRGB = [0x67, 0xc8, 0xe6];
 const BG_ACTIVE: ColorRGB = [0x3e, 0x52, 0x89];
-const SPOTLIGHT_COLOR = "#e7c127";
+const SPOTLIGHT_COLOR: ColorRGB = [0xe7, 0xc1, 0x27];
 const TRANSITION_DURATION_MS = 150;
+
+const VERTEX_SHADER_SOURCE = `
+attribute vec2 a_position;
+void main() {
+  gl_Position = vec4(a_position, 0.0, 1.0);
+}
+`;
+
+const FRAGMENT_SHADER_SOURCE = `
+precision mediump float;
+uniform vec4 u_color;
+void main() {
+  gl_FragColor = u_color;
+}
+`;
 
 const NORMALIZED_VERTICES: Record<SpotlightSide, Vertex2D[]> = {
   left: [
@@ -37,6 +51,104 @@ const NORMALIZED_VERTICES: Record<SpotlightSide, Vertex2D[]> = {
   ],
 };
 
+const toNormalizedColor = (color: ColorRGB) =>
+  color.map((channel) => channel / 255) as [number, number, number];
+
+const SPOTLIGHT_COLOR_NORMALIZED = toNormalizedColor(SPOTLIGHT_COLOR);
+
+const convertVerticesToClipSpace = (
+  vertices: Vertex2D[],
+  width: number,
+  height: number,
+) =>
+  vertices.flatMap(({ x, y }) => {
+    const clipX = width === 0 ? 0 : (x / width) * 2 - 1;
+    const clipY = height === 0 ? 0 : 1 - (y / height) * 2;
+    return [clipX, clipY];
+  });
+
+type WebGLResources = {
+  gl: WebGLRenderingContext;
+  program: WebGLProgram;
+  vertexBuffer: WebGLBuffer;
+  positionLocation: number;
+  colorLocation: WebGLUniformLocation | null;
+  canvas: HTMLCanvasElement;
+};
+
+const createShader = (
+  gl: WebGLRenderingContext,
+  type: number,
+  source: string,
+): WebGLShader | null => {
+  const shader = gl.createShader(type);
+  if (!shader) {
+    console.error("Failed to create shader");
+    return null;
+  }
+
+  gl.shaderSource(shader, source);
+  gl.compileShader(shader);
+
+  const compiled = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
+  if (!compiled) {
+    console.error(gl.getShaderInfoLog(shader));
+    gl.deleteShader(shader);
+    return null;
+  }
+
+  return shader;
+};
+
+const createProgram = (
+  gl: WebGLRenderingContext,
+  vertexSource: string,
+  fragmentSource: string,
+): WebGLProgram | null => {
+  const deleteShaders = (
+    vertexShader: WebGLShader,
+    fragmentShader: WebGLShader,
+  ) => {
+    gl.deleteShader(vertexShader);
+    gl.deleteShader(fragmentShader);
+  };
+
+  const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexSource);
+  const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentSource);
+
+  if (!vertexShader || !fragmentShader) {
+    if (vertexShader) {
+      gl.deleteShader(vertexShader);
+    }
+    if (fragmentShader) {
+      gl.deleteShader(fragmentShader);
+    }
+    return null;
+  }
+
+  const program = gl.createProgram();
+  if (!program) {
+    deleteShaders(vertexShader, fragmentShader);
+    return null;
+  }
+
+  gl.attachShader(program, vertexShader);
+  gl.attachShader(program, fragmentShader);
+  gl.linkProgram(program);
+
+  const linked = gl.getProgramParameter(program, gl.LINK_STATUS);
+  if (!linked) {
+    console.error(gl.getProgramInfoLog(program));
+    gl.deleteProgram(program);
+    deleteShaders(vertexShader, fragmentShader);
+    return null;
+  }
+
+  deleteShaders(vertexShader, fragmentShader);
+
+  return program;
+};
+
 const createVertices = (side: SpotlightSide, width: number, height: number) =>
   NORMALIZED_VERTICES[side].map((point) => ({
     x: point.x * width,
@@ -46,11 +158,12 @@ const createVertices = (side: SpotlightSide, width: number, height: number) =>
 export function useSpotlightSketch() {
   const footerRef = useRef<HTMLElement | null>(null);
   const sketchContainerRef = useRef<HTMLDivElement | null>(null);
-  const p5InstanceRef = useRef<p5 | null>(null);
-  const canvasSizeRef = useRef({ width: 0, height: 0 });
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const spotlightTargetRef = useRef<SpotlightSide>("none");
   const activeSpotlightRef = useRef<SpotlightSide>("none");
   const appliedSizeRef = useRef({ width: 0, height: 0 });
+  const animationFrameRef = useRef<number | null>(null);
+  const webglResourcesRef = useRef<WebGLResources | null>(null);
 
   const vertexTransition = useTransitionState<Vertex2D[]>(
     createVertices("none", 0, 0),
@@ -71,84 +184,207 @@ export function useSpotlightSketch() {
   useEffect(() => {
     let isMounted = true;
 
-    const init = async () => {
-      if (!sketchContainerRef.current) {
-        return;
-      }
+    const container = sketchContainerRef.current;
+    if (!container) {
+      return;
+    }
 
-      const { default: P5 } = await import("p5");
+    const canvas = document.createElement("canvas");
+    canvas.style.width = "100%";
+    canvas.style.height = "100%";
+    canvas.style.display = "block";
+    container.replaceChildren(canvas);
+    canvasRef.current = canvas;
 
-      if (!isMounted || !sketchContainerRef.current) {
-        return;
-      }
+    const gl =
+      canvas.getContext("webgl", {
+        alpha: false,
+        antialias: true,
+        premultipliedAlpha: false,
+      }) ?? undefined;
 
-      const sketch = (p: p5) => {
-        p.setup = () => {
-          const rect = footerRef.current?.getBoundingClientRect() ?? {
-            width: 0,
-            height: 0,
-          };
-          canvasSizeRef.current.width = rect.width;
-          canvasSizeRef.current.height = rect.height;
-
-          p.createCanvas(rect.width, rect.height);
-          appliedSizeRef.current = { width: rect.width, height: rect.height };
-          vertexTransition.jumpTo(
-            createVertices("none", rect.width, rect.height),
-          );
-          colorTransition.jumpTo([...BG_IDLE]);
-          activeSpotlightRef.current = "none";
-          p.frameRate(60);
-        };
-
-        p.draw = () => {
-          const targetSide = spotlightTargetRef.current;
-          const sizeChanged =
-            appliedSizeRef.current.width !== p.width ||
-            appliedSizeRef.current.height !== p.height;
-
-          if (targetSide !== activeSpotlightRef.current || sizeChanged) {
-            vertexTransition.startTransition(
-              createVertices(targetSide, p.width, p.height),
-            );
-            const nextColor =
-              targetSide === "none"
-                ? ([...BG_IDLE] as ColorRGB)
-                : ([...BG_ACTIVE] as ColorRGB);
-            colorTransition.startTransition(nextColor);
-            activeSpotlightRef.current = targetSide;
-            appliedSizeRef.current = { width: p.width, height: p.height };
-          }
-
-          const interpolatedVertices = vertexTransition.step(p.deltaTime);
-          const interpolatedColor = colorTransition.step(p.deltaTime);
-          const isAnimating =
-            vertexTransition.getProgress() < 1 ||
-            colorTransition.getProgress() < 1;
-
-          p.background(...interpolatedColor);
-          if (targetSide !== "none" || isAnimating) {
-            p.noStroke();
-            p.fill(SPOTLIGHT_COLOR);
-            p.beginShape();
-            interpolatedVertices.forEach((vertex) => {
-              p.vertex(vertex.x, vertex.y);
-            });
-            p.endShape(p.CLOSE);
-          }
-        };
+    if (!gl) {
+      console.error("WebGL is not supported");
+      return () => {
+        canvas.remove();
+        canvasRef.current = null;
       };
+    }
 
-      p5InstanceRef.current = new P5(sketch, sketchContainerRef.current);
+    const program = createProgram(
+      gl,
+      VERTEX_SHADER_SOURCE,
+      FRAGMENT_SHADER_SOURCE,
+    );
+    if (!program) {
+      canvas.remove();
+      canvasRef.current = null;
+      return () => {};
+    }
+
+    const vertexBuffer = gl.createBuffer();
+    if (!vertexBuffer) {
+      gl.deleteProgram(program);
+      canvas.remove();
+      canvasRef.current = null;
+      return () => {};
+    }
+
+    const positionLocation = gl.getAttribLocation(program, "a_position");
+    const colorLocation = gl.getUniformLocation(program, "u_color");
+
+    webglResourcesRef.current = {
+      gl,
+      program,
+      vertexBuffer,
+      positionLocation,
+      colorLocation,
+      canvas,
     };
 
-    init();
+    const rect = footerRef.current?.getBoundingClientRect() ?? {
+      width: 0,
+      height: 0,
+    };
+    const initialWidth = Math.max(0, Math.floor(rect.width));
+    const initialHeight = Math.max(0, Math.floor(rect.height));
+    canvas.width = initialWidth;
+    canvas.height = initialHeight;
+    appliedSizeRef.current = { width: initialWidth, height: initialHeight };
+
+    vertexTransition.jumpTo(
+      createVertices("none", initialWidth, initialHeight),
+    );
+    colorTransition.jumpTo([...BG_IDLE]);
+    activeSpotlightRef.current = "none";
+    gl.viewport(0, 0, initialWidth, initialHeight);
+
+    let lastTimestamp = performance.now();
+
+    const render = (timestamp: number) => {
+      if (!isMounted) {
+        return;
+      }
+
+      const deltaTime = timestamp - lastTimestamp;
+      lastTimestamp = timestamp;
+
+      const resources = webglResourcesRef.current;
+      if (!resources) {
+        return;
+      }
+
+      const {
+        gl: currentGl,
+        canvas: currentCanvas,
+        vertexBuffer: currentBuffer,
+      } = resources;
+
+      const targetSide = spotlightTargetRef.current;
+      const sizeChanged =
+        appliedSizeRef.current.width !== currentCanvas.width ||
+        appliedSizeRef.current.height !== currentCanvas.height;
+
+      if (targetSide !== activeSpotlightRef.current || sizeChanged) {
+        vertexTransition.startTransition(
+          createVertices(targetSide, currentCanvas.width, currentCanvas.height),
+        );
+        const nextColor =
+          targetSide === "none"
+            ? ([...BG_IDLE] as ColorRGB)
+            : ([...BG_ACTIVE] as ColorRGB);
+        colorTransition.startTransition(nextColor);
+        activeSpotlightRef.current = targetSide;
+        appliedSizeRef.current = {
+          width: currentCanvas.width,
+          height: currentCanvas.height,
+        };
+      }
+
+      const interpolatedVertices = vertexTransition.step(
+        Math.max(0, deltaTime),
+      );
+      const interpolatedColor = colorTransition.step(Math.max(0, deltaTime));
+      const isAnimating =
+        vertexTransition.getProgress() < 1 || colorTransition.getProgress() < 1;
+
+      currentGl.viewport(0, 0, currentCanvas.width, currentCanvas.height);
+      currentGl.clearColor(
+        interpolatedColor[0] / 255,
+        interpolatedColor[1] / 255,
+        interpolatedColor[2] / 255,
+        1,
+      );
+      currentGl.clear(currentGl.COLOR_BUFFER_BIT);
+
+      if (
+        (targetSide !== "none" || isAnimating) &&
+        currentCanvas.width > 0 &&
+        currentCanvas.height > 0
+      ) {
+        const vertices = convertVerticesToClipSpace(
+          interpolatedVertices,
+          currentCanvas.width,
+          currentCanvas.height,
+        );
+
+        currentGl.bindBuffer(currentGl.ARRAY_BUFFER, currentBuffer);
+        currentGl.bufferData(
+          currentGl.ARRAY_BUFFER,
+          new Float32Array(vertices),
+          currentGl.STREAM_DRAW,
+        );
+
+        currentGl.useProgram(resources.program);
+        currentGl.enableVertexAttribArray(resources.positionLocation);
+        currentGl.vertexAttribPointer(
+          resources.positionLocation,
+          2,
+          currentGl.FLOAT,
+          false,
+          0,
+          0,
+        );
+        if (resources.colorLocation) {
+          currentGl.uniform4f(
+            resources.colorLocation,
+            SPOTLIGHT_COLOR_NORMALIZED[0],
+            SPOTLIGHT_COLOR_NORMALIZED[1],
+            SPOTLIGHT_COLOR_NORMALIZED[2],
+            1,
+          );
+        }
+
+        currentGl.drawArrays(
+          currentGl.TRIANGLE_FAN,
+          0,
+          interpolatedVertices.length,
+        );
+      }
+
+      animationFrameRef.current = requestAnimationFrame(render);
+    };
+
+    animationFrameRef.current = requestAnimationFrame((timestamp) => {
+      lastTimestamp = timestamp;
+      render(timestamp);
+    });
 
     return () => {
       isMounted = false;
-      if (p5InstanceRef.current) {
-        p5InstanceRef.current.remove();
-        p5InstanceRef.current = null;
+      if (animationFrameRef.current !== null) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+      const resources = webglResourcesRef.current;
+      if (resources) {
+        resources.gl.deleteBuffer(resources.vertexBuffer);
+        resources.gl.deleteProgram(resources.program);
+      }
+      webglResourcesRef.current = null;
+      if (canvasRef.current) {
+        canvasRef.current.remove();
+        canvasRef.current = null;
       }
     };
   }, [colorTransition, vertexTransition]);
@@ -163,14 +399,15 @@ export function useSpotlightSketch() {
       const nextWidth = Math.max(0, Math.floor(width));
       const nextHeight = Math.max(0, Math.floor(height));
 
-      canvasSizeRef.current.width = nextWidth;
-      canvasSizeRef.current.height = nextHeight;
+      const canvas = canvasRef.current;
+      if (canvas) {
+        canvas.width = nextWidth;
+        canvas.height = nextHeight;
+      }
 
-      if (p5InstanceRef.current) {
-        p5InstanceRef.current.resizeCanvas(
-          canvasSizeRef.current.width,
-          canvasSizeRef.current.height,
-        );
+      const resources = webglResourcesRef.current;
+      if (resources) {
+        resources.gl.viewport(0, 0, nextWidth, nextHeight);
       }
     };
 
