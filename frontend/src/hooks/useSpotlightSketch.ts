@@ -15,18 +15,19 @@ const BG_ACTIVE: ColorRGB = [0x3e, 0x52, 0x89];
 const SPOTLIGHT_COLOR: ColorRGB = [0xe7, 0xc1, 0x27];
 const TRANSITION_DURATION_MS = 150;
 
-const VERTEX_SHADER_SOURCE = `
-attribute vec2 a_position;
+const VERTEX_SHADER_SOURCE = `#version 300 es
+in vec2 a_position;
 void main() {
   gl_Position = vec4(a_position, 0.0, 1.0);
 }
 `;
 
-const FRAGMENT_SHADER_SOURCE = `
+const FRAGMENT_SHADER_SOURCE = `#version 300 es
 precision mediump float;
 uniform vec4 u_color;
+out vec4 fragColor;
 void main() {
-  gl_FragColor = u_color;
+  fragColor = u_color;
 }
 `;
 
@@ -68,7 +69,7 @@ const convertVerticesToClipSpace = (
   });
 
 type WebGLResources = {
-  gl: WebGLRenderingContext;
+  gl: WebGL2RenderingContext;
   program: WebGLProgram;
   vertexBuffer: WebGLBuffer;
   positionLocation: number;
@@ -77,7 +78,7 @@ type WebGLResources = {
 };
 
 const createShader = (
-  gl: WebGLRenderingContext,
+  gl: WebGL2RenderingContext,
   type: number,
   source: string,
 ): WebGLShader | null => {
@@ -101,7 +102,7 @@ const createShader = (
 };
 
 const createProgram = (
-  gl: WebGLRenderingContext,
+  gl: WebGL2RenderingContext,
   vertexSource: string,
   fragmentSource: string,
 ): WebGLProgram | null => {
@@ -196,12 +197,11 @@ export function useSpotlightSketch() {
     container.replaceChildren(canvas);
     canvasRef.current = canvas;
 
-    const gl =
-      canvas.getContext("webgl", {
-        alpha: false,
-        antialias: true,
-        premultipliedAlpha: false,
-      }) ?? undefined;
+    const gl = canvas.getContext("webgl2", {
+      alpha: false,
+      antialias: true,
+      premultipliedAlpha: false,
+    }) as WebGL2RenderingContext | null;
 
     if (!gl) {
       console.error("WebGL is not supported");
