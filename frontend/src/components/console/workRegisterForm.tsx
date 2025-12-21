@@ -14,7 +14,9 @@ export default function WorkRegisterForm() {
   const [inputSlug, setInputSlug] = useState<string>("");
   const [inputTitle, setInputTitle] = useState<string>("");
   const [inputComment, setInputComment] = useState<string>("");
-  const [inputPublishedDate, setInputPublishedDate] = useState<string>(() => new Date().toISOString().split("T")[0]);
+  const [inputPublishedDate, setInputPublishedDate] = useState<string>(
+    () => new Date().toISOString().split("T")[0],
+  );
   const [inputAccentColor, setInputAccentColor] = useState<string>("#000000");
   const [inputThumbnailImage, setInputThumbnailImage] = useState<string>("");
   const [inputWorkImages, setInputWorkImages] = useState<string[]>([]);

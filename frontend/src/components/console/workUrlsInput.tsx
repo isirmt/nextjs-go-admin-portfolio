@@ -23,10 +23,7 @@ type WorkUrlsInputProps = {
   onChange: (items: WorkUrlItem[]) => void;
 };
 
-export default function WorkUrlsInput({
-  items,
-  onChange,
-}: WorkUrlsInputProps) {
+export default function WorkUrlsInput({ items, onChange }: WorkUrlsInputProps) {
   const handleFieldChange = useCallback(
     (id: string, field: "label" | "url", value: string) => {
       onChange(
@@ -51,10 +48,10 @@ export default function WorkUrlsInput({
 
   if (!items.length) {
     return (
-      <div className="flex flex-col justify-center items-center gap-4">
+      <div className="flex flex-col items-center justify-center gap-4">
         <button
           onClick={handleAddItem}
-          className="flex items-center justify-center text-xl cursor-pointer border border-[#7e11d1] size-8 leading-none font-bold text-[#7e11d1] transition hover:bg-[#7e11d1] hover:text-white"
+          className="flex size-8 cursor-pointer items-center justify-center border border-[#7e11d1] text-xl leading-none font-bold text-[#7e11d1] transition hover:bg-[#7e11d1] hover:text-white"
         >
           +
         </button>
@@ -63,18 +60,18 @@ export default function WorkUrlsInput({
   }
 
   return (
-    <div className="flex flex-col justify-center items-center gap-4">
+    <div className="flex flex-col items-center justify-center gap-4">
       {items.map((item, index) => (
         <div
           key={item.id}
-          className="flex flex-col w-full gap-3 border border-dotted border-[#c68ef0] bg-white/60 p-4"
+          className="flex w-full flex-col gap-3 border border-dotted border-[#c68ef0] bg-white/60 p-4"
         >
-          <div className="flex select-none items-center justify-between text-sm font-semibold text-[#7e11d1]">
+          <div className="flex items-center justify-between text-sm font-semibold text-[#7e11d1] select-none">
             <span>LINK {index + 1}</span>
             <button
               type="button"
               onClick={() => handleRemove(item.id)}
-              className="text-xs text-[#e04787] underline underline-offset-2 cursor-pointer hover:text-[#b03062]"
+              className="cursor-pointer text-xs text-[#e04787] underline underline-offset-2 hover:text-[#b03062]"
             >
               削除
             </button>
@@ -84,7 +81,9 @@ export default function WorkUrlsInput({
             <input
               className="w-full border-b-2 border-[#c68ef0] px-4 py-1 outline-none focus:border-[#7e11d1]"
               value={item.label}
-              onChange={(e) => handleFieldChange(item.id, "label", e.target.value)}
+              onChange={(e) =>
+                handleFieldChange(item.id, "label", e.target.value)
+              }
               placeholder="Example"
             />
           </label>
@@ -94,7 +93,9 @@ export default function WorkUrlsInput({
               type="url"
               className="w-full border-b-2 border-[#c68ef0] px-4 py-1 outline-none focus:border-[#7e11d1]"
               value={item.url}
-              onChange={(e) => handleFieldChange(item.id, "url", e.target.value)}
+              onChange={(e) =>
+                handleFieldChange(item.id, "url", e.target.value)
+              }
               placeholder="https://example.com"
             />
           </label>
@@ -102,11 +103,10 @@ export default function WorkUrlsInput({
       ))}
       <button
         onClick={handleAddItem}
-        className="flex items-center justify-center text-xl cursor-pointer border border-[#7e11d1] size-8 leading-none font-bold text-[#7e11d1] transition hover:bg-[#7e11d1] hover:text-white"
+        className="flex size-8 cursor-pointer items-center justify-center border border-[#7e11d1] text-xl leading-none font-bold text-[#7e11d1] transition hover:bg-[#7e11d1] hover:text-white"
       >
         +
       </button>
     </div>
   );
 }
-
