@@ -20,6 +20,16 @@ const totalLineStyle = (count: number, staggerSeconds = 0.12) =>
 function WorkCard({ work }: { work: Work }) {
   const { images } = useImagesContext();
   const { techs } = useTechsContext();
+  const { ref: cardBackAnimationRef, isActive: isCardBackActive } =
+    useInViewAnimation<HTMLDivElement>({
+      threshold: 0.25,
+      delayMs: 100 + 300,
+    });
+  const { ref: cardFrontAnimationRef, isActive: isCardFrontActive } =
+    useInViewAnimation<HTMLDivElement>({
+      threshold: 0.25,
+      delayMs: 0 + 300,
+    });
   const imageInfo = useMemo(
     () =>
       work.thumbnail_image_id
@@ -69,6 +79,14 @@ function WorkCard({ work }: { work: Work }) {
           <div className="absolute bottom-0 -left-full flex w-full flex-col items-start rounded-tr-xl bg-[#6354eb] py-3 pr-6 pl-[20%] transition-all duration-400 ease-out group-hover:left-[-10%]">
             <div className="text-xl font-black text-white">{work.title}</div>
           </div>
+          <div
+            ref={cardBackAnimationRef}
+            className={`animate-iv-out-down absolute top-0 left-0 z-4 size-full bg-[#6354eb] ${isCardBackActive ? "is-active" : ""}`}
+          />
+          <div
+            ref={cardFrontAnimationRef}
+            className={`animate-iv-out-down absolute top-0 left-0 z-5 size-full bg-[#94d5f3] ${isCardFrontActive ? "is-active" : ""}`}
+          />
         </div>
       </button>
       <div className="flex w-full justify-start gap-2">
@@ -96,7 +114,7 @@ export default function WorksList() {
     });
 
   return (
-    <div className="flex flex-col items-center justify-center bg-[#cff7f7] px-20 pt-20 pb-40">
+    <div className="flex flex-col items-center justify-center bg-[#f8f8f8] px-20 pt-20 pb-40">
       <div
         ref={lineAnimationRef}
         className="relative mt-10 mb-30 drop-shadow-2xl drop-shadow-[#a9e4e4]"

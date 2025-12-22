@@ -37,6 +37,15 @@
   }
 }
 
+@keyframes iv-out-down {
+  0% {
+    top: 0;
+  }
+  100% {
+    top: 100%;
+  }
+}
+
 .animate-iv-line line,
 .animate-iv-line path {
   stroke-dasharray: var(--work-line-length, 2000);
@@ -51,6 +60,14 @@
   animation-delay: calc(
     var(--work-line-index, 0) * var(--work-line-stagger, 0.12s)
   );
+}
+
+.animate-iv-out-down {
+  top: 0;
+}
+
+.animate-iv-out-down.is-active {
+  animation: iv-out-down 0.3s ease-out forwards;
 }
 
 @media (prefers-color-scheme: dark) {
