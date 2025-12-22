@@ -115,6 +115,7 @@ export default function WorksList() {
 
   return (
     <div className="flex flex-col items-center justify-center bg-[#f8f8f8] px-20 pt-20 pb-40">
+      <div className="pointer-events-none absolute top-0 left-0 z-0 size-full bg-[url('/noise_color_128.png')] opacity-20 mix-blend-multiply" />
       <div
         ref={lineAnimationRef}
         className="relative mt-10 mb-30 drop-shadow-2xl drop-shadow-[#a9e4e4]"
