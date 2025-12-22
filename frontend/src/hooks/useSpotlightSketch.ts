@@ -266,6 +266,14 @@ export function useSpotlightSketch() {
       return () => {};
     }
 
+    gl.blendEquationSeparate(gl.FUNC_ADD, gl.FUNC_ADD);
+    gl.blendFuncSeparate(
+      gl.ONE_MINUS_DST_COLOR,
+      gl.ONE_MINUS_SRC_COLOR,
+      gl.ONE,
+      gl.ONE_MINUS_SRC_ALPHA,
+    );
+
     const positionLocation = gl.getAttribLocation(program, "a_position");
     const colorLocation = gl.getUniformLocation(program, "u_color");
 
@@ -403,7 +411,7 @@ export function useSpotlightSketch() {
             1,
           );
         }
-
+        gl.disable(gl.BLEND);
         currentGl.drawArrays(
           currentGl.TRIANGLE_FAN,
           0,
@@ -421,6 +429,7 @@ export function useSpotlightSketch() {
           width: currentCanvas.width,
           height: currentCanvas.height,
         };
+        if (targetSide !== "none") gl.enable(gl.BLEND);
         snowflakes.forEach((flake) => {
           flake.update(safeDelta, bounds);
           flake.render({
