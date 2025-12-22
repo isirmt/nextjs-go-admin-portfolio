@@ -20,6 +20,7 @@
   }
   25% {
     transform: scale(50%);
+    filter: blur(3px);
   }
   50% {
     transform: scale(110%);
