@@ -2,12 +2,14 @@
 "use client";
 
 import { useImagesContext } from "@/contexts/imagesContext";
+import { useTechsContext } from "@/contexts/techsContext";
 import { useWorksContext } from "@/contexts/worksContext";
 import { Work } from "@/types/works/common";
 import { useMemo } from "react";
 
 function WorkCard({ work }: { work: Work }) {
   const { images } = useImagesContext();
+  const { techs } = useTechsContext();
   const imageInfo = useMemo(
     () =>
       work.thumbnail_image_id
@@ -15,15 +17,18 @@ function WorkCard({ work }: { work: Work }) {
         : undefined,
     [images, work.thumbnail_image_id],
   );
-  const thumbnailAlt = imageInfo?.file_name ?? `${work.title}のサムネイル`;
+  const thumbnailAlt = useMemo(
+    () => imageInfo?.file_name ?? `${work.title}のサムネイル`,
+    [imageInfo, work.title],
+  );
 
   return (
     <div>
       <button className="cursor-pointer border">
-        <div className="flex aspect-square size-48 items-center justify-center overflow-hidden rounded">
+        <div className="flex aspect-square size-72 items-center justify-center overflow-hidden rounded bg-white">
           <img
             src={`/api/images/${work.thumbnail_image_id}/raw`}
-            className="size-48 object-contain"
+            className="size-full object-contain"
             alt={thumbnailAlt}
           />
         </div>

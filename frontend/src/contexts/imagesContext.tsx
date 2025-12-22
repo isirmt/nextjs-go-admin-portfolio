@@ -42,7 +42,7 @@ export function ImagesProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    void fetchImages();
+    fetchImages();
   }, [fetchImages]);
 
   const value = useMemo(

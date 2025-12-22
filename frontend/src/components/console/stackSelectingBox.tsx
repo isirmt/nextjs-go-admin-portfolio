@@ -3,44 +3,24 @@
 
 import backendApi from "@/lib/auth/backendFetch";
 import ImageSelectingBox from "./imageSelectingBox";
-import { CommonTechStack } from "@/types/techStacks/common";
 import { useCallback, useEffect, useState } from "react";
 import { LabelText } from "./labelBlock";
+import { useTechsContext } from "@/contexts/techsContext";
 
 type StackSelectingBoxProps = {
   onChange: (ids: string[]) => void;
 };
 
-const sortByName = (stacks: CommonTechStack[]) =>
-  [...stacks].sort((a, b) => a.name.localeCompare(b.name, "ja"));
-
 export default function StackSelectingBox({
   onChange,
 }: StackSelectingBoxProps) {
-  const [techStacks, setTechStacks] = useState<CommonTechStack[]>([]);
+  const { techs, refreshTechs } = useTechsContext();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [newStackName, setNewStackName] = useState("");
   const [logoImageId, setLogoImageId] = useState("");
   const [logoPickerKey, setLogoPickerKey] = useState(0); // 登録時の画像選択リセットに利用
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-
-  const fetchTechStacks = useCallback(async () => {
-    try {
-      const response = await fetch("/api/tech-stacks");
-      if (!response.ok) {
-        throw new Error("取得に失敗しました");
-      }
-      const parsedStacks = (await response.json()) as CommonTechStack[];
-      setTechStacks(sortByName(parsedStacks));
-    } catch (error) {
-      throw new Error(`取得に失敗しました: ${error}`);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchTechStacks();
-  }, [fetchTechStacks]);
 
   useEffect(() => {
     onChange(selectedIds);
@@ -85,8 +65,7 @@ export default function StackSelectingBox({
         throw new Error(message || "登録に失敗しました");
       }
 
-      const createdStack = (await response.json()) as CommonTechStack;
-      setTechStacks((prev) => sortByName([...prev, createdStack]));
+      refreshTechs();
       setNewStackName("");
       setLogoImageId("");
       setLogoPickerKey((prev) => prev + 1);
@@ -97,12 +76,12 @@ export default function StackSelectingBox({
     } finally {
       setIsSubmitting(false);
     }
-  }, [logoImageId, newStackName]);
+  }, [logoImageId, newStackName, refreshTechs]);
 
   return (
     <div className="relative flex w-full flex-col gap-4 bg-[#f8f8f8] p-4">
       <div className="flex flex-wrap gap-3">
-        {techStacks.map((stack) => {
+        {techs.map((stack) => {
           const isSelected = selectedIds.includes(stack.id);
           return (
             <button
