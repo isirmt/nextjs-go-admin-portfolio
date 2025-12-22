@@ -6,6 +6,7 @@ import { useTechsContext } from "@/contexts/techsContext";
 import { useWorksContext } from "@/contexts/worksContext";
 import { Work } from "@/types/works/common";
 import { useMemo, type CSSProperties } from "react";
+import { useInViewAnimation } from "@/hooks/useInViewAnimation";
 
 const lineStyle = (index: number) =>
   ({ "--work-line-index": index }) as CSSProperties;
@@ -77,12 +78,19 @@ function WorkCard({ work }: { work: Work }) {
 
 export default function WorksList() {
   const { works } = useWorksContext();
+  const { ref: lineAnimationRef, isActive: isLineActive } =
+    useInViewAnimation<HTMLDivElement>({
+      delayMs: 150,
+    });
 
   return (
     <div className="flex flex-col items-center justify-center bg-[#cff7f7] px-20 pt-20 pb-40">
-      <div className="relative mt-10 mb-30 drop-shadow-2xl drop-shadow-[#a9e4e4]">
+      <div
+        ref={lineAnimationRef}
+        className="relative mt-10 mb-30 drop-shadow-2xl drop-shadow-[#a9e4e4]"
+      >
         <svg
-          className="animate-line w-96"
+          className={`animate-line w-96 ${isLineActive ? "is-active" : ""}`}
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 852.65 170.1"
           style={totalLineStyle(12, 0.05)}
@@ -186,7 +194,7 @@ export default function WorksList() {
           </g>
         </svg>
         <svg
-          className="animate-line absolute top-0 left-0 w-96"
+          className={`animate-line absolute top-0 left-0 w-96 ${isLineActive ? "is-active" : ""}`}
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 852.65 170.1"
           style={totalLineStyle(12, 0.1)}

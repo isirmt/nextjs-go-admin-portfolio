@@ -40,6 +40,10 @@
 .animate-line path {
   stroke-dasharray: var(--work-line-length, 2000);
   stroke-dashoffset: var(--work-line-length, 2000);
+}
+
+.animate-line.is-active line,
+.animate-line.is-active path {
   animation: work-line-draw
     calc(var(--work-line-stagger, 0.12s) * var(--work-line-total, 12)) ease
     forwards;
