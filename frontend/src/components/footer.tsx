@@ -16,7 +16,7 @@ export default function Footer() {
   return (
     <footer
       ref={footerRef}
-      className="relative overflow-hidden bg-[#67c8e6] select-none"
+      className="relative -mt-20 overflow-hidden bg-transparent select-none"
     >
       <div className="absolute left-[10%] z-1 aspect-946/2472 h-full bg-[url('/footer_stripe.svg')] bg-center bg-no-repeat opacity-5 bg-blend-saturation" />
       <div className="absolute left-[70%] z-1 aspect-946/2472 h-full bg-[url('/footer_stripe.svg')] bg-center bg-no-repeat opacity-12 bg-blend-saturation" />
@@ -25,7 +25,7 @@ export default function Footer() {
         ref={sketchContainerRef}
         className="pointer-events-none absolute top-0 left-0 z-0 h-full w-full"
       />
-      <div className="relative z-2 flex flex-col items-center">
+      <div className="relative z-2 flex flex-col items-center pt-12">
         <section className="flex flex-col items-center justify-center py-12">
           <div
             className={`text-4xl text-white transition ${delaGothicOne.className} ${getSpotlightSide() !== "none" && "drop-shadow-2xl"}`}

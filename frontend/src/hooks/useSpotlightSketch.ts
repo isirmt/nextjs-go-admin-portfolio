@@ -32,6 +32,13 @@ const SNOWFLAKE_COLOR: [number, number, number, number] = [
   0.85,
 ];
 
+const WAVE_MIN_AMPLITUDE = 8;
+const WAVE_MAX_AMPLITUDE = 32;
+const WAVE_HEIGHT_RATIO = 0.08;
+const WAVE_MIN_LENGTH = 120;
+const WAVE_LENGTH_RATIO = 0.4;
+const WAVE_STEPS_PER_LENGTH = 20;
+
 const VERTEX_SHADER_SOURCE = `#version 300 es
 in vec2 a_position;
 void main() {
@@ -171,6 +178,36 @@ const createVertices = (side: SpotlightSide, width: number, height: number) =>
     y: point.y * height,
   }));
 
+const createSineClipPath = (width: number, height: number) => {
+  const amplitude = Math.min(
+    WAVE_MAX_AMPLITUDE,
+    Math.max(WAVE_MIN_AMPLITUDE, Math.floor(height * WAVE_HEIGHT_RATIO)),
+  );
+  const waveLength = Math.max(
+    WAVE_MIN_LENGTH,
+    Math.floor(width * WAVE_LENGTH_RATIO),
+  );
+  const step = Math.max(8, Math.floor(waveLength / WAVE_STEPS_PER_LENGTH));
+  const waveAmplitude = amplitude * 0.6;
+  const points: string[] = [`0px ${height}px`];
+
+  for (let x = 0; x <= width; x += step) {
+    const phase = (x / waveLength) * Math.PI * 2;
+    const y = Math.max(0, amplitude + Math.sin(phase) * waveAmplitude);
+    points.push(`${x}px ${y}px`);
+  }
+
+  if (width % step !== 0) {
+    const phase = (width / waveLength) * Math.PI * 2;
+    const y = Math.max(0, amplitude + Math.sin(phase) * waveAmplitude);
+    points.push(`${width}px ${y}px`);
+  }
+
+  points.push(`${width}px ${height}px`);
+
+  return `polygon(${points.join(",")})`;
+};
+
 export function useSpotlightSketch() {
   const footerRef = useRef<HTMLElement | null>(null);
   const sketchContainerRef = useRef<HTMLDivElement | null>(null);
@@ -246,7 +283,7 @@ export function useSpotlightSketch() {
     if (!program) {
       canvas.remove();
       canvasRef.current = null;
-      return () => {};
+      return;
     }
 
     const vertexBuffer = gl.createBuffer();
@@ -263,7 +300,7 @@ export function useSpotlightSketch() {
       canvas.remove();
       canvasRef.current = null;
       snowflakesRef.current = [];
-      return () => {};
+      return;
     }
 
     gl.blendEquationSeparate(gl.FUNC_ADD, gl.FUNC_ADD);
@@ -285,6 +322,7 @@ export function useSpotlightSketch() {
     const initialHeight = Math.max(0, Math.floor(rect.height));
     canvas.width = initialWidth;
     canvas.height = initialHeight;
+    canvas.style.clipPath = createSineClipPath(initialWidth, initialHeight);
     appliedSizeRef.current = { width: initialWidth, height: initialHeight };
 
     webglResourcesRef.current = {
@@ -483,6 +521,7 @@ export function useSpotlightSketch() {
       if (canvas) {
         canvas.width = nextWidth;
         canvas.height = nextHeight;
+        canvas.style.clipPath = createSineClipPath(nextWidth, nextHeight);
       }
 
       const resources = webglResourcesRef.current;

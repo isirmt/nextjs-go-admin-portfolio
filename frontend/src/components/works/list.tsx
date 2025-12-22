@@ -70,7 +70,7 @@ export default function WorksList() {
   const { works } = useWorksContext();
 
   return (
-    <div className="flex justify-center bg-[#cff7f7] px-20 py-20">
+    <div className="flex justify-center bg-[#cff7f7] px-20 pt-20 pb-40">
       <div className="flex w-fit flex-wrap justify-center gap-x-12 gap-y-16">
         {works.map((work, workIdx) => (
           <WorkCard key={workIdx} work={work} />
