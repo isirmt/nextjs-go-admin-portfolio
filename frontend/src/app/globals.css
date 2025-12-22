@@ -27,6 +27,27 @@
   }
 }
 
+@keyframes work-line-draw {
+  0% {
+    stroke-dashoffset: var(--work-line-length, 2000);
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.animate-line line,
+.animate-line path {
+  stroke-dasharray: var(--work-line-length, 2000);
+  stroke-dashoffset: var(--work-line-length, 2000);
+  animation: work-line-draw
+    calc(var(--work-line-stagger, 0.12s) * var(--work-line-total, 12)) ease
+    forwards;
+  animation-delay: calc(
+    var(--work-line-index, 0) * var(--work-line-stagger, 0.12s)
+  );
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
