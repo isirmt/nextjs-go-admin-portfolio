@@ -5,7 +5,7 @@ import { useImagesContext } from "@/contexts/imagesContext";
 import { useTechsContext } from "@/contexts/techsContext";
 import { useWorksContext } from "@/contexts/worksContext";
 import { Work } from "@/types/works/common";
-import { useMemo, type CSSProperties } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 import { useInViewAnimation } from "@/hooks/useInViewAnimation";
 import { smoochSans } from "@/lib/fonts";
 
@@ -19,7 +19,7 @@ function SectionText() {
   return (
     <div
       ref={lineAnimationRef}
-      className="relative mt-10 flex items-center flex-col gap-4 mb-30 drop-shadow-2xl drop-shadow-[#a9e4e4]"
+      className="relative mt-10 mb-30 flex flex-col items-center gap-4 drop-shadow-2xl drop-shadow-[#a9e4e4]"
     >
       <svg
         className={`animate-iv-line w-96 ${isLineActive ? "is-active" : ""}`}
@@ -208,7 +208,9 @@ function SectionText() {
           style={lineStyle(11)}
         />
       </svg>
-      <div className="select-none text-[#777]">中学校時代の制作物も添えて───</div>
+      <div className="text-[#777] select-none">
+        中学校時代の制作物も添えて───
+      </div>
     </div>
   );
 }
@@ -256,19 +258,31 @@ function CloudSmall({ className }: CloudProps) {
   );
 }
 
-function WorkCard({ work }: { work: Work }) {
+function WorkCard({
+  work,
+  selectingId,
+  selectingFunc,
+}: {
+  work: Work;
+  selectingId?: string;
+  selectingFunc: (id?: string) => void;
+}) {
   const { images } = useImagesContext();
   const { techs } = useTechsContext();
-  const randomDelayMs = useMemo(() => delayFromId(work.id), [work.id]);
+  const randomInViewDelayMs = useMemo(() => delayFromId(work.id), [work.id]);
+  const randomSelectingDelayMs = useMemo(
+    () => delayFromId(work.id, 500),
+    [work.id],
+  );
   const { ref: cardBackAnimationRef, isActive: isCardBackActive } =
     useInViewAnimation<HTMLDivElement>({
       threshold: 0.15,
-      delayMs: randomDelayMs,
+      delayMs: randomInViewDelayMs,
     });
   const { ref: cardFrontAnimationRef, isActive: isCardFrontActive } =
     useInViewAnimation<HTMLDivElement>({
       threshold: 0.15,
-      delayMs: randomDelayMs,
+      delayMs: randomInViewDelayMs,
     });
   const imageInfo = useMemo(
     () =>
@@ -299,7 +313,15 @@ function WorkCard({ work }: { work: Work }) {
   }, [work.created_at]);
 
   return (
-    <div className="relative flex flex-col items-center gap-3 select-none">
+    <div
+      className={`relative flex flex-col items-center gap-3 transition-opacity select-none ${selectingId === work.id ? "opacity-100" : selectingId ? "pointer-events-none opacity-0" : "opacity-100"}`}
+      onClick={() =>
+        selectingFunc(selectingId === work.id ? undefined : work.id)
+      }
+      style={{
+        transitionDelay: `${randomSelectingDelayMs}ms`,
+      }}
+    >
       <div className="pointer-events-none absolute -top-9 z-3 max-w-full rounded-xl bg-[#6354eb] px-3 py-1 text-white drop-shadow-sm drop-shadow-[#a39ed1] select-none before:absolute before:top-0 before:left-[50%] before:-z-1 before:block before:translate-x-[-50%] before:translate-y-full before:border-[22px_10px_0px_10px] before:border-x-transparent before:border-t-[#6354eb] before:content-['']">
         {work.comment}
       </div>
@@ -353,6 +375,7 @@ function WorkCard({ work }: { work: Work }) {
 
 export default function WorksList() {
   const { works } = useWorksContext();
+  const [selectingWork, setSelectingWork] = useState<string>();
   const { ref: andMoreTextRef, isActive: isAndMoreTextActive } =
     useInViewAnimation<HTMLDivElement>({
       threshold: 0.2,
@@ -360,7 +383,9 @@ export default function WorksList() {
     });
 
   return (
-    <div className="relative flex flex-col items-center justify-center overflow-x-hidden bg-[#f8f8f8] px-20 pt-20 pb-40">
+    <div
+      className={`relative flex flex-col items-center justify-center overflow-x-hidden bg-[#f8f8f8] px-20 pt-20 pb-40`}
+    >
       <CloudLarge className="animate-up-down absolute bottom-[5%] left-[10%] size-36 [animation-delay:.13s] [animation-duration:1s]" />
       <CloudLarge className="animate-up-down absolute right-[30%] bottom-[35%] size-36 [animation-delay:.23s] [animation-duration:2s]" />
       <CloudLarge className="animate-up-down absolute top-[25%] -left-[3%] size-36 [animation-delay:.23s] [animation-duration:2s]" />
@@ -377,7 +402,12 @@ export default function WorksList() {
       <SectionText />
       <div className="flex w-fit flex-wrap justify-center gap-x-12 gap-y-16">
         {works.map((work, workIdx) => (
-          <WorkCard key={workIdx} work={work} />
+          <WorkCard
+            key={workIdx}
+            work={work}
+            selectingId={selectingWork}
+            selectingFunc={setSelectingWork}
+          />
         ))}
       </div>
     </div>
