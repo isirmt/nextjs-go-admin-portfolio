@@ -5,7 +5,7 @@ import { useImagesContext } from "@/contexts/imagesContext";
 import { useTechsContext } from "@/contexts/techsContext";
 import { useWorksContext } from "@/contexts/worksContext";
 import { Work } from "@/types/works/common";
-import { useMemo, useState, type CSSProperties } from "react";
+import React, { useMemo, useState, type CSSProperties } from "react";
 import { useInViewAnimation } from "@/hooks/useInViewAnimation";
 import { smoochSans } from "@/lib/fonts";
 
@@ -269,9 +269,12 @@ function WorkCard({
 }) {
   const { images } = useImagesContext();
   const { techs } = useTechsContext();
-  const randomInViewDelayMs = useMemo(() => delayFromId(work.id), [work.id]);
+  const randomInViewDelayMs = useMemo(
+    () => delayFromId(work.id, 300),
+    [work.id],
+  );
   const randomSelectingDelayMs = useMemo(
-    () => delayFromId(work.id, 500),
+    () => delayFromId(work.id, 150),
     [work.id],
   );
   const { ref: cardBackAnimationRef, isActive: isCardBackActive } =
@@ -375,41 +378,121 @@ function WorkCard({
 
 export default function WorksList() {
   const { works } = useWorksContext();
-  const [selectingWork, setSelectingWork] = useState<string>();
+  const [selectingWorkId, setSelectingWorkId] = useState<string>();
   const { ref: andMoreTextRef, isActive: isAndMoreTextActive } =
     useInViewAnimation<HTMLDivElement>({
       threshold: 0.2,
       delayMs: 250,
     });
+  const selectedLastWork = useMemo(() => {
+    return works.find((work) => work.id === selectingWorkId);
+  }, [selectingWorkId, works]);
 
   return (
-    <div
-      className={`relative flex flex-col items-center justify-center overflow-x-hidden bg-[#f8f8f8] px-20 pt-20 pb-40`}
-    >
-      <CloudLarge className="animate-up-down absolute bottom-[5%] left-[10%] size-36 [animation-delay:.13s] [animation-duration:1s]" />
-      <CloudLarge className="animate-up-down absolute right-[30%] bottom-[35%] size-36 [animation-delay:.23s] [animation-duration:2s]" />
-      <CloudLarge className="animate-up-down absolute top-[25%] -left-[3%] size-36 [animation-delay:.23s] [animation-duration:2s]" />
-      <CloudSmall className="animate-up-down absolute top-[10%] left-[25%] size-36 [animation-delay:.53s] [animation-duration:3s]" />
-      <CloudSmall className="animate-up-down absolute -right-[2%] bottom-[40%] size-36 [animation-delay:.13s] [animation-duration:1s]" />
-      <CloudSmall className="animate-up-down absolute right-[10%] bottom-[10%] size-36 [animation-delay:.33s] [animation-duration:1s]" />
+    <React.Fragment>
       <div
-        ref={andMoreTextRef}
-        className={`animate-iv-fade-tracking absolute bottom-5 z-0 text-9xl text-[#aaa] select-none ${smoochSans.className} ${isAndMoreTextActive ? "is-active" : ""}`}
+        className={`relative flex flex-col items-center justify-center overflow-x-hidden bg-[#f8f8f8] px-20 pt-20 pb-40`}
       >
-        And More
+        <CloudLarge className="animate-up-down absolute bottom-[5%] left-[10%] size-36 [animation-delay:.13s] [animation-duration:1s]" />
+        <CloudLarge className="animate-up-down absolute right-[30%] bottom-[35%] size-36 [animation-delay:.23s] [animation-duration:2s]" />
+        <CloudLarge className="animate-up-down absolute top-[25%] -left-[3%] size-36 [animation-delay:.23s] [animation-duration:2s]" />
+        <CloudSmall className="animate-up-down absolute top-[10%] left-[25%] size-36 [animation-delay:.53s] [animation-duration:3s]" />
+        <CloudSmall className="animate-up-down absolute -right-[2%] bottom-[40%] size-36 [animation-delay:.13s] [animation-duration:1s]" />
+        <CloudSmall className="animate-up-down absolute right-[10%] bottom-[10%] size-36 [animation-delay:.33s] [animation-duration:1s]" />
+        <div
+          ref={andMoreTextRef}
+          className={`animate-iv-fade-tracking absolute bottom-5 z-0 text-9xl text-[#aaa] select-none ${smoochSans.className} ${isAndMoreTextActive ? "is-active" : ""}`}
+        >
+          And More
+        </div>
+        <div className="pointer-events-none absolute top-0 left-0 z-0 size-full bg-[url('/noise_color_128.png')] opacity-20 mix-blend-multiply" />
+        <SectionText />
+        <div className="flex w-fit flex-wrap justify-center gap-x-12 gap-y-16">
+          {works.map((work, workIdx) => (
+            <WorkCard
+              key={workIdx}
+              work={work}
+              selectingId={selectingWorkId}
+              selectingFunc={setSelectingWorkId}
+            />
+          ))}
+        </div>
       </div>
-      <div className="pointer-events-none absolute top-0 left-0 z-0 size-full bg-[url('/noise_color_128.png')] opacity-20 mix-blend-multiply" />
-      <SectionText />
-      <div className="flex w-fit flex-wrap justify-center gap-x-12 gap-y-16">
-        {works.map((work, workIdx) => (
-          <WorkCard
-            key={workIdx}
-            work={work}
-            selectingId={selectingWork}
-            selectingFunc={setSelectingWork}
-          />
-        ))}
+      <div
+        className={`fixed top-0 left-0 z-100 size-full ${selectingWorkId ? "pointer-events-auto bg-[#eee]/70 opacity-100 backdrop-blur-md backdrop-saturate-50 [transition-property:all_backdrop-filter_background-color] delay-250" : "pointer-events-none opacity-0 backdrop-blur-none [transition-property:all_backdrop-filter_background-color_opacity] delay-0"}`}
+      >
+        <div className="pointer-events-none fixed top-0 left-0 z-1 size-full bg-[linear-gradient(to_bottom,transparent_calc(100dvh-250px),rgba(255,255,255,1))]" />
+        <div className="size-full overflow-y-auto overscroll-contain">
+          <div className="relative min-h-full">
+            <div className="pointer-events-none absolute top-0 left-0 z-0 size-full bg-[url('/noise_color_128.png')] opacity-20 mix-blend-multiply" />
+            <div className="absolute top-26 left-0 h-0 w-full border-b border-[#555]" />
+            <section className="relative mx-auto flex min-h-dvh max-w-6xl flex-col px-10 pt-5 pb-10">
+              <div>
+                <div className="text-7xl leading-none font-black whitespace-nowrap text-[#6354eb]">
+                  {selectedLastWork?.title}
+                </div>
+              </div>
+              <div className="relative grid min-h-full flex-1 grid-cols-2 gap-10 pt-10">
+                <div className="relative flex flex-col gap-6">
+                  <div className="relative rounded-lg bg-[#666] p-4 text-white after:absolute after:-top-15 after:left-7 after:z-200 after:block after:size-0 after:border-[30px_10px] after:border-[transparent_transparent_#666_transparent] after:content-['']">
+                    {selectedLastWork?.comment}
+                  </div>
+                  <div className="flex flex-wrap gap-4">
+                    <div
+                      className="h-4 w-24 rounded-full"
+                      style={{
+                        backgroundColor: `${selectedLastWork?.accent_color}`,
+                      }}
+                    />
+                    <div
+                      className="size-4 rounded-full"
+                      style={{
+                        backgroundColor: `${selectedLastWork?.accent_color}`,
+                      }}
+                    />
+                    <div
+                      className="size-4 rounded-full"
+                      style={{
+                        backgroundColor: `${selectedLastWork?.accent_color}`,
+                      }}
+                    />
+                    <div
+                      className="size-4 rounded-full"
+                      style={{
+                        backgroundColor: `${selectedLastWork?.accent_color}`,
+                      }}
+                    />
+                  </div>
+                  <div>{selectedLastWork?.description}</div>
+                </div>
+                <div className="flex flex-col items-center justify-center text-center">
+                  {selectedLastWork?.images.map((imageId, imageIdx) => (
+                    <div key={imageIdx} className="my-5">
+                      <img
+                        src={`/api/images/${imageId.image_id}/raw`}
+                        alt={`選択中の制作物画像${imageIdx + 1}`}
+                        className="mx-auto max-h-[60vh] object-contain"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <button
+                className="group sticky bottom-10 z-2 flex cursor-pointer items-center gap-4"
+                onClick={() => setSelectingWorkId(undefined)}
+              >
+                <div className="h-0 grow border-b border-[#aaa] transition-all"></div>
+                <div
+                  className={`shrink-0 px-10 text-6xl leading-none tracking-wider transition-all group-hover:px-0 ${smoochSans.className}`}
+                >
+                  CLOSE
+                </div>
+                <div className="h-0 grow border-b border-[#aaa] transition-all"></div>
+              </button>
+            </section>
+          </div>
+        </div>
       </div>
-    </div>
+    </React.Fragment>
   );
 }
