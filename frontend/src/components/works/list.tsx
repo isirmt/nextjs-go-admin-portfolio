@@ -5,7 +5,7 @@ import { useImagesContext } from "@/contexts/imagesContext";
 import { useTechsContext } from "@/contexts/techsContext";
 import { useWorksContext } from "@/contexts/worksContext";
 import { Work } from "@/types/works/common";
-import React, { useMemo, useState, type CSSProperties } from "react";
+import React, { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { useInViewAnimation } from "@/hooks/useInViewAnimation";
 import { smoochSans } from "@/lib/fonts";
 
@@ -314,13 +314,11 @@ function WorkCard({
   const createdYear = useMemo(() => {
     return new Date(work.created_at).getFullYear();
   }, [work.created_at]);
+  const isSelected = selectingId === work.id;
 
   return (
     <div
-      className={`relative flex flex-col items-center gap-3 transition-opacity select-none ${selectingId === work.id ? "opacity-100" : selectingId ? "pointer-events-none opacity-0" : "opacity-100"}`}
-      onClick={() =>
-        selectingFunc(selectingId === work.id ? undefined : work.id)
-      }
+      className={`relative flex flex-col items-center gap-3 transition-opacity select-none ${isSelected ? "opacity-100" : selectingId ? "pointer-events-none opacity-0" : "opacity-100"}`}
       style={{
         transitionDelay: `${randomSelectingDelayMs}ms`,
       }}
@@ -328,16 +326,25 @@ function WorkCard({
       <div className="pointer-events-none absolute -top-9 z-3 max-w-full rounded-xl bg-[#6354eb] px-3 py-1 text-white drop-shadow-sm drop-shadow-[#a39ed1] select-none before:absolute before:top-0 before:left-[50%] before:-z-1 before:block before:translate-x-[-50%] before:translate-y-full before:border-[22px_10px_0px_10px] before:border-x-transparent before:border-t-[#6354eb] before:content-['']">
         {work.comment}
       </div>
-      <button className="group relative flex cursor-pointer items-center justify-center drop-shadow-2xl transition-all duration-150">
-        <div className="ease-over pointer-events-none absolute z-0 size-[95%] rotate-17 bg-[#94d5f3] transition-all duration-300 group-hover:rotate-107" />
-        <div className="relative z-2 flex aspect-square size-72 items-center justify-center overflow-hidden rounded-xl bg-white">
+      <button
+        onClick={() => selectingFunc(isSelected ? undefined : work.id)}
+        className={`group relative flex cursor-pointer items-center justify-center drop-shadow-2xl transition-all duration-100 ${isSelected ? "scale-110" : ""}`}
+      >
+        <div
+          className={`pointer-events-none absolute z-0 size-[95%] bg-[#94d5f3] transition-all duration-300 ${isSelected ? "-rotate-377 delay-200 ease-linear" : "ease-over rotate-17 group-hover:rotate-107"}`}
+        />
+        <div
+          className={`relative z-2 flex aspect-square size-72 items-center justify-center overflow-hidden bg-white transition-all ${isSelected ? "rounded-3xl" : "rounded-xl"}`}
+        >
           <img
             src={`/api/images/${work.thumbnail_image_id}/raw`}
-            className="pointer-events-none size-72 object-cover transition-all duration-200 ease-out group-hover:scale-110 group-hover:skew-x-1 group-hover:brightness-110"
+            className={`pointer-events-none size-72 object-cover transition-all duration-200 ease-out ${isSelected ? "skew-x-1 brightness-120 duration-100" : "group-hover:scale-110 group-hover:skew-x-1 group-hover:brightness-110"}`}
             alt={thumbnailAlt}
           />
         </div>
-        <div className="pointer-events-none absolute top-0 left-0 z-3 size-full overflow-hidden rounded-xl">
+        <div
+          className={`pointer-events-none absolute top-0 left-0 z-3 size-full overflow-hidden transition-all ${isSelected ? "rounded-3xl" : "rounded-xl"}`}
+        >
           <div
             className="absolute top-0 left-0 size-0 border-[1.5rem] transition-all duration-150 group-hover:border-[1.75rem]"
             style={{
@@ -379,14 +386,49 @@ function WorkCard({
 export default function WorksList() {
   const { works } = useWorksContext();
   const [selectingWorkId, setSelectingWorkId] = useState<string>();
+  const [lastSelectedWorkId, setLastSelectedWorkId] = useState<string>();
   const { ref: andMoreTextRef, isActive: isAndMoreTextActive } =
     useInViewAnimation<HTMLDivElement>({
       threshold: 0.2,
       delayMs: 250,
     });
+
   const selectedLastWork = useMemo(() => {
-    return works.find((work) => work.id === selectingWorkId);
-  }, [selectingWorkId, works]);
+    const targetId = selectingWorkId ?? lastSelectedWorkId;
+    return works.find((work) => work.id === targetId);
+  }, [lastSelectedWorkId, selectingWorkId, works]);
+
+  const handleSelectWork = (id?: string) => {
+    setSelectingWorkId(id);
+    if (id) {
+      setLastSelectedWorkId(id);
+    }
+  };
+
+  useEffect(() => {
+    if (!selectingWorkId) {
+      return;
+    }
+    const { style } = document.body;
+    const previousOverflow = style.overflow;
+    const previousOverscroll = style.overscrollBehavior;
+    const previousTouchAction = style.touchAction;
+    const previousPaddingRight = style.paddingRight;
+    const scrollbarWidth =
+      window.innerWidth - document.documentElement.clientWidth;
+    style.overflow = "hidden";
+    style.overscrollBehavior = "contain";
+    style.touchAction = "none";
+    if (scrollbarWidth > 0) {
+      style.paddingRight = `${scrollbarWidth}px`;
+    }
+    return () => {
+      style.overflow = previousOverflow;
+      style.overscrollBehavior = previousOverscroll;
+      style.touchAction = previousTouchAction;
+      style.paddingRight = previousPaddingRight;
+    };
+  }, [selectingWorkId]);
 
   return (
     <React.Fragment>
@@ -413,13 +455,13 @@ export default function WorksList() {
               key={workIdx}
               work={work}
               selectingId={selectingWorkId}
-              selectingFunc={setSelectingWorkId}
+              selectingFunc={handleSelectWork}
             />
           ))}
         </div>
       </div>
       <div
-        className={`fixed top-0 left-0 z-100 size-full ${selectingWorkId ? "pointer-events-auto bg-[#eee]/70 opacity-100 backdrop-blur-md backdrop-saturate-50 [transition-property:all_backdrop-filter_background-color] delay-250" : "pointer-events-none opacity-0 backdrop-blur-none [transition-property:all_backdrop-filter_background-color_opacity] delay-0"}`}
+        className={`fixed top-0 left-0 z-100 size-full transition-opacity ${selectingWorkId ? "pointer-events-auto bg-[#eee]/70 opacity-100 backdrop-blur-md backdrop-saturate-50 delay-450" : "pointer-events-none opacity-0 backdrop-blur-none delay-0"}`}
       >
         <div className="pointer-events-none fixed top-0 left-0 z-1 size-full bg-[linear-gradient(to_bottom,transparent_calc(100dvh-250px),rgba(255,255,255,1))]" />
         <div className="size-full overflow-y-auto overscroll-contain">
@@ -432,9 +474,9 @@ export default function WorksList() {
                   {selectedLastWork?.title}
                 </div>
               </div>
-              <div className="relative grid min-h-full flex-1 grid-cols-2 gap-10 pt-10">
+              <div className="relative mb-14 grid min-h-full flex-1 grid-cols-2 gap-10 pt-10">
                 <div className="relative flex flex-col gap-6">
-                  <div className="relative rounded-lg bg-[#666] p-4 text-white after:absolute after:-top-15 after:left-7 after:z-200 after:block after:size-0 after:border-[30px_10px] after:border-[transparent_transparent_#666_transparent] after:content-['']">
+                  <div className="relative -top-2 rounded-lg bg-[#666] px-6 py-4 text-white after:absolute after:-top-15 after:left-7 after:z-200 after:block after:size-0 after:border-[30px_10px] after:border-[transparent_transparent_#666_transparent] after:content-['']">
                     {selectedLastWork?.comment}
                   </div>
                   <div className="flex flex-wrap gap-4">
@@ -471,7 +513,7 @@ export default function WorksList() {
                       <img
                         src={`/api/images/${imageId.image_id}/raw`}
                         alt={`選択中の制作物画像${imageIdx + 1}`}
-                        className="mx-auto max-h-[60vh] object-contain"
+                        className="mx-auto max-h-[60vh] object-contain select-none"
                       />
                     </div>
                   ))}
