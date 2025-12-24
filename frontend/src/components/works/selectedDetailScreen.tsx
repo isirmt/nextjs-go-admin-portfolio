@@ -4,7 +4,8 @@
 import { useWorksContext } from "@/contexts/worksContext";
 import { useTechInfoGetter } from "@/hooks/useTechInfoGetter";
 import { smoochSans } from "@/lib/fonts";
-import { useMemo } from "react";
+import Link from "next/link";
+import { useEffect, useMemo, useRef } from "react";
 
 type SelectedDetailScreenProps = {
   selectingWorkId?: string;
@@ -18,12 +19,24 @@ export default function SelectedDetailScreen({
   setSelectingWorkId,
 }: SelectedDetailScreenProps) {
   const { works } = useWorksContext();
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+
   const selectedLastWork = useMemo(() => {
     const targetId = selectingWorkId ?? lastSelectedWorkId;
     return works.find((work) => work.id === targetId);
   }, [lastSelectedWorkId, selectingWorkId, works]);
 
   const { techsInfo } = useTechInfoGetter(selectedLastWork?.tech_stacks ?? []);
+
+  useEffect(() => {
+    if (!selectingWorkId) return;
+    const containerElement = scrollContainerRef.current;
+    if (!containerElement) return;
+    const resetScroll = () => containerElement.scrollTo({ top: 0 });
+    resetScroll();
+
+    return;
+  }, [selectingWorkId]);
 
   return (
     <div
@@ -35,6 +48,7 @@ export default function SelectedDetailScreen({
       />
       <div className="animate-spin-reverse fixed bottom-10 left-6 size-34 bg-[url('/windmill.svg')] opacity-50 [animation-duration:10s]" />
       <div
+        ref={scrollContainerRef}
         className={`size-full ${selectingWorkId ? "overflow-y-scroll overscroll-contain" : "overflow-y-hidden"}`}
       >
         <div className="relative min-h-full">
@@ -89,7 +103,39 @@ export default function SelectedDetailScreen({
                     </div>
                   ))}
                 </div>
-                <div>{selectedLastWork?.description}</div>
+                {selectedLastWork?.urls &&
+                  selectedLastWork?.urls.length > 0 && (
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center text-center text-xl font-bold text-[#353535]">
+                        <div className="h-0 flex-1 border-b" />
+                        <span className="mx-4 select-none">関連リンク</span>
+                        <div className="h-0 flex-1 border-b" />
+                      </div>
+                      <div className="flex flex-col gap-2 px-4 py-4">
+                        {selectedLastWork?.urls.map((workUrl, urlIdx) => (
+                          <div className="flex items-end gap-2" key={urlIdx}>
+                            <Link
+                              target="_blank"
+                              rel="noopener"
+                              href={workUrl.url}
+                              className="inline-block w-fit border-b text-lg leading-none text-[#361ea0] hover:text-[#361ea0]/70"
+                            >
+                              {workUrl.label}
+                            </Link>
+                            <div className="text-xs leading-none text-[#555]">
+                              {workUrl.url}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="flex items-center text-center text-xl font-bold text-[#353535]">
+                        <div className="h-0 flex-1 border-b" />
+                      </div>
+                    </div>
+                  )}
+                <div className="whitespace-pre-wrap">
+                  {selectedLastWork?.description}
+                </div>
               </div>
               <div className="flex flex-col items-center justify-center text-center">
                 {selectedLastWork?.images.map((imageId, imageIdx) => (
