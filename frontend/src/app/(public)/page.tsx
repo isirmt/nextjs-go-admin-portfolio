@@ -5,6 +5,65 @@ import { WorksProvider } from "@/contexts/worksContext";
 import { delaGothicOne } from "@/lib/fonts";
 import Image from "next/image";
 import Link from "next/link";
+import React from "react";
+
+const myQualifications = [
+  "技術英語能力検定 2級",
+  "TOEIC Listening & Reading Test 725点",
+];
+const myAreas = [
+  "フロントエンド・クライアント実装",
+  "バックエンド・システム設計",
+  "UI/UX設計",
+  "UIアニメーション",
+  "機械学習",
+];
+const myTools = [
+  "React",
+  "Next.js",
+  "Tailwind CSS",
+  "DxLib",
+  "OpenGL",
+  "Unity",
+  "Illustrator",
+  "Photoshop",
+];
+
+const DetailBox = ({
+  label,
+  array,
+  isApplyingEtc,
+}: {
+  label: string;
+  array: string[];
+  isApplyingEtc?: boolean;
+}) => {
+  return (
+    <div className="flex flex-col gap-3">
+      <div className={`text-2xl text-[#054a5c] ${delaGothicOne.className}`}>
+        {label}
+      </div>
+      <ul className="ml-8 flex flex-wrap gap-3 text-[#054a5c]">
+        {array.map((item, itemIdx) => (
+          <li key={itemIdx} className="flex items-center gap-2">
+            {item}
+            {itemIdx < array.length - 1 && (
+              <span className="text-[#9395a8] select-none">/</span>
+            )}
+          </li>
+        ))}
+        {isApplyingEtc && (
+          <React.Fragment>
+            <li className="flex items-center gap-2">
+              <span className="text-[#9395a8] select-none">/</span>
+              etc...
+            </li>
+          </React.Fragment>
+        )}
+      </ul>
+    </div>
+  );
+};
 
 export default function Home() {
   return (
@@ -75,15 +134,14 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-              <div className="relative -mt-6 flex flex-col items-center justify-center bg-[#c6f4ff] py-20">
-                <div className="flex w-fit flex-col gap-3">
-                  <div
-                    className={`text-2xl text-[#054a5c] ${delaGothicOne.className}`}
-                  >
-                    資格
-                  </div>
-                  <ul className="ml-8 flex flex-col gap-3 text-[#054a5c]"></ul>
-                </div>
+              <div className="relative -mt-6 grid grid-cols-3 bg-[#c6f4ff] px-20 py-20">
+                <DetailBox label="資格" array={myQualifications} />
+                <DetailBox label="分野" array={myAreas} />
+                <DetailBox
+                  label="フレームワーク・ツール等"
+                  array={myTools}
+                  isApplyingEtc
+                />
               </div>
             </section>
             <section aria-label="works-display" className="relative w-full">
