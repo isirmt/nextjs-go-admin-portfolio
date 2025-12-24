@@ -7,10 +7,6 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 
-const myQualifications = [
-  "技術英語能力検定 2級",
-  "TOEIC Listening & Reading Test 725点",
-];
 const myAreas = [
   "フロントエンド・クライアント実装",
   "バックエンド・システム設計",
@@ -66,6 +62,15 @@ const DetailBox = ({
 };
 
 export default function Home() {
+  const birthDate = new Date(2004, 3 - 1, 8);
+  const today = new Date();
+  const hasHadBirthday =
+    today.getMonth() > birthDate.getMonth() ||
+    (today.getMonth() === birthDate.getMonth() &&
+      today.getDate() >= birthDate.getDate());
+  const age =
+    today.getFullYear() - birthDate.getFullYear() - (hasHadBirthday ? 0 : 1);
+
   return (
     <main>
       <ImagesProvider>
@@ -102,7 +107,7 @@ export default function Home() {
               </ul>
             </nav>
             <section aria-label="profile" className="relative w-full">
-              <div className="relative z-10 mt-32 w-4/5 rounded-tr-4xl bg-[#ffe7bb] [box-shadow:.5rem_.5rem_0_0_#f7885c]">
+              <div className="relative z-10 mt-32 w-fit rounded-tr-4xl bg-[#ffe7bb] [box-shadow:.5rem_.5rem_0_0_#f7885c]">
                 <div className="font-dot absolute -top-10 left-24 flex flex-col items-center justify-center">
                   <div className="text-6xl leading-none tracking-wider">
                     入本聖也
@@ -111,31 +116,30 @@ export default function Home() {
                     seiya irimoto
                   </div>
                 </div>
-                <div className="ml-36 flex gap-10 py-24">
+                <div className="flex gap-10 pt-24 pr-44 pb-14 pl-36">
                   <div className="flex flex-col items-end gap-6">
-                    <div className="size-48 overflow-hidden rounded-2xl">
+                    <div className="size-36 overflow-hidden rounded-2xl select-none">
                       <Image
                         src={"/isirmt_icon.webp"}
-                        width={192}
-                        height={192}
+                        width={144}
+                        height={144}
                         alt="isirmt_icon"
                       />
                     </div>
-                    <button className="size-12 rounded-2xl bg-[#f7885c]"></button>
                   </div>
-                  <div className="flex flex-col gap-6 text-lg font-semibold tracking-wide text-[#61230b]">
-                    <div>2004年 3月 8日生</div>
-                    <div>千葉大学工学部総合工学科医工学コース</div>
-                    <div>
-                      プログラミング等を活用したアプリケーションを制作
-                      <br />
-                      イラスト・音楽・映像等も組み合わせた作品の制作にも挑戦中
+                  <div className="flex flex-col gap-2 text-sm font-semibold tracking-wide text-[#61230b]">
+                    <div className="flex gap-2">
+                      <div>兵庫県神戸市出身</div>
+                      <div>
+                        2004年 3月 8日生の&nbsp;
+                        {age}&nbsp;歳
+                      </div>
                     </div>
+                    <div>インタラクティブな設計をするのが好きです</div>
                   </div>
                 </div>
               </div>
-              <div className="relative -mt-6 grid grid-cols-3 bg-[#c6f4ff] px-20 py-20">
-                <DetailBox label="資格" array={myQualifications} />
+              <div className="relative -mt-6 grid grid-cols-2 gap-20 bg-[#c6f4ff] px-40 py-20">
                 <DetailBox label="分野" array={myAreas} />
                 <DetailBox
                   label="フレームワーク・ツール等"
