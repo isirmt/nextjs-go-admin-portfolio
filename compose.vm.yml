@@ -40,6 +40,9 @@ services:
       DATABASE_URL: ${DATABASE_URL}
       ALLOWED_ORIGIN: ${ALLOWED_ORIGIN}
       ADMIN_SECRET: ${ADMIN_SECRET}
+      UPLOAD_DIR: /uploads
+    volumes:
+      - ./uploads:/uploads
     restart: unless-stopped
     depends_on:
       db:
