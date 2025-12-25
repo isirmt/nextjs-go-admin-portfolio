@@ -8,9 +8,8 @@ const TableNameCommonTechStack = "common_tech_stacks"
 
 // CommonTechStack mapped from table <common_tech_stacks>
 type CommonTechStack struct {
-	ID          *string `gorm:"column:id;type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
-	Name        string  `gorm:"column:name;type:text;not null" json:"name"`
-	LogoImageID *string `gorm:"column:logo_image_id;type:uuid" json:"logo_image_id"`
+	ID   *string `gorm:"column:id;type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
+	Name string  `gorm:"column:name;type:text;not null" json:"name"`
 }
 
 // TableName CommonTechStack's table name

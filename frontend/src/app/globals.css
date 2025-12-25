@@ -14,6 +14,7 @@
   --animate-jump: jump 1s cubic-bezier(0, 0.5, 0.02, 1.69) 1;
   --animate-up-down: up-down 2s steps(10, jump-none) infinite alternate;
   --animate-spin-reverse: spin 1s linear infinite reverse;
+  --animate-orbit: orbit 40s linear infinite;
 }
 
 @keyframes jump {
@@ -46,6 +47,15 @@
 
   100% {
     transform: translateY(-0.5rem);
+  }
+}
+
+@keyframes orbit {
+  0% {
+    offset-distance: 0%;
+  }
+  100% {
+    offset-distance: 100%;
   }
 }
 
@@ -89,6 +99,22 @@
   animation-delay: calc(
     var(--work-line-index, 0) * var(--work-line-stagger, 0.12s)
   );
+}
+
+.animate-iv-icon-moving {
+  top: 2rem;
+  left: -1.5rem;
+  transform: rotate(-30deg);
+  transition:
+    top 0.7s var(--ease-over),
+    left 0.7s var(--ease-over),
+    transform 0.7s var(--ease-over);
+}
+
+.animate-iv-icon-moving.is-active {
+  top: 0.5rem;
+  left: -0.35rem;
+  transform: rotate(-10deg);
 }
 
 .animate-iv-fade-tracking {

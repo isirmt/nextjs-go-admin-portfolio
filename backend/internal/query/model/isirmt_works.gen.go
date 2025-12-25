@@ -13,13 +13,11 @@ const TableNameIsirmtWork = "isirmt_works"
 // IsirmtWork mapped from table <isirmt_works>
 type IsirmtWork struct {
 	ID               *string    `gorm:"column:id;type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
-	Slug             string     `gorm:"column:slug;type:text;not null" json:"slug"`
 	Title            string     `gorm:"column:title;type:text;not null" json:"title"`
 	Comment          string     `gorm:"column:comment;type:text;not null" json:"comment"`
 	CreatedAt        *time.Time `gorm:"column:created_at;type:timestamp with time zone;not null;default:now()" json:"created_at"`
 	AccentColor      *string    `gorm:"column:accent_color;type:character(7);not null;default:#000000" json:"accent_color"`
 	Description      *string    `gorm:"column:description;type:text" json:"description"`
-	IsPublic         bool       `gorm:"column:is_public;type:boolean;not null" json:"is_public"`
 	ThumbnailImageID *string    `gorm:"column:thumbnail_image_id;type:uuid" json:"thumbnail_image_id"`
 }
 

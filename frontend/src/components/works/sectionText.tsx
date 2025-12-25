@@ -200,9 +200,7 @@ export function SectionText() {
           style={lineStyle(11)}
         />
       </svg>
-      <div className="text-[#777] select-none">
-        中学校時代の制作物も添えて───
-      </div>
+      <div className="text-[#777] select-none">isirmt&nbsp;の足跡</div>
     </div>
   );
 }

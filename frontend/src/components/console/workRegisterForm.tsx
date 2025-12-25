@@ -12,7 +12,6 @@ import WorkUrlsInput, {
 import { useWorksContext } from "@/contexts/worksContext";
 
 export default function WorkRegisterForm() {
-  const [inputSlug, setInputSlug] = useState<string>("");
   const [inputTitle, setInputTitle] = useState<string>("");
   const [inputComment, setInputComment] = useState<string>("");
   const [inputPublishedDate, setInputPublishedDate] = useState<string>(
@@ -51,7 +50,6 @@ export default function WorkRegisterForm() {
 
       try {
         const payload = {
-          slug: inputSlug.trim(),
           title: inputTitle.trim(),
           comment: inputComment.trim(),
           published_date: inputPublishedDate || undefined,
@@ -96,7 +94,6 @@ export default function WorkRegisterForm() {
       inputComment,
       inputDescription,
       inputPublishedDate,
-      inputSlug,
       inputTechStacks,
       inputThumbnailImage,
       inputTitle,
@@ -123,17 +120,6 @@ export default function WorkRegisterForm() {
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <LabelBox>
-            <LabelText required>識別パス</LabelText>
-            <input
-              name="slug"
-              value={inputSlug}
-              onChange={(e) => setInputSlug(e.target.value)}
-              required
-              placeholder="work_name"
-              className="w-full border-b-2 border-[#c68ef0] px-4 py-2 outline-none focus:border-[#7e11d1]"
-            />
-          </LabelBox>
-          <LabelBox>
             <LabelText required>制作物名</LabelText>
             <input
               name="title"
@@ -144,7 +130,7 @@ export default function WorkRegisterForm() {
               className="w-full border-b-2 border-[#c68ef0] px-4 py-2 outline-none focus:border-[#7e11d1]"
             />
           </LabelBox>
-          <LabelBox isLong>
+          <LabelBox>
             <LabelText required>コメント</LabelText>
             <input
               name="comment"
@@ -200,7 +186,7 @@ export default function WorkRegisterForm() {
               value={inputDescription}
               onChange={(e) => setInputDescription(e.target.value)}
               rows={5}
-              className="w-full border-y border-[#c68ef0] px-4 py-3 outline-none focus:border-[#7e11d1]"
+              className="field-sizing-content min-h-[5lh] w-full border-y border-[#c68ef0] px-4 py-3 outline-none focus:border-[#7e11d1]"
             />
           </LabelBox>
           <LabelBox isLong>

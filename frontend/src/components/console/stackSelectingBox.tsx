@@ -1,8 +1,6 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import backendApi from "@/lib/auth/backendFetch";
-import ImageSelectingBox from "./imageSelectingBox";
 import { useCallback, useEffect, useState } from "react";
 import { LabelText } from "./labelBlock";
 import { useTechsContext } from "@/contexts/techsContext";
@@ -17,8 +15,6 @@ export default function StackSelectingBox({
   const { techs, refreshTechs } = useTechsContext();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [newStackName, setNewStackName] = useState("");
-  const [logoImageId, setLogoImageId] = useState("");
-  const [logoPickerKey, setLogoPickerKey] = useState(0); // 登録時の画像選択リセットに利用
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -32,10 +28,6 @@ export default function StackSelectingBox({
         ? prev.filter((stackId) => stackId !== id)
         : [...prev, id],
     );
-  }, []);
-
-  const handleLogoSelected = useCallback((ids: string[]) => {
-    setLogoImageId(ids[0] ?? "");
   }, []);
 
   const handleCreateTechStack = useCallback(async () => {
@@ -56,7 +48,6 @@ export default function StackSelectingBox({
         },
         body: JSON.stringify({
           name: trimmedName,
-          logo_image_id: logoImageId || undefined,
         }),
       });
 
@@ -67,8 +58,6 @@ export default function StackSelectingBox({
 
       refreshTechs();
       setNewStackName("");
-      setLogoImageId("");
-      setLogoPickerKey((prev) => prev + 1);
     } catch (error) {
       setSubmitError(
         error instanceof Error ? error.message : "登録に失敗しました",
@@ -76,7 +65,7 @@ export default function StackSelectingBox({
     } finally {
       setIsSubmitting(false);
     }
-  }, [logoImageId, newStackName, refreshTechs]);
+  }, [newStackName, refreshTechs]);
 
   return (
     <div className="relative flex w-full flex-col gap-4 bg-[#f8f8f8] p-4">
@@ -93,17 +82,6 @@ export default function StackSelectingBox({
               <div
                 className={`absolute top-0 left-0 z-1 flex size-full items-center justify-center transition-all duration-200 ${isSelected ? "bg-[#65a6df]/75" : "bg-transparent hover:bg-[#65a6df]/75"}`}
               />
-              {stack.logo_image_id ? (
-                <img
-                  src={`/api/images/${stack.logo_image_id}/raw`}
-                  alt={stack.name}
-                  className="size-10 rounded object-contain"
-                />
-              ) : (
-                <div className="flex size-10 items-center justify-center rounded bg-[#ece6f7] text-xs leading-none font-bold text-[#7e11d1]">
-                  No Logo
-                </div>
-              )}
               <span className="text-sm font-semibold text-[#3a3a3a]">
                 {stack.name}
               </span>
@@ -121,14 +99,6 @@ export default function StackSelectingBox({
             placeholder="Next.js"
           />
         </label>
-        <div className="space-y-2">
-          <LabelText>ロゴ画像</LabelText>
-          <ImageSelectingBox
-            key={logoPickerKey}
-            onChange={handleLogoSelected}
-            multiple={false}
-          />
-        </div>
         {submitError && <p className="text-sm text-[#e04787]">{submitError}</p>}
         <button
           type="button"

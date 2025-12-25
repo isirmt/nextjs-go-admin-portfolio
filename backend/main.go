@@ -38,12 +38,10 @@ type createWorkURL struct {
 }
 
 type createTechStackRequest struct {
-	Name        string  `json:"name"`
-	LogoImageID *string `json:"logo_image_id"`
+	Name string `json:"name"`
 }
 
 type createWorkRequest struct {
-	Slug             string          `json:"slug"`
 	Title            string          `json:"title"`
 	Comment          string          `json:"comment"`
 	Description      string          `json:"description"`
@@ -75,13 +73,11 @@ type workTechStackResponse struct {
 
 type workResponse struct {
 	ID               string                  `json:"id"`
-	Slug             string                  `json:"slug"`
 	Title            string                  `json:"title"`
 	Comment          string                  `json:"comment"`
 	CreatedAt        string                  `json:"created_at"`
 	AccentColor      string                  `json:"accent_color"`
 	Description      *string                 `json:"description"`
-	IsPublic         bool                    `json:"is_public"`
 	ThumbnailImageID *string                 `json:"thumbnail_image_id"`
 	Images           []workImageResponse     `json:"images"`
 	Urls             []workURLResponse       `json:"urls"`
@@ -352,26 +348,9 @@ func (pSrv *server) handleCreateTechStack(c echo.Context) error {
 	}
 
 	ctx := c.Request().Context()
-	var logoImageID *string
-	if req.LogoImageID != nil {
-		trimmed := strings.TrimSpace(*req.LogoImageID)
-		if trimmed != "" {
-			logoImageID = &trimmed
-		}
-	}
-	if logoImageID != nil {
-		_, err := pSrv.q.CommonImage.WithContext(ctx).Where(pSrv.q.CommonImage.ID.Eq(*logoImageID)).First()
-		if err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				return c.String(400, "logo image not found")
-			}
-			return c.String(500, "failed to validate logo image")
-		}
-	}
 
 	newStack := &model.CommonTechStack{
-		Name:        name,
-		LogoImageID: logoImageID,
+		Name: name,
 	}
 
 	if err := pSrv.q.CommonTechStack.WithContext(ctx).Create(newStack); err != nil {
@@ -461,13 +440,11 @@ func (pSrv *server) handleGetWorks(c echo.Context) error {
 
 		responses = append(responses, workResponse{
 			ID:               workID,
-			Slug:             work.Slug,
 			Title:            work.Title,
 			Comment:          work.Comment,
 			CreatedAt:        createdAt,
 			AccentColor:      *work.AccentColor,
 			Description:      work.Description,
-			IsPublic:         work.IsPublic,
 			ThumbnailImageID: work.ThumbnailImageID,
 			Images:           images,
 			Urls:             urls,
@@ -482,11 +459,6 @@ func (pSrv *server) handleCreateWork(c echo.Context) error {
 	var req createWorkRequest
 	if err := c.Bind(&req); err != nil {
 		return c.String(400, "invalid request body")
-	}
-
-	slug := strings.TrimSpace(req.Slug)
-	if slug == "" {
-		return c.String(400, "slug is required")
 	}
 
 	title := strings.TrimSpace(req.Title)
@@ -530,12 +502,6 @@ func (pSrv *server) handleCreateWork(c echo.Context) error {
 	}
 
 	ctx := c.Request().Context()
-
-	if _, err := pSrv.q.IsirmtWork.WithContext(ctx).Where(pSrv.q.IsirmtWork.Slug.Eq(slug)).First(); err == nil {
-		return c.String(http.StatusConflict, "slug already exists")
-	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
-		return c.String(500, "failed to validate slug")
-	}
 
 	workImageIDs := make([]string, 0, len(req.WorkImageIDs))
 	imageIDSet := map[string]struct{}{}
@@ -605,12 +571,10 @@ func (pSrv *server) handleCreateWork(c echo.Context) error {
 	accentCopy := accentColor
 
 	work := &model.IsirmtWork{
-		Slug:             slug,
 		Title:            title,
 		Comment:          comment,
 		AccentColor:      &accentCopy,
 		Description:      descriptionPtr,
-		IsPublic:         true,
 		ThumbnailImageID: &thumbnailCopy,
 		CreatedAt:        &publishedTime,
 	}

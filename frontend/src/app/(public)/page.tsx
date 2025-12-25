@@ -3,10 +3,74 @@ import { ImagesProvider } from "@/contexts/imagesContext";
 import { TechsProvider } from "@/contexts/techsContext";
 import { WorksProvider } from "@/contexts/worksContext";
 import { delaGothicOne } from "@/lib/fonts";
-import Image from "next/image";
+import ProfileCard from "@/components/profile/card";
 import Link from "next/link";
+import React from "react";
+
+const myAreas = [
+  "フロントエンド・クライアント実装",
+  "バックエンド・システム設計",
+  "UI/UX設計",
+  "UIアニメーション",
+  "機械学習",
+];
+const myTools = [
+  "React",
+  "Next.js",
+  "Tailwind CSS",
+  "DxLib",
+  "OpenGL",
+  "Unity",
+  "Illustrator",
+  "Photoshop",
+];
+
+const DetailBox = ({
+  label,
+  array,
+  isApplyingEtc,
+}: {
+  label: string;
+  array: string[];
+  isApplyingEtc?: boolean;
+}) => {
+  return (
+    <div className="flex flex-col gap-3">
+      <div className={`text-2xl text-[#054a5c] ${delaGothicOne.className}`}>
+        {label}
+      </div>
+      <ul className="ml-8 flex flex-wrap gap-3 text-[#054a5c]">
+        {array.map((item, itemIdx) => (
+          <li key={itemIdx} className="flex items-center gap-2">
+            {item}
+            {itemIdx < array.length - 1 && (
+              <span className="text-[#9395a8] select-none">/</span>
+            )}
+          </li>
+        ))}
+        {isApplyingEtc && (
+          <React.Fragment>
+            <li className="flex items-center gap-2">
+              <span className="text-[#9395a8] select-none">/</span>
+              etc...
+            </li>
+          </React.Fragment>
+        )}
+      </ul>
+    </div>
+  );
+};
 
 export default function Home() {
+  const birthDate = new Date(2004, 3 - 1, 8);
+  const today = new Date();
+  const hasHadBirthday =
+    today.getMonth() > birthDate.getMonth() ||
+    (today.getMonth() === birthDate.getMonth() &&
+      today.getDate() >= birthDate.getDate());
+  const age =
+    today.getFullYear() - birthDate.getFullYear() - (hasHadBirthday ? 0 : 1);
+
   return (
     <main>
       <ImagesProvider>
@@ -42,48 +106,18 @@ export default function Home() {
                 </li>
               </ul>
             </nav>
-            <section aria-label="profile" className="relative w-full">
-              <div className="relative z-10 mt-32 w-4/5 rounded-tr-4xl bg-[#ffe7bb] [box-shadow:.5rem_.5rem_0_0_#f7885c]">
-                <div className="font-dot absolute -top-10 left-24 flex flex-col items-center justify-center">
-                  <div className="text-6xl leading-none tracking-wider">
-                    入本聖也
-                  </div>
-                  <div className="text-3xl leading-none font-semibold tracking-wide">
-                    seiya irimoto
-                  </div>
-                </div>
-                <div className="ml-36 flex gap-10 py-24">
-                  <div className="flex flex-col items-end gap-6">
-                    <div className="size-48 overflow-hidden rounded-2xl">
-                      <Image
-                        src={"/isirmt_icon.webp"}
-                        width={192}
-                        height={192}
-                        alt="isirmt_icon"
-                      />
-                    </div>
-                    <button className="size-12 rounded-2xl bg-[#f7885c]"></button>
-                  </div>
-                  <div className="flex flex-col gap-6 text-lg font-semibold tracking-wide text-[#61230b]">
-                    <div>2004年 3月 8日生</div>
-                    <div>千葉大学工学部総合工学科医工学コース</div>
-                    <div>
-                      プログラミング等を活用したアプリケーションを制作
-                      <br />
-                      イラスト・音楽・映像等も組み合わせた作品の制作にも挑戦中
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="relative -mt-6 flex flex-col items-center justify-center bg-[#c6f4ff] py-20">
-                <div className="flex w-fit flex-col gap-3">
-                  <div
-                    className={`text-2xl text-[#054a5c] ${delaGothicOne.className}`}
-                  >
-                    資格
-                  </div>
-                  <ul className="ml-8 flex flex-col gap-3 text-[#054a5c]"></ul>
-                </div>
+            <section
+              aria-label="profile"
+              className="relative w-full overflow-x-hidden"
+            >
+              <ProfileCard age={age} />
+              <div className="relative -mt-6 grid grid-cols-2 gap-20 bg-[#c6f4ff] px-40 pt-32 pb-20">
+                <DetailBox label="分野" array={myAreas} />
+                <DetailBox
+                  label="フレームワーク・ツール等"
+                  array={myTools}
+                  isApplyingEtc
+                />
               </div>
             </section>
             <section aria-label="works-display" className="relative w-full">

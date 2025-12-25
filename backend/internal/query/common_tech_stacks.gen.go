@@ -30,7 +30,6 @@ func newCommonTechStack(db *gorm.DB, opts ...gen.DOOption) commonTechStack {
 	_commonTechStack.ALL = field.NewAsterisk(tableName)
 	_commonTechStack.ID = field.NewString(tableName, "id")
 	_commonTechStack.Name = field.NewString(tableName, "name")
-	_commonTechStack.LogoImageID = field.NewString(tableName, "logo_image_id")
 
 	_commonTechStack.fillFieldMap()
 
@@ -40,10 +39,9 @@ func newCommonTechStack(db *gorm.DB, opts ...gen.DOOption) commonTechStack {
 type commonTechStack struct {
 	commonTechStackDo commonTechStackDo
 
-	ALL         field.Asterisk
-	ID          field.String
-	Name        field.String
-	LogoImageID field.String
+	ALL  field.Asterisk
+	ID   field.String
+	Name field.String
 
 	fieldMap map[string]field.Expr
 }
@@ -62,7 +60,6 @@ func (c *commonTechStack) updateTableName(table string) *commonTechStack {
 	c.ALL = field.NewAsterisk(table)
 	c.ID = field.NewString(table, "id")
 	c.Name = field.NewString(table, "name")
-	c.LogoImageID = field.NewString(table, "logo_image_id")
 
 	c.fillFieldMap()
 
@@ -91,10 +88,9 @@ func (c *commonTechStack) GetFieldByName(fieldName string) (field.OrderExpr, boo
 }
 
 func (c *commonTechStack) fillFieldMap() {
-	c.fieldMap = make(map[string]field.Expr, 3)
+	c.fieldMap = make(map[string]field.Expr, 2)
 	c.fieldMap["id"] = c.ID
 	c.fieldMap["name"] = c.Name
-	c.fieldMap["logo_image_id"] = c.LogoImageID
 }
 
 func (c commonTechStack) clone(db *gorm.DB) commonTechStack {

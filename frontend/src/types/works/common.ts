@@ -18,13 +18,11 @@ export type WorkTechStack = {
 
 export type Work = {
   id: string;
-  slug: string;
   title: string;
   comment: string;
   created_at: string;
   accent_color: string;
   description: string | null;
-  is_public: boolean;
   thumbnail_image_id: string | null;
   images: WorkImage[];
   urls: WorkUrl[];

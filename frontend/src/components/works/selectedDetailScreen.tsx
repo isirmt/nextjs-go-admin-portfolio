@@ -91,7 +91,7 @@ export default function SelectedDetailScreen({
                     }}
                   />
                 </div>
-                <div className="flex w-full justify-start gap-2">
+                <div className="flex w-full flex-wrap justify-start gap-3">
                   {techsInfo.map((stack, techIdx) => (
                     <div
                       key={techIdx}

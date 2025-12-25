@@ -15,21 +15,18 @@ CREATE TABLE
 CREATE TABLE
     IF NOT EXISTS common_tech_stacks (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
-        name TEXT NOT NULL,
-        logo_image_id UUID REFERENCES common_images (id) ON DELETE SET NULL
+        name TEXT NOT NULL
     );
 
 /* 作品格納 */
 CREATE TABLE
     IF NOT EXISTS isirmt_works (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
-        slug TEXT UNIQUE NOT NULL,
         title TEXT NOT NULL,
         comment TEXT NOT NULL,
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW (),
         accent_color CHAR(7) NOT NULL DEFAULT '#000000',
         description TEXT,
-        is_public BOOLEAN NOT NULL DEFAULT FALSE,
         thumbnail_image_id UUID REFERENCES common_images (id) ON DELETE SET NULL
     );
 

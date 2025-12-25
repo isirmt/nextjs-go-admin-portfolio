@@ -29,13 +29,11 @@ func newIsirmtWork(db *gorm.DB, opts ...gen.DOOption) isirmtWork {
 	tableName := _isirmtWork.isirmtWorkDo.TableName()
 	_isirmtWork.ALL = field.NewAsterisk(tableName)
 	_isirmtWork.ID = field.NewString(tableName, "id")
-	_isirmtWork.Slug = field.NewString(tableName, "slug")
 	_isirmtWork.Title = field.NewString(tableName, "title")
 	_isirmtWork.Comment = field.NewString(tableName, "comment")
 	_isirmtWork.CreatedAt = field.NewTime(tableName, "created_at")
 	_isirmtWork.AccentColor = field.NewString(tableName, "accent_color")
 	_isirmtWork.Description = field.NewString(tableName, "description")
-	_isirmtWork.IsPublic = field.NewBool(tableName, "is_public")
 	_isirmtWork.ThumbnailImageID = field.NewString(tableName, "thumbnail_image_id")
 
 	_isirmtWork.fillFieldMap()
@@ -48,13 +46,11 @@ type isirmtWork struct {
 
 	ALL              field.Asterisk
 	ID               field.String
-	Slug             field.String
 	Title            field.String
 	Comment          field.String
 	CreatedAt        field.Time
 	AccentColor      field.String
 	Description      field.String
-	IsPublic         field.Bool
 	ThumbnailImageID field.String
 
 	fieldMap map[string]field.Expr
@@ -73,13 +69,11 @@ func (i isirmtWork) As(alias string) *isirmtWork {
 func (i *isirmtWork) updateTableName(table string) *isirmtWork {
 	i.ALL = field.NewAsterisk(table)
 	i.ID = field.NewString(table, "id")
-	i.Slug = field.NewString(table, "slug")
 	i.Title = field.NewString(table, "title")
 	i.Comment = field.NewString(table, "comment")
 	i.CreatedAt = field.NewTime(table, "created_at")
 	i.AccentColor = field.NewString(table, "accent_color")
 	i.Description = field.NewString(table, "description")
-	i.IsPublic = field.NewBool(table, "is_public")
 	i.ThumbnailImageID = field.NewString(table, "thumbnail_image_id")
 
 	i.fillFieldMap()
@@ -107,15 +101,13 @@ func (i *isirmtWork) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (i *isirmtWork) fillFieldMap() {
-	i.fieldMap = make(map[string]field.Expr, 9)
+	i.fieldMap = make(map[string]field.Expr, 7)
 	i.fieldMap["id"] = i.ID
-	i.fieldMap["slug"] = i.Slug
 	i.fieldMap["title"] = i.Title
 	i.fieldMap["comment"] = i.Comment
 	i.fieldMap["created_at"] = i.CreatedAt
 	i.fieldMap["accent_color"] = i.AccentColor
 	i.fieldMap["description"] = i.Description
-	i.fieldMap["is_public"] = i.IsPublic
 	i.fieldMap["thumbnail_image_id"] = i.ThumbnailImageID
 }
 
