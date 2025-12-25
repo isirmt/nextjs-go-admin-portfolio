@@ -28,6 +28,7 @@ services:
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       ADMIN_ALLOWED_EMAILS: ${ADMIN_ALLOWED_EMAILS}
       ADMIN_SECRET: ${ADMIN_SECRET}
+      AUTH_TRUST_HOST: ${AUTH_TRUST_HOST}
     depends_on:
       db:
         condition: service_healthy
