@@ -1,0 +1,69 @@
+name: Build and Push Images
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Image version (e.g. 0.0.1)"
+        required: true
+        default: "0.0.1"
+      push_latest:
+        description: "push :latest tag"
+        required: true
+        default: "true"
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: meta (web)
+        id: meta_web
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}-web
+          tags: |
+            type=raw,value=${{ inputs.version }}
+            type=raw,value=latest,enable=${{ inputs.push_latest == 'true' }}
+
+      - name: Build and push (web)
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: true
+          tags: ${{ steps.meta_web.outputs.tags }}
+          labels: ${{ steps.meta_web.outputs.labels }}
+
+      - name: meta (backend)
+        id: meta_backend
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}-backend
+          tags: |
+            type=raw,value=${{ inputs.version }}
+            type=raw,value=latest,enable=${{ inputs.push_latest == 'true' }}
+
+      - name: Build and push (backend)
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: ${{ steps.meta_backend.outputs.tags }}
+          labels: ${{ steps.meta_backend.outputs.labels }}
