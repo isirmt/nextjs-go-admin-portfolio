@@ -1,5 +1,6 @@
 "use client";
 
+import { useInViewAnimation } from "@/hooks/useInViewAnimation";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
@@ -43,6 +44,8 @@ const getRoundRectPath = (
 export default function ProfileCard({ age }: ProfileCardProps) {
   const cardRef = useRef<HTMLDivElement | null>(null);
   const [orbit, setOrbit] = useState<OrbitState | null>(null);
+  const { ref: iconRef, isActive: isActiveIcon } =
+    useInViewAnimation<HTMLAnchorElement>({ threshold: 1, delayMs: 300 });
 
   useEffect(() => {
     const element = cardRef.current;
@@ -98,23 +101,42 @@ export default function ProfileCard({ age }: ProfileCardProps) {
         ref={cardRef}
         className="relative z-10 w-fit rounded-tr-[5rem] rounded-br-3xl bg-[#ffe7bb] [box-shadow:0_.75rem_0_0_#f7885c]"
       >
+        <div className="pointer-events-none absolute -bottom-9 -left-9 z-100 aspect-square size-30 scale-y-155 -rotate-10 bg-[url('/star_y.png')] bg-contain bg-center bg-no-repeat drop-shadow-[#ffd67c] -hue-rotate-40" />
+        <div className="pointer-events-none absolute -right-9 -bottom-9 z-100 aspect-square size-30 rotate-20 bg-[url('/star_y.png')] bg-contain bg-center bg-no-repeat drop-shadow-[#ffd67c]" />
+        <div className="pointer-events-none absolute right-6 bottom-15 z-100 aspect-square size-17 scale-y-134 rotate-11 bg-[url('/star_y.png')] bg-contain bg-center bg-no-repeat drop-shadow drop-shadow-[#ffd67c] -hue-rotate-20" />
         <div className="font-dot absolute -top-10 left-24 flex flex-col items-center justify-center">
           <div className="text-6xl leading-none tracking-wider">入本聖也</div>
           <div className="text-3xl leading-none font-semibold tracking-wide">
             seiya irimoto
           </div>
         </div>
-        <div className="relative flex flex-col gap-6 pt-24 pr-44 pb-14 pl-36">
+        <div className="relative flex flex-col gap-8 pt-24 pr-44 pb-14 pl-36">
           <div className="relative flex max-w-2xl items-center gap-10">
-            <div className="flex flex-col items-end gap-6">
-              <div className="size-36 overflow-hidden rounded-2xl select-none">
+            <div className="group relative flex flex-col items-end gap-6 drop-shadow-xl drop-shadow-[#ffd67c]">
+              <div className="pointer-events-none relative z-1 size-36 overflow-hidden rounded-lg transition-all select-none group-hover:opacity-0">
                 <Image
                   src={"/isirmt_icon.webp"}
                   width={144}
                   height={144}
                   alt="isirmt_icon"
+                  className="pointer-events-none"
                 />
               </div>
+              <Link
+                target="_blank"
+                rel="noopener"
+                href="https://itomiri.com"
+                ref={iconRef}
+                className={`animate-iv-icon-moving pointer-events-auto absolute z-0 block size-36 overflow-hidden rounded-lg select-none group-hover:top-0! group-hover:left-0! group-hover:transform-[rotate(0deg)]! group-hover:ease-linear! group-hover:[transition:all_100ms]! ${isActiveIcon ? "is-active" : ""}`}
+              >
+                <Image
+                  src={"/itomiri_icon.png"}
+                  width={144}
+                  height={144}
+                  alt="itomiri_icon"
+                  className="pointer-events-none"
+                />
+              </Link>
             </div>
             <div className="flex w-fit flex-col gap-2.5 text-sm font-semibold tracking-wide text-[#61230b]">
               <div className="flex gap-2">
@@ -137,7 +159,7 @@ export default function ProfileCard({ age }: ProfileCardProps) {
                 名義としても活動してたり...(イラスト・音楽制作など)
               </div>
               <div className="flex flex-wrap items-center gap-1">
-                問い合わせ・ご依頼等は
+                お問い合わせ・ご依頼等は
                 <Link
                   className="underline underline-offset-2 transition-colors duration-200 hover:text-[#61230b]/70"
                   target="_blank"
@@ -178,7 +200,7 @@ export default function ProfileCard({ age }: ProfileCardProps) {
               </div>
             </div>
           </div>
-          <div className="flex flex-wrap gap-4 px-6">
+          <div className="relative z-1 flex flex-wrap gap-4">
             <Link
               href="https://x.com/isirmt"
               target="_blank"
@@ -189,8 +211,8 @@ export default function ProfileCard({ age }: ProfileCardProps) {
                 src="/x_logo.png"
                 alt="X logo"
                 className="pointer-events-none select-none"
-                width={18}
-                height={18}
+                width={17}
+                height={17}
               />
             </Link>
             <Link
@@ -203,8 +225,36 @@ export default function ProfileCard({ age }: ProfileCardProps) {
                 src="/github_logo.png"
                 alt="GitHub logo"
                 className="pointer-events-none select-none"
-                width={26}
-                height={26}
+                width={23}
+                height={23}
+              />
+            </Link>
+            <Link
+              href="https://qiita.com/isirmt"
+              target="_blank"
+              rel="noopener"
+              className="flex size-10 items-center justify-center overflow-hidden rounded-4xl bg-white shadow-lg transition-all hover:scale-110 hover:drop-shadow-xl"
+            >
+              <Image
+                src="/qiita_logo.png"
+                alt="Qiita logo"
+                className="pointer-events-none select-none"
+                width={23}
+                height={23}
+              />
+            </Link>
+            <Link
+              href="https://zenn.dev/isirmt"
+              target="_blank"
+              rel="noopener"
+              className="flex size-10 items-center justify-center overflow-hidden rounded-4xl bg-white shadow-lg transition-all hover:scale-110 hover:drop-shadow-xl"
+            >
+              <Image
+                src="/zenn_logo.svg"
+                alt="Zenn logo"
+                className="pointer-events-none select-none"
+                width={20}
+                height={20}
               />
             </Link>
           </div>
