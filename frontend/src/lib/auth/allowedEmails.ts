@@ -1,7 +1,5 @@
-import { requiredEnv } from "../requiredEnv";
-
 export const isAllowedEmail = (email: string | null | undefined) => {
-  const allowedEmailsEnv = requiredEnv("ADMIN_ALLOWED_EMAILS");
+  const allowedEmailsEnv = process.env.ADMIN_ALLOWED_EMAILS || "";
   const allowedEmails = allowedEmailsEnv
     .split(",")
     .map((e) => e.trim().toLowerCase())

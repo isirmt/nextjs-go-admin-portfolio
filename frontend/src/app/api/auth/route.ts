@@ -1,10 +1,9 @@
 import { isAllowedEmail } from "@/lib/auth/allowedEmails";
 import { auth } from "@/lib/auth/options";
-import { requiredEnv } from "@/lib/requiredEnv";
 
 const ADMIN_HEADER = "X-Admin-Secret";
-const ADMIN_SECRET = requiredEnv("ADMIN_SECRET");
-const BACKEND_BASE_URL = requiredEnv("BACKEND_BASE_URL");
+const ADMIN_SECRET = process.env.ADMIN_SECRET;
+const BACKEND_BASE_URL = process.env.BACKEND_BASE_URL;
 
 async function proxy(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -20,6 +19,13 @@ async function proxy(request: Request) {
     });
   if (!isAllowedEmail(session.user?.email))
     return new Response("Forbidden", { status: 403 });
+
+  if (!ADMIN_SECRET) {
+    return new Response("server configuration error", { status: 500 });
+  }
+  if (!BACKEND_BASE_URL) {
+    return new Response("server configuration error", { status: 500 });
+  }
 
   const upstreamUrl = new URL(apiUrl, BACKEND_BASE_URL);
 
