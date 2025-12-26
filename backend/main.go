@@ -154,6 +154,8 @@ func main() {
 	epWorks := router.Group("/works")
 	epWorks.GET("", pSrv.handleGetWorks)
 	epWorks.POST("", pSrv.requireAdmin(pSrv.handleCreateWork))
+	epWorks.PUT("/:id", pSrv.requireAdmin(pSrv.handleUpdateWork))
+	epWorks.DELETE("/:id", pSrv.requireAdmin(pSrv.handleDeleteWork))
 
 	addr := getEnv("HOST", "0.0.0.0") + ":" + getEnv("PORT", "4000")
 	log.Printf("backend listening on %s", addr)
@@ -636,6 +638,237 @@ func (pSrv *server) handleCreateWork(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, work)
+}
+
+func (pSrv *server) handleUpdateWork(c echo.Context) error {
+	workID := strings.TrimSpace(c.Param("id"))
+	if workID == "" {
+		return c.String(400, "work id is required")
+	}
+
+	var req createWorkRequest
+	if err := c.Bind(&req); err != nil {
+		return c.String(400, "invalid request body")
+	}
+
+	title := strings.TrimSpace(req.Title)
+	if title == "" {
+		return c.String(400, "title is required")
+	}
+
+	comment := strings.TrimSpace(req.Comment)
+	if comment == "" {
+		return c.String(400, "comment is required")
+	}
+
+	accentColor := strings.TrimSpace(req.AccentColor)
+	if accentColor == "" {
+		accentColor = "#000000"
+	}
+	accentColor = strings.ToLower(accentColor)
+	if !hexColorPattern.MatchString(accentColor) {
+		return c.String(400, "accent_color must be formatted as #rrggbb")
+	}
+
+	description := strings.TrimSpace(req.Description)
+	var descriptionPtr *string
+	if description != "" {
+		descriptionPtr = &description
+	}
+
+	published := strings.TrimSpace(req.PublishedDate)
+	if published == "" {
+		return c.String(400, "published_date is required")
+	}
+	parsedPublished, err := time.Parse("2006-01-02", published)
+	if err != nil {
+		return c.String(400, "published_date must be formatted as YYYY-MM-DD")
+	}
+	publishedTime := parsedPublished.UTC()
+
+	thumbnailID := strings.TrimSpace(req.ThumbnailImageID)
+	if thumbnailID == "" {
+		return c.String(400, "thumbnail_image_id is required")
+	}
+
+	ctx := c.Request().Context()
+
+	if _, err := pSrv.q.IsirmtWork.WithContext(ctx).Where(pSrv.q.IsirmtWork.ID.Eq(workID)).First(); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return c.String(404, "work not found")
+		}
+		return c.String(500, "failed to fetch work")
+	}
+
+	workImageIDs := make([]string, 0, len(req.WorkImageIDs))
+	imageIDSet := map[string]struct{}{}
+	for _, id := range req.WorkImageIDs {
+		trimmed := strings.TrimSpace(id)
+		if trimmed == "" {
+			continue
+		}
+		workImageIDs = append(workImageIDs, trimmed)
+		imageIDSet[trimmed] = struct{}{}
+	}
+	imageIDSet[thumbnailID] = struct{}{}
+
+	if len(imageIDSet) > 0 {
+		imageIDs := make([]string, 0, len(imageIDSet))
+		for id := range imageIDSet {
+			imageIDs = append(imageIDs, id)
+		}
+		count, err := pSrv.q.CommonImage.WithContext(ctx).Where(pSrv.q.CommonImage.ID.In(imageIDs...)).Count()
+		if err != nil {
+			return c.String(500, "failed to validate images")
+		}
+		if int(count) != len(imageIDs) {
+			return c.String(400, "unknown image id provided")
+		}
+	}
+
+	techStackIDs := make([]string, 0, len(req.TechStackIDs))
+	techSet := map[string]struct{}{}
+	for _, id := range req.TechStackIDs {
+		trimmed := strings.TrimSpace(id)
+		if trimmed == "" {
+			continue
+		}
+		if _, exists := techSet[trimmed]; exists {
+			continue
+		}
+		techSet[trimmed] = struct{}{}
+		techStackIDs = append(techStackIDs, trimmed)
+	}
+	if len(techStackIDs) == 0 {
+		return c.String(400, "tech_stack_ids is required")
+	}
+	if count, err := pSrv.q.CommonTechStack.WithContext(ctx).Where(pSrv.q.CommonTechStack.ID.In(techStackIDs...)).Count(); err != nil {
+		return c.String(500, "failed to validate tech stacks")
+	} else if int(count) != len(techStackIDs) {
+		return c.String(400, "unknown tech stack id provided")
+	}
+
+	filteredUrls := make([]createWorkURL, 0, len(req.Urls))
+	for _, entry := range req.Urls {
+		label := strings.TrimSpace(entry.Label)
+		url := strings.TrimSpace(entry.URL)
+		if label == "" && url == "" {
+			continue
+		}
+		if label == "" || url == "" {
+			return c.String(400, "url entries require both label and url")
+		}
+		filteredUrls = append(filteredUrls, createWorkURL{
+			Label: label,
+			URL:   url,
+		})
+	}
+
+	if err := pSrv.q.Transaction(func(tx *query.Query) error {
+		if _, err := tx.IsirmtWork.WithContext(ctx).Where(tx.IsirmtWork.ID.Eq(workID)).Updates(map[string]interface{}{
+			"title":              title,
+			"comment":            comment,
+			"accent_color":       accentColor,
+			"description":        descriptionPtr,
+			"thumbnail_image_id": thumbnailID,
+			"created_at":         publishedTime,
+		}); err != nil {
+			return err
+		}
+
+		if _, err := tx.IsirmtWorkImage.WithContext(ctx).Where(tx.IsirmtWorkImage.WorkID.Eq(workID)).Delete(); err != nil {
+			return err
+		}
+		if _, err := tx.IsirmtWorkURL.WithContext(ctx).Where(tx.IsirmtWorkURL.WorkID.Eq(workID)).Delete(); err != nil {
+			return err
+		}
+		if _, err := tx.IsirmtWorkTechStack.WithContext(ctx).Where(tx.IsirmtWorkTechStack.WorkID.Eq(workID)).Delete(); err != nil {
+			return err
+		}
+
+		if len(workImageIDs) > 0 {
+			images := make([]*model.IsirmtWorkImage, 0, len(workImageIDs))
+			for idx, imageID := range workImageIDs {
+				images = append(images, &model.IsirmtWorkImage{
+					WorkID:       workID,
+					ImageID:      imageID,
+					DisplayOrder: int32(idx),
+				})
+			}
+			if err := tx.IsirmtWorkImage.WithContext(ctx).Create(images...); err != nil {
+				return err
+			}
+		}
+
+		if len(filteredUrls) > 0 {
+			urlModels := make([]*model.IsirmtWorkURL, 0, len(filteredUrls))
+			for idx, entry := range filteredUrls {
+				urlModels = append(urlModels, &model.IsirmtWorkURL{
+					WorkID:       workID,
+					Label:        entry.Label,
+					URL:          entry.URL,
+					DisplayOrder: int32(idx),
+				})
+			}
+			if err := tx.IsirmtWorkURL.WithContext(ctx).Create(urlModels...); err != nil {
+				return err
+			}
+		}
+
+		if len(techStackIDs) > 0 {
+			techModels := make([]*model.IsirmtWorkTechStack, 0, len(techStackIDs))
+			for _, techID := range techStackIDs {
+				techModels = append(techModels, &model.IsirmtWorkTechStack{
+					WorkID:      workID,
+					TechStackID: techID,
+				})
+			}
+			if err := tx.IsirmtWorkTechStack.WithContext(ctx).Create(techModels...); err != nil {
+				return err
+			}
+		}
+
+		return nil
+	}); err != nil {
+		return c.String(500, "failed to update work")
+	}
+
+	return c.String(http.StatusOK, "ok")
+}
+
+func (pSrv *server) handleDeleteWork(c echo.Context) error {
+	workID := strings.TrimSpace(c.Param("id"))
+	if workID == "" {
+		return c.String(400, "work id is required")
+	}
+
+	ctx := c.Request().Context()
+	if _, err := pSrv.q.IsirmtWork.WithContext(ctx).Where(pSrv.q.IsirmtWork.ID.Eq(workID)).First(); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return c.String(404, "work not found")
+		}
+		return c.String(500, "failed to fetch work")
+	}
+
+	if err := pSrv.q.Transaction(func(tx *query.Query) error {
+		if _, err := tx.IsirmtWorkImage.WithContext(ctx).Where(tx.IsirmtWorkImage.WorkID.Eq(workID)).Delete(); err != nil {
+			return err
+		}
+		if _, err := tx.IsirmtWorkURL.WithContext(ctx).Where(tx.IsirmtWorkURL.WorkID.Eq(workID)).Delete(); err != nil {
+			return err
+		}
+		if _, err := tx.IsirmtWorkTechStack.WithContext(ctx).Where(tx.IsirmtWorkTechStack.WorkID.Eq(workID)).Delete(); err != nil {
+			return err
+		}
+		if _, err := tx.IsirmtWork.WithContext(ctx).Where(tx.IsirmtWork.ID.Eq(workID)).Delete(); err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
+		return c.String(500, "failed to delete work")
+	}
+
+	return c.String(http.StatusOK, "ok")
 }
 
 func getEnv(key string, fallback string) string {

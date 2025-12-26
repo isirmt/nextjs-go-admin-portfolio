@@ -1,34 +1,38 @@
 "use client";
 
 import backendApi from "@/lib/auth/backendFetch";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { LabelText } from "./labelBlock";
 import { useTechsContext } from "@/contexts/techsContext";
 
 type StackSelectingBoxProps = {
   onChange: (ids: string[]) => void;
+  initialSelectedIds?: string[];
 };
 
 export default function StackSelectingBox({
   onChange,
+  initialSelectedIds,
 }: StackSelectingBoxProps) {
   const { techs, refreshTechs } = useTechsContext();
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [selectedIds, setSelectedIds] = useState<string[]>(
+    initialSelectedIds ?? [],
+  );
   const [newStackName, setNewStackName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  useEffect(() => {
-    onChange(selectedIds);
-  }, [onChange, selectedIds]);
-
-  const handleToggleSelect = useCallback((id: string) => {
-    setSelectedIds((prev) =>
-      prev.includes(id)
-        ? prev.filter((stackId) => stackId !== id)
-        : [...prev, id],
-    );
-  }, []);
+  const handleToggleSelect = useCallback(
+    (id: string) => {
+      const exists = selectedIds.includes(id);
+      const nextSelectedIds = exists
+        ? selectedIds.filter((stackId) => stackId !== id)
+        : [...selectedIds, id];
+      onChange(nextSelectedIds);
+      setSelectedIds(nextSelectedIds);
+    },
+    [onChange, selectedIds],
+  );
 
   const handleCreateTechStack = useCallback(async () => {
     const trimmedName = newStackName.trim();

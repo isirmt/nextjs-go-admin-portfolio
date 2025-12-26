@@ -1,7 +1,13 @@
 "use client";
 
 import backendApi from "@/lib/auth/backendFetch";
-import React, { useCallback, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import ImageSelectingBox from "./imageSelectingBox";
 import StackSelectingBox from "./stackSelectingBox";
 import { LabelBox, LabelText } from "./labelBlock";
@@ -11,30 +17,120 @@ import WorkUrlsInput, {
 } from "./workUrlsInput";
 import { useWorksContext } from "@/contexts/worksContext";
 
-export default function WorkRegisterForm() {
-  const [inputTitle, setInputTitle] = useState<string>("");
-  const [inputComment, setInputComment] = useState<string>("");
-  const [inputPublishedDate, setInputPublishedDate] = useState<string>(
-    () => new Date().toISOString().split("T")[0],
+type WorkRegisterFormMode = "post" | "put";
+
+type WorkRegisterFormUrlValue = {
+  id?: string;
+  label: string;
+  url: string;
+};
+
+type WorkRegisterFormInitialValues = {
+  title?: string;
+  comment?: string;
+  publishedDate?: string;
+  accentColor?: string;
+  thumbnailImageId?: string;
+  workImageIds?: string[];
+  techStackIds?: string[];
+  description?: string;
+  urls?: WorkRegisterFormUrlValue[];
+};
+
+type WorkRegisterFormProps = {
+  mode?: WorkRegisterFormMode;
+  workId?: string;
+  initialValues?: WorkRegisterFormInitialValues;
+  onSubmitted?: () => void;
+};
+
+const initializeUrlItems = (
+  urls?: WorkRegisterFormUrlValue[],
+): WorkUrlItem[] => {
+  if (!urls || urls.length == 0) {
+    return [createEmptyWorkUrlItem()];
+  }
+  return urls.map((entry) => ({
+    id: entry.id ?? createEmptyWorkUrlItem().id,
+    label: entry.label ?? "",
+    url: entry.url ?? "",
+  }));
+};
+
+export default function WorkRegisterForm({
+  mode = "post",
+  workId,
+  initialValues,
+  onSubmitted,
+}: WorkRegisterFormProps) {
+  const [inputTitle, setInputTitle] = useState<string>(
+    initialValues?.title ?? "",
   );
-  const [inputAccentColor, setInputAccentColor] = useState<string>("#000000");
-  const [inputThumbnailImage, setInputThumbnailImage] = useState<string>("");
-  const [inputWorkImages, setInputWorkImages] = useState<string[]>([]);
-  const [inputTechStacks, setInputTechStacks] = useState<string[]>([]);
-  const [inputDescription, setInputDescription] = useState<string>("");
-  const [inputUrls, setInputUrls] = useState<WorkUrlItem[]>([
-    createEmptyWorkUrlItem(),
-  ]);
+  const [inputComment, setInputComment] = useState<string>(
+    initialValues?.comment ?? "",
+  );
+  const [inputPublishedDate, setInputPublishedDate] = useState<string>(
+    initialValues?.publishedDate || new Date().toISOString().split("T")[0],
+  );
+  const [inputAccentColor, setInputAccentColor] = useState<string>(
+    initialValues?.accentColor ?? "#000000",
+  );
+  const [inputThumbnailImage, setInputThumbnailImage] = useState<string>(
+    initialValues?.thumbnailImageId ?? "",
+  );
+  const [inputWorkImages, setInputWorkImages] = useState<string[]>(
+    initialValues?.workImageIds ?? [],
+  );
+  const [inputTechStacks, setInputTechStacks] = useState<string[]>(
+    initialValues?.techStackIds ?? [],
+  );
+  const [inputDescription, setInputDescription] = useState<string>(
+    initialValues?.description ?? "",
+  );
+  const [inputUrls, setInputUrls] = useState<WorkUrlItem[]>(
+    initializeUrlItems(initialValues?.urls),
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
   const { refreshWorks } = useWorksContext();
+  const initialKey = useMemo(
+    () => JSON.stringify(initialValues ?? {}) ?? "",
+    [initialValues],
+  );
+  const lastInitialKeyRef = useRef<string | null>(null);
+  const isEditingMode = mode === "put";
+
+  useEffect(() => {
+    if (lastInitialKeyRef.current === initialKey) {
+      return;
+    }
+    lastInitialKeyRef.current = initialKey;
+    setInputTitle(initialValues?.title ?? "");
+    setInputComment(initialValues?.comment ?? "");
+    setInputPublishedDate(
+      initialValues?.publishedDate || new Date().toISOString().split("T")[0],
+    );
+    setInputAccentColor(initialValues?.accentColor ?? "#000000");
+    setInputThumbnailImage(initialValues?.thumbnailImageId ?? "");
+    setInputWorkImages(initialValues?.workImageIds ?? []);
+    setInputTechStacks(initialValues?.techStackIds ?? []);
+    setInputDescription(initialValues?.description ?? "");
+    setInputUrls(initializeUrlItems(initialValues?.urls));
+    setSubmitError(null);
+    setSubmitSuccess(null);
+  }, [initialKey, initialValues]);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       setSubmitError(null);
       setSubmitSuccess(null);
+
+      if (isEditingMode && !workId) {
+        setSubmitError("更新対象のIDが見つかりません");
+        return;
+      }
 
       if (!inputThumbnailImage) {
         setSubmitError("サムネイル画像を選択してください");
@@ -66,24 +162,37 @@ export default function WorkRegisterForm() {
             .filter((item) => item.label || item.url),
         };
 
-        const response = await backendApi("/works", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
+        const response = await backendApi(
+          isEditingMode ? `/works/${workId}` : "/works",
+          {
+            method: isEditingMode ? "PUT" : "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
           },
-          body: JSON.stringify(payload),
-        });
+        );
 
         if (!response.ok) {
           const message = await response.text();
-          throw new Error(message || "登録に失敗しました");
+          throw new Error(
+            message ||
+              (isEditingMode ? "更新に失敗しました" : "登録に失敗しました"),
+          );
         }
 
-        setSubmitSuccess("登録が完了しました");
+        setSubmitSuccess(
+          isEditingMode ? "更新が完了しました" : "登録が完了しました",
+        );
         await refreshWorks();
+        onSubmitted?.();
       } catch (error) {
         setSubmitError(
-          error instanceof Error ? error.message : "登録に失敗しました",
+          error instanceof Error
+            ? error.message
+            : isEditingMode
+              ? "更新に失敗しました"
+              : "登録に失敗しました",
         );
       } finally {
         setIsSubmitting(false);
@@ -99,7 +208,10 @@ export default function WorkRegisterForm() {
       inputTitle,
       inputUrls,
       inputWorkImages,
+      isEditingMode,
+      onSubmitted,
       refreshWorks,
+      workId,
     ],
   );
 
@@ -143,7 +255,10 @@ export default function WorkRegisterForm() {
           </LabelBox>
           <LabelBox isLong>
             <LabelText required>技術構成</LabelText>
-            <StackSelectingBox onChange={handleTechStacksSelected} />
+            <StackSelectingBox
+              onChange={handleTechStacksSelected}
+              initialSelectedIds={inputTechStacks}
+            />
           </LabelBox>
           <LabelBox isLong>
             <LabelText required>関連リンク</LabelText>
@@ -173,11 +288,20 @@ export default function WorkRegisterForm() {
           </LabelBox>
           <LabelBox isLong>
             <LabelText required>サムネイル</LabelText>
-            <ImageSelectingBox onChange={handleThumbnailSelected} />
+            <ImageSelectingBox
+              onChange={handleThumbnailSelected}
+              initialSelectedIds={
+                inputThumbnailImage ? [inputThumbnailImage] : []
+              }
+            />
           </LabelBox>
           <LabelBox isLong>
             <LabelText required>参考画像</LabelText>
-            <ImageSelectingBox multiple onChange={handleWorkImagesSelected} />
+            <ImageSelectingBox
+              multiple
+              onChange={handleWorkImagesSelected}
+              initialSelectedIds={inputWorkImages}
+            />
           </LabelBox>
           <LabelBox isLong>
             <LabelText required>説明</LabelText>

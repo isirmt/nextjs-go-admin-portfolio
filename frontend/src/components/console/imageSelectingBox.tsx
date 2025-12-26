@@ -8,16 +8,20 @@ import { useEffect, useState } from "react";
 type ImageSelectingBoxProps = {
   onChange: (ids: string[]) => void;
   multiple?: boolean;
+  initialSelectedIds?: string[];
 };
 
 export default function ImageSelectingBox({
   onChange,
   multiple,
+  initialSelectedIds,
 }: ImageSelectingBoxProps) {
   const { images, refreshImages } = useImagesContext();
   const { isDragging, dragProps, fileInputProps, openFileDialog } =
     useDragAndDropUploader({ onUploadSuccess: refreshImages });
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [selectedIds, setSelectedIds] = useState<string[]>(
+    initialSelectedIds ?? [],
+  );
 
   useEffect(() => {
     onChange(selectedIds);
