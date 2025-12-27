@@ -4,7 +4,13 @@
 import { useImagesContext } from "@/contexts/imagesContext";
 import { useWorksContext } from "@/contexts/worksContext";
 import { Work } from "@/types/works/common";
-import React, { useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useInViewAnimation } from "@/hooks/useInViewAnimation";
 import { useTechInfoGetter } from "@/hooks/useTechInfoGetter";
 import { smoochSans } from "@/lib/fonts";
@@ -25,10 +31,12 @@ function WorkCard({
   work,
   selectingId,
   selectingFunc,
+  onRecordClick,
 }: {
   work: Work;
   selectingId?: string;
   selectingFunc: (id?: string) => void;
+  onRecordClick?: (id: string) => void;
 }) {
   const { images } = useImagesContext();
   const randomInViewDelayMs = useMemo(
@@ -75,7 +83,14 @@ function WorkCard({
         <MarqueeText text={work.comment} />
       </div>
       <button
-        onClick={() => selectingFunc(isSelected ? undefined : work.id)}
+        onClick={() => {
+          if (isSelected) {
+            selectingFunc(undefined);
+            return;
+          }
+          selectingFunc(work.id);
+          onRecordClick?.(work.id);
+        }}
         className={`group relative flex cursor-pointer items-center justify-center drop-shadow-2xl transition-all duration-100 ${isSelected ? "scale-110" : ""}`}
       >
         <div
@@ -130,6 +145,7 @@ export default function WorksList() {
   const { works } = useWorksContext();
   const [selectingWorkId, setSelectingWorkId] = useState<string>();
   const [lastSelectedWorkId, setLastSelectedWorkId] = useState<string>();
+  const clickLimiterRef = useRef<Map<string, number>>(new Map());
   const { ref: andMoreTextRef, isActive: isAndMoreTextActive } =
     useInViewAnimation<HTMLDivElement>({
       threshold: 0.2,
@@ -142,6 +158,24 @@ export default function WorksList() {
       setLastSelectedWorkId(id);
     }
   };
+
+  const recordClick = useCallback((id: string) => {
+    const now = Date.now();
+    const last = clickLimiterRef.current.get(id) ?? 0;
+    if (now - last < 2000) {
+      return;
+    }
+    clickLimiterRef.current.set(id, now);
+
+    const url = `/api/works/${id}/clicks`;
+    try {
+      const blob = new Blob([], { type: "application/json" });
+      navigator.sendBeacon(url, blob);
+      return;
+    } catch {
+      // do nothing
+    }
+  }, []);
 
   useEffect(() => {
     if (!selectingWorkId) {
@@ -194,6 +228,7 @@ export default function WorksList() {
               work={work}
               selectingId={selectingWorkId}
               selectingFunc={handleSelectWork}
+              onRecordClick={recordClick}
             />
           ))}
         </div>

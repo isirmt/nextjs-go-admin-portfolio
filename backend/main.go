@@ -13,6 +13,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -30,6 +31,7 @@ type server struct {
 	allowedOrigin string
 	maxUploadSize uint32
 	adminSecret   string
+	clickLimiter  *clickLimiter
 }
 
 type createWorkURL struct {
@@ -86,6 +88,54 @@ type workResponse struct {
 
 var hexColorPattern = regexp.MustCompile(`^#[0-9a-fA-F]{6}$`)
 
+type clickLimiter struct {
+	mu              sync.Mutex
+	lastClicks      map[string]time.Time
+	minInterval     time.Duration
+	maxEntries      int
+	cleanupInterval time.Duration
+	lastCleanup     time.Time
+}
+
+func createClickLimiter(minInterval time.Duration, maxEntries int, cleanupInterval time.Duration) *clickLimiter {
+	return &clickLimiter{
+		lastClicks:      make(map[string]time.Time),
+		minInterval:     minInterval,
+		maxEntries:      maxEntries,
+		cleanupInterval: cleanupInterval,
+		lastCleanup:     time.Now(),
+	}
+}
+
+func (l *clickLimiter) isAllowedClick(ip, workID string) bool {
+	if l == nil {
+		return true
+	}
+
+	now := time.Now()
+	key := ip + "|" + workID
+
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
+	if last, ok := l.lastClicks[key]; ok && now.Sub(last) < l.minInterval {
+		return false
+	}
+	l.lastClicks[key] = now
+
+	if len(l.lastClicks) > l.maxEntries || now.Sub(l.lastCleanup) >= l.cleanupInterval {
+		expireBefore := now.Add(-l.minInterval * 10)
+		for k, t := range l.lastClicks {
+			if t.Before(expireBefore) {
+				delete(l.lastClicks, k)
+			}
+		}
+		l.lastCleanup = now
+	}
+
+	return true
+}
+
 func main() {
 	dbUrl := os.Getenv("DATABASE_URL")
 	if dbUrl == "" {
@@ -131,6 +181,7 @@ func main() {
 		allowedOrigin: os.Getenv("ALLOWED_ORIGIN"),
 		maxUploadSize: 20 << 20, // 20 MiB
 		adminSecret:   adminSecret,
+		clickLimiter:  createClickLimiter(2*time.Second, 10000, time.Minute),
 	}
 
 	router := echo.New()
@@ -153,6 +204,7 @@ func main() {
 	epWorks := router.Group("/works")
 	epWorks.GET("", pSrv.handleGetWorks)
 	epWorks.POST("", pSrv.requireAdmin(pSrv.handleCreateWork))
+	epWorks.POST("/:id/clicks", pSrv.handleCreateWorkClick)
 	epWorks.PUT("/:id", pSrv.requireAdmin(pSrv.handleUpdateWork))
 	epWorks.DELETE("/:id", pSrv.requireAdmin(pSrv.handleDeleteWork))
 
@@ -471,6 +523,31 @@ func (pSrv *server) handleGetWorks(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, responses)
+}
+
+func (pSrv *server) handleCreateWorkClick(c echo.Context) error {
+	workID := strings.TrimSpace(c.Param("id"))
+	if workID == "" {
+		return c.String(400, "work id is required")
+	}
+
+	ip := c.RealIP()
+	if ip == "" {
+		ip = "unknown"
+	}
+	if !pSrv.clickLimiter.isAllowedClick(ip, workID) {
+		return c.NoContent(http.StatusAccepted)
+	}
+
+	ctx := c.Request().Context()
+	click := &model.IsirmtWorkClick{
+		WorkID: workID,
+	}
+	if err := pSrv.q.IsirmtWorkClick.WithContext(ctx).Create(click); err != nil {
+		return c.String(500, "failed to create work click")
+	}
+
+	return c.NoContent(http.StatusCreated)
 }
 
 func (pSrv *server) handleCreateWork(c echo.Context) error {
