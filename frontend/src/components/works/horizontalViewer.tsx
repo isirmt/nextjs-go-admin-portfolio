@@ -22,14 +22,11 @@ export default function HorizontalViewer() {
 
   return (
     <div className="absolute top-0 left-0 size-full overflow-hidden px-20 opacity-50">
-      <div
-        className="animate-vertical-loop flex flex-col gap-10"
-        style={marqueeStyle}
-      >
+      <div className="animate-vertical-loop flex flex-col" style={marqueeStyle}>
         {loopImages.map((image, imageIdx) => (
           <img
             alt={`${image.file_name}`}
-            className="pointer-events-none w-[20vw]"
+            className="pointer-events-none my-2.5 w-[32vw] max-w-96 lg:my-5"
             key={`${image.id}-${imageIdx}`}
             src={`/api/images/${image.id}/raw`}
           />
