@@ -7,6 +7,7 @@ import ProfileCard from "@/components/profile/card";
 import Link from "next/link";
 import React from "react";
 import HorizontalViewer from "@/components/works/horizontalViewer";
+import RealtimeWorld from "@/components/realtimeWorld";
 
 const myAreas = [
   "フロントエンド・クライアント実装",
@@ -83,11 +84,12 @@ export default function Home() {
             >
               <HorizontalViewer />
               <div className="pointer-events-none absolute top-0 left-0 size-full bg-[linear-gradient(0deg,transparent_calc(100%-1px),#000_calc(100%-1px)),linear-gradient(90deg,transparent_calc(100%-1px),#000_calc(100%-1px))] bg-size-[64px_64px] opacity-10" />
+              <RealtimeWorld />
               <div className="font-dot pointer-events-none absolute flex size-full items-center justify-center text-8xl leading-none">
                 isirmt
               </div>
             </section>
-            <nav className="sticky top-0 z-50 -mt-20 h-20 w-full bg-white">
+            <nav className="sticky top-0 z-50 -mt-20 h-20 w-full">
               <ul className="font-dot flex h-full w-full items-center justify-start gap-6 px-10 tracking-wide">
                 <li>
                   <Link
