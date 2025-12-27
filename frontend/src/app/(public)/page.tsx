@@ -6,6 +6,7 @@ import { delaGothicOne } from "@/lib/fonts";
 import ProfileCard from "@/components/profile/card";
 import Link from "next/link";
 import React from "react";
+import HorizontalViewer from "@/components/works/horizontalViewer";
 
 const myAreas = [
   "フロントエンド・クライアント実装",
@@ -80,7 +81,9 @@ export default function Home() {
               aria-label="top-view"
               className="relative h-dvh w-full bg-gray-50"
             >
-              <div className="font-dot absolute flex size-full items-center justify-center text-8xl leading-none">
+              <HorizontalViewer />
+              <div className="pointer-events-none absolute top-0 left-0 size-full bg-[linear-gradient(0deg,transparent_calc(100%-1px),#000_calc(100%-1px)),linear-gradient(90deg,transparent_calc(100%-1px),#000_calc(100%-1px))] bg-size-[64px_64px] opacity-10" />
+              <div className="font-dot pointer-events-none absolute flex size-full items-center justify-center text-8xl leading-none">
                 isirmt
               </div>
             </section>
