@@ -1,7 +1,7 @@
 "use client";
 
 import { useWorksContext } from "@/contexts/worksContext";
-import { Environment } from "@react-three/drei";
+import { lightenHex } from "@/lib/sketch/colorChanger";
 import { Canvas, useThree } from "@react-three/fiber";
 import {
   CuboidCollider,
@@ -9,6 +9,7 @@ import {
   RigidBody,
   type RapierRigidBody,
 } from "@react-three/rapier";
+import React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type WorkClickEvent = {
@@ -51,6 +52,7 @@ function FallingBoxBody({
 }) {
   const bodyRef = useRef<RapierRigidBody | null>(null);
   const [isHovering, setIsHovering] = useState(false);
+  const lighterColor = useMemo(() => lightenHex(color, 0.4), [color]);
 
   useEffect(() => {
     const body = bodyRef.current;
@@ -84,11 +86,17 @@ function FallingBoxBody({
       canSleep
     >
       <mesh
-        onPointerEnter={() => setIsHovering(true)}
-        onPointerLeave={() => setIsHovering(false)}
+        onPointerEnter={() => {
+          document.body.style.cursor = "pointer";
+          setIsHovering(true);
+        }}
+        onPointerLeave={() => {
+          document.body.style.cursor = "default";
+          setIsHovering(false);
+        }}
       >
         <boxGeometry args={[boxSize, boxSize, wallDepth]} />
-        <meshStandardMaterial color={isHovering ? "#00ff00" : color} />
+        <meshStandardMaterial color={isHovering ? color : lighterColor} />
       </mesh>
     </RigidBody>
   );
@@ -241,19 +249,25 @@ function WorkClickPhysics() {
 
 export default function RealtimeWorld() {
   return (
-    <div className="absolute top-0 left-0 size-full">
-      <Canvas
-        onContextMenu={(e) => e.preventDefault()}
-        orthographic
-        camera={{ position: [0, 0, 10], zoom: 80 }}
-        gl={{
-          antialias: true,
-        }}
-      >
-        <ambientLight intensity={1.5} />
-        <directionalLight position={[3, 4, 5]} intensity={0.6} />
-        <WorkClickPhysics />
-      </Canvas>
-    </div>
+    <React.Fragment>
+      <div className="absolute top-0 left-0 size-full">
+        <Canvas
+          onContextMenu={(e) => e.preventDefault()}
+          orthographic
+          camera={{ position: [0, 0, 10], zoom: 80 }}
+          gl={{
+            antialias: true,
+          }}
+        >
+          <ambientLight intensity={1.5} />
+          <directionalLight position={[3, 4, 5]} intensity={1} />
+          <WorkClickPhysics />
+        </Canvas>
+      </div>
+      <div className="font-dot absolute top-6 right-6 flex items-center gap-1 text-xl">
+        <span className="size-3 animate-pulse rounded-full bg-[#f06363]" />
+        <span>LIVE</span>
+      </div>
+    </React.Fragment>
   );
 }

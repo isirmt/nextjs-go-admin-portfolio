@@ -4,10 +4,10 @@ import { TechsProvider } from "@/contexts/techsContext";
 import { WorksProvider } from "@/contexts/worksContext";
 import { delaGothicOne } from "@/lib/fonts";
 import ProfileCard from "@/components/profile/card";
-import Link from "next/link";
 import React from "react";
 import HorizontalViewer from "@/components/works/horizontalViewer";
 import RealtimeWorld from "@/components/realtimeWorld";
+import Navigation from "@/components/navigation";
 
 const myAreas = [
   "フロントエンド・クライアント実装",
@@ -89,28 +89,7 @@ export default function Home() {
                 isirmt
               </div>
             </section>
-            <nav className="sticky top-0 z-50 -mt-20 h-20 w-full">
-              <ul className="font-dot flex h-full w-full items-center justify-start gap-6 px-10 tracking-wide">
-                <li>
-                  <Link
-                    href={`/`}
-                    className="inline-flex flex-col items-center justify-center"
-                  >
-                    <div className="text-2xl leading-none">Profile</div>
-                    <div className="text-sm leading-none">プロフィール</div>
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href={`/console`}
-                    className="inline-flex flex-col items-center justify-center"
-                  >
-                    <div className="text-2xl leading-none">Console</div>
-                    <div className="text-sm leading-none">コンソール</div>
-                  </Link>
-                </li>
-              </ul>
-            </nav>
+            <Navigation />
             <section
               aria-label="profile"
               className="relative w-full overflow-x-hidden"
