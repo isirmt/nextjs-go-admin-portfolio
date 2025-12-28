@@ -1,5 +1,6 @@
 "use client";
 
+import { useSelectingCubeContext } from "@/contexts/selectingCubeContext";
 import { useWorksContext } from "@/contexts/worksContext";
 import { lightenHex } from "@/lib/sketch/colorChanger";
 import { Canvas, useThree } from "@react-three/fiber";
@@ -53,6 +54,7 @@ function FallingBoxBody({
   const bodyRef = useRef<RapierRigidBody | null>(null);
   const [isHovering, setIsHovering] = useState(false);
   const lighterColor = useMemo(() => lightenHex(color, 0.4), [color]);
+  const { setSelectingCubeId } = useSelectingCubeContext();
 
   useEffect(() => {
     const body = bodyRef.current;
@@ -88,10 +90,12 @@ function FallingBoxBody({
       <mesh
         onPointerEnter={() => {
           document.body.style.cursor = "pointer";
+          setSelectingCubeId(box.workId);
           setIsHovering(true);
         }}
         onPointerLeave={() => {
           document.body.style.cursor = "default";
+          setSelectingCubeId(null);
           setIsHovering(false);
         }}
       >

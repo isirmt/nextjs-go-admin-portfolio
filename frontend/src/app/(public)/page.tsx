@@ -5,9 +5,9 @@ import { WorksProvider } from "@/contexts/worksContext";
 import { delaGothicOne } from "@/lib/fonts";
 import ProfileCard from "@/components/profile/card";
 import React from "react";
-import HorizontalViewer from "@/components/works/horizontalViewer";
-import RealtimeWorld from "@/components/realtimeWorld";
 import Navigation from "@/components/navigation";
+import HeroSection from "@/components/heroSection";
+import { SelectingCubeContextProvider } from "@/contexts/selectingCubeContext";
 
 const myAreas = [
   "フロントエンド・クライアント実装",
@@ -82,12 +82,9 @@ export default function Home() {
               aria-label="top-view"
               className="relative h-dvh w-full bg-gray-50"
             >
-              <HorizontalViewer />
-              <div className="pointer-events-none absolute top-0 left-0 size-full bg-[linear-gradient(0deg,transparent_calc(100%-1px),#000_calc(100%-1px)),linear-gradient(90deg,transparent_calc(100%-1px),#000_calc(100%-1px))] bg-size-[64px_64px] opacity-10" />
-              <RealtimeWorld />
-              <div className="font-dot pointer-events-none absolute flex size-full items-center justify-center text-8xl leading-none">
-                isirmt
-              </div>
+              <SelectingCubeContextProvider>
+                <HeroSection />
+              </SelectingCubeContextProvider>
             </section>
             <Navigation />
             <section
