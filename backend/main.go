@@ -410,6 +410,9 @@ func (pSrv *server) handleUploadImage(c echo.Context) error {
 	if err != nil {
 		return c.String(400, "file is required")
 	}
+	if fileHeader.Size > 0 && fileHeader.Size > int64(pSrv.maxUploadSize) {
+		return c.String(http.StatusRequestEntityTooLarge, "file too large")
+	}
 
 	src, err := fileHeader.Open()
 	if err != nil {
@@ -432,9 +435,16 @@ func (pSrv *server) handleUploadImage(c echo.Context) error {
 	}
 	defer dst.Close()
 
-	size, err := io.Copy(dst, src)
+	limit := int64(pSrv.maxUploadSize) + 1
+	size, err := io.Copy(dst, io.LimitReader(src, limit))
 	if err != nil {
 		return c.String(500, "failed to save file")
+	}
+
+	if size > int64(pSrv.maxUploadSize) {
+		_ = dst.Close()
+		_ = os.Remove(dstPath)
+		return c.String(http.StatusRequestEntityTooLarge, "file too large")
 	}
 
 	if _, err := dst.Seek(0, io.SeekStart); err != nil {
