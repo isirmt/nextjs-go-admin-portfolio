@@ -78,32 +78,32 @@ export default function Home() {
       <ImagesProvider>
         <WorksProvider>
           <TechsProvider>
-            <section
-              aria-label="top-view"
-              className="relative h-dvh w-full bg-gray-50"
-            >
-              <SelectingCubeContextProvider>
+            <SelectingCubeContextProvider>
+              <section
+                aria-label="top-view"
+                className="relative h-dvh w-full bg-gray-50"
+              >
                 <HeroSection />
-              </SelectingCubeContextProvider>
-            </section>
-            <Navigation />
-            <section
-              aria-label="profile"
-              className="relative w-full overflow-x-hidden"
-            >
-              <ProfileCard age={age} />
-              <div className="relative -mt-6 grid grid-cols-2 gap-20 bg-[#c6f4ff] px-40 pt-32 pb-20">
-                <DetailBox label="分野" array={myAreas} />
-                <DetailBox
-                  label="フレームワーク・ツール等"
-                  array={myTools}
-                  isApplyingEtc
-                />
-              </div>
-            </section>
-            <section aria-label="works-display" className="relative w-full">
-              <WorkConveyer />
-            </section>
+              </section>
+              <Navigation />
+              <section
+                aria-label="profile"
+                className="relative w-full overflow-x-hidden"
+              >
+                <ProfileCard age={age} />
+                <div className="relative -mt-6 grid grid-cols-2 gap-20 bg-[#c6f4ff] px-40 pt-32 pb-20">
+                  <DetailBox label="分野" array={myAreas} />
+                  <DetailBox
+                    label="フレームワーク・ツール等"
+                    array={myTools}
+                    isApplyingEtc
+                  />
+                </div>
+              </section>
+              <section aria-label="works-display" className="relative w-full">
+                <WorkConveyer />
+              </section>
+            </SelectingCubeContextProvider>
           </TechsProvider>
         </WorksProvider>
       </ImagesProvider>

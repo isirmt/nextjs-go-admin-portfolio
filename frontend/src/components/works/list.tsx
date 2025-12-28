@@ -1,7 +1,9 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useImagesContext } from "@/contexts/imagesContext";
+import { useSelectingCubeContext } from "@/contexts/selectingCubeContext";
 import { useWorksContext } from "@/contexts/worksContext";
 import { Work } from "@/types/works/common";
 import React, {
@@ -143,21 +145,23 @@ function WorkCard({
 
 export default function WorksList() {
   const { works } = useWorksContext();
+  const { clickedCubeId, clickNonce } = useSelectingCubeContext();
   const [selectingWorkId, setSelectingWorkId] = useState<string>();
   const [lastSelectedWorkId, setLastSelectedWorkId] = useState<string>();
   const clickLimiterRef = useRef<Map<string, number>>(new Map());
+  const lastHandledCubeClickRef = useRef(0);
   const { ref: andMoreTextRef, isActive: isAndMoreTextActive } =
     useInViewAnimation<HTMLDivElement>({
       threshold: 0.2,
       delayMs: 250,
     });
 
-  const handleSelectWork = (id?: string) => {
+  const handleSelectWork = useCallback((id?: string) => {
     setSelectingWorkId(id);
     if (id) {
       setLastSelectedWorkId(id);
     }
-  };
+  }, []);
 
   const recordClick = useCallback((id: string) => {
     const now = Date.now();
@@ -201,6 +205,28 @@ export default function WorksList() {
       style.paddingRight = previousPaddingRight;
     };
   }, [selectingWorkId]);
+
+  useEffect(() => {
+    if (!clickedCubeId || clickNonce === 0) {
+      return;
+    }
+    if (lastHandledCubeClickRef.current === clickNonce) {
+      return;
+    }
+    lastHandledCubeClickRef.current = clickNonce;
+    if (selectingWorkId === clickedCubeId) {
+      handleSelectWork(undefined);
+      return;
+    }
+    handleSelectWork(clickedCubeId);
+    recordClick(clickedCubeId);
+  }, [
+    clickedCubeId,
+    clickNonce,
+    handleSelectWork,
+    recordClick,
+    selectingWorkId,
+  ]);
 
   return (
     <React.Fragment>

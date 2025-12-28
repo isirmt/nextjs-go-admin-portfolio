@@ -22,7 +22,7 @@ export default function HeroSection() {
       <div className="pointer-events-none absolute flex size-full items-center justify-center">
         {selectingWork ? (
           <div className="absolute flex flex-col gap-2 text-center text-[#222]">
-            <div className="font-noto text-6xl font-bold">
+            <div className="font-noto text-6xl font-bold tracking-wide">
               {selectingWork.title}
             </div>
             <div className="font-noto text-2xl">詳細を表示</div>

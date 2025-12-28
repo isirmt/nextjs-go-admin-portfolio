@@ -51,10 +51,10 @@ function FallingBoxBody({
   wallDepth: number;
   color: string;
 }) {
+  const { setSelectingCubeId, emitCubeClick } = useSelectingCubeContext();
   const bodyRef = useRef<RapierRigidBody | null>(null);
   const [isHovering, setIsHovering] = useState(false);
   const lighterColor = useMemo(() => lightenHex(color, 0.4), [color]);
-  const { setSelectingCubeId } = useSelectingCubeContext();
 
   useEffect(() => {
     const body = bodyRef.current;
@@ -88,15 +88,21 @@ function FallingBoxBody({
       canSleep
     >
       <mesh
-        onPointerEnter={() => {
+        onPointerEnter={(e) => {
+          e.stopPropagation();
           document.body.style.cursor = "pointer";
           setSelectingCubeId(box.workId);
           setIsHovering(true);
         }}
-        onPointerLeave={() => {
+        onPointerLeave={(e) => {
+          e.stopPropagation();
           document.body.style.cursor = "default";
           setSelectingCubeId(null);
           setIsHovering(false);
+        }}
+        onClick={(e) => {
+          e.stopPropagation();
+          emitCubeClick(box.workId);
         }}
       >
         <boxGeometry args={[boxSize, boxSize, wallDepth]} />
