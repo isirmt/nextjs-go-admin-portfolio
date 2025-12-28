@@ -2,7 +2,7 @@ import Link from "next/link";
 
 const links = [
   { href: "/", label: "Profile", subLabel: "プロフィール" },
-  { href: "/console", label: "Console", subLabel: "コンソール" },
+  { href: "/console/works", label: "Console", subLabel: "コンソール" },
 ];
 
 export default function Navigation() {

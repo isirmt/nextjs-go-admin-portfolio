@@ -18,7 +18,7 @@ export default function SessionButton() {
       <button
         className="cursor-pointer"
         type="button"
-        onClick={() => signOut({ callbackUrl: "/" })}
+        onClick={() => signOut()}
       >
         ログアウト
       </button>
@@ -29,7 +29,7 @@ export default function SessionButton() {
     <button
       type="button"
       className="cursor-pointer"
-      onClick={() => signIn("google", { callbackUrl: "/console" })}
+      onClick={() => signIn("google", { callbackUrl: "/console/works" })}
     >
       Googleでログイン
     </button>

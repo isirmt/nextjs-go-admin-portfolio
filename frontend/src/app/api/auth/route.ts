@@ -17,7 +17,7 @@ async function proxy(request: Request) {
     return new Response("parameter(api_url) must be a relative path", {
       status: 400,
     });
-  if (!isAllowedEmail(session.user?.email))
+  if (!isAllowedEmail(session.user?.email) || session.user?.role !== "admin")
     return new Response("Forbidden", { status: 403 });
 
   if (!ADMIN_SECRET) {
