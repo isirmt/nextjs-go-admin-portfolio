@@ -6,6 +6,7 @@ import { lightenHex } from "@/lib/sketch/colorChanger";
 import { Canvas, useThree } from "@react-three/fiber";
 import {
   CuboidCollider,
+  ConvexHullCollider,
   Physics,
   RigidBody,
   type RapierRigidBody,
@@ -82,7 +83,7 @@ function FallingBoxBody({
       enabledTranslations={[true, true, false]}
       enabledRotations={[false, false, true]}
       friction={0.6}
-      restitution={0.2}
+      restitution={0.7}
       linearDamping={0.2}
       angularDamping={0.15}
       canSleep
@@ -130,6 +131,32 @@ function WorkClickPhysics() {
   const wallDepth = Math.max(BOX_DEPTH, boxSize * 0.4);
   const pixelToWorld = viewport.height / size.height;
   const floorOffset = pixelToWorld * 96;
+  const floorY = -viewport.height / 2 + floorOffset;
+  const rightWallX = viewport.width / 2;
+  const triangleSize = pixelToWorld * 300;
+  const triangleVertices = useMemo(() => {
+    const halfDepth = wallDepth / 2;
+    return new Float32Array([
+      0,
+      0,
+      -halfDepth,
+      -triangleSize,
+      0,
+      -halfDepth,
+      0,
+      triangleSize,
+      -halfDepth,
+      0,
+      0,
+      halfDepth,
+      -triangleSize,
+      0,
+      halfDepth,
+      0,
+      triangleSize,
+      halfDepth,
+    ]);
+  }, [triangleSize, wallDepth]);
 
   const colorMap = useMemo(() => {
     const map = new Map<string, string>();
@@ -150,12 +177,12 @@ function WorkClickPhysics() {
       const angle = (angleDeg * Math.PI) / 180;
       const speed = Math.max(10, boxSize * randomInRange(18, 26));
       const velocity: [number, number, number] = [
-        Math.cos(angle) * speed,
+        0,
         Math.sin(angle) * speed,
         0,
       ];
       const impulse: [number, number, number] = [
-        Math.cos(angle) * speed * randomInRange(0.4, 0.7),
+        0,
         Math.sin(angle) * speed * randomInRange(0.4, 0.7),
         0,
       ];
@@ -231,14 +258,10 @@ function WorkClickPhysics() {
 
   return (
     <Physics gravity={[0, -4.9, 0]} timeStep={1 / 60}>
-      <RigidBody type="fixed" colliders={false}>
+      <RigidBody type="fixed" colliders={false} friction={0} restitution={0.7}>
         <CuboidCollider
           args={[viewport.width / 2, wallThickness / 2, wallDepth / 2]}
-          position={[
-            0,
-            -viewport.height / 2 - wallThickness / 2 + floorOffset,
-            0,
-          ]}
+          position={[0, floorY - wallThickness / 2, 0]}
         />
         <CuboidCollider
           args={[wallThickness / 2, viewport.height / 2, wallDepth / 2]}
@@ -246,7 +269,11 @@ function WorkClickPhysics() {
         />
         <CuboidCollider
           args={[wallThickness / 2, viewport.height / 2, wallDepth / 2]}
-          position={[viewport.width / 2 + wallThickness / 2, 0, 0]}
+          position={[rightWallX + wallThickness / 2, 0, 0]}
+        />
+        <ConvexHullCollider
+          args={[triangleVertices]}
+          position={[rightWallX, floorY, 0]}
         />
       </RigidBody>
 
