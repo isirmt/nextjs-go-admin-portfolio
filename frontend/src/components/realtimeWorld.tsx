@@ -96,7 +96,7 @@ function FallingBoxBody({
         }}
         onPointerLeave={(e) => {
           e.stopPropagation();
-          document.body.style.cursor = "default";
+          document.body.style.cursor = "auto";
           setSelectingCubeId(null);
           setIsHovering(false);
         }}
