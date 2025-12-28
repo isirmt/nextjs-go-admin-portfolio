@@ -101,6 +101,7 @@ export default function ProfileCard({ age }: ProfileCardProps) {
         ref={cardRef}
         className="relative z-10 w-fit rounded-tr-[5rem] rounded-br-3xl bg-[#ffe7bb] [box-shadow:0_.75rem_0_0_#f7885c]"
       >
+        <div className="pointer-events-none absolute top-5 left-0 h-[calc(100%-40px)] w-[calc(100%-20px)] rounded-tr-[4rem] rounded-br-3xl border-y-2 border-r-2 border-dashed border-[#f7885c] opacity-70" />
         <div className="pointer-events-none absolute -bottom-9 -left-9 z-100 aspect-square size-30 scale-y-155 -rotate-10 bg-[url('/star_y.png')] bg-contain bg-center bg-no-repeat drop-shadow-[#ffd67c] -hue-rotate-40" />
         <div className="pointer-events-none absolute -right-9 -bottom-9 z-100 aspect-square size-30 rotate-20 bg-[url('/star_y.png')] bg-contain bg-center bg-no-repeat drop-shadow-[#ffd67c]" />
         <div className="pointer-events-none absolute right-6 bottom-15 z-100 aspect-square size-17 scale-y-134 rotate-11 bg-[url('/star_y.png')] bg-contain bg-center bg-no-repeat drop-shadow drop-shadow-[#ffd67c] -hue-rotate-20" />
