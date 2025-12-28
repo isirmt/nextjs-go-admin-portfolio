@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/purity */
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -217,6 +218,7 @@ export function useSpotlightSketch() {
   const activeSpotlightRef = useRef<SpotlightSide>("none");
   const appliedSizeRef = useRef({ width: 0, height: 0 });
   const animationFrameRef = useRef<number | null>(null);
+  const lastTimestampRef = useRef<number>(performance.now());
   const webglResourcesRef = useRef<WebGLResources | null>(null);
   const snowflakesRef = useRef<Snowflake[]>([]);
 
@@ -353,15 +355,13 @@ export function useSpotlightSketch() {
     activeSpotlightRef.current = "none";
     gl.viewport(0, 0, initialWidth, initialHeight);
 
-    let lastTimestamp = performance.now();
-
     const render = (timestamp: number) => {
       if (!isMounted) {
         return;
       }
 
-      const deltaTime = timestamp - lastTimestamp;
-      lastTimestamp = timestamp;
+      const deltaTime = timestamp - lastTimestampRef.current;
+      lastTimestampRef.current = timestamp;
 
       const resources = webglResourcesRef.current;
       if (!resources) {
@@ -482,12 +482,32 @@ export function useSpotlightSketch() {
     };
 
     animationFrameRef.current = requestAnimationFrame((timestamp) => {
-      lastTimestamp = timestamp;
+      lastTimestampRef.current = timestamp;
       render(timestamp);
     });
 
+    const handleVisibilityChange = () => {
+      if (!isMounted) {
+        return;
+      }
+      if (document.visibilityState === "hidden") {
+        if (animationFrameRef.current !== null) {
+          cancelAnimationFrame(animationFrameRef.current);
+          animationFrameRef.current = null;
+        }
+        return;
+      }
+      lastTimestampRef.current = performance.now();
+      if (animationFrameRef.current === null) {
+        animationFrameRef.current = requestAnimationFrame(render);
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
     return () => {
       isMounted = false;
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       if (animationFrameRef.current !== null) {
         cancelAnimationFrame(animationFrameRef.current);
         animationFrameRef.current = null;

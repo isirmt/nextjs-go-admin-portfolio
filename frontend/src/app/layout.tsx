@@ -18,7 +18,7 @@ export default function RootLayout({
       <head>
         <meta name="application-name" content="Folims" />
       </head>
-      <body className={`${notoSansJp.variable} antialiased`}>
+      <body className={`${notoSansJp.variable} bg-white antialiased`}>
         <ScrollbarWidthSetter />
         {children}
       </body>

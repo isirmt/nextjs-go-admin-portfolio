@@ -141,5 +141,19 @@
   }
 }
 
+.animate-vertical-loop {
+  animation: vertical-loop var(--scroll-duration) linear infinite;
+  will-change: transform;
+}
+
+@keyframes vertical-loop {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-50%);
+  }
+}
+
 body {
 }

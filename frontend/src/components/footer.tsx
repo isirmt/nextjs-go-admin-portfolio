@@ -3,6 +3,7 @@
 import { delaGothicOne } from "@/lib/fonts";
 import { InformationSite } from "./latestNews";
 import { useSpotlightSketch } from "@/hooks/useSpotlightSketch";
+import Link from "next/link";
 
 export default function Footer() {
   const {
@@ -77,6 +78,12 @@ export default function Footer() {
           <div
             className={`absolute bottom-2 left-2 z-10 text-xs leading-none font-semibold text-black ${getSpotlightSide() !== "none" && "drop-shadow-2xl"}`}
           >
+            <Link
+              href="/privacy-policy"
+              className="block border-b border-transparent hover:border-black"
+            >
+              プライバシーポリシー
+            </Link>
             © isirmt
           </div>
         </div>
