@@ -111,7 +111,7 @@ export default function ProfileCard({ age }: ProfileCardProps) {
             seiya irimoto
           </div>
         </div>
-        <div className="relative flex flex-col gap-8 pt-24 pr-44 pb-14 pl-36">
+        <div className="relative flex flex-col gap-10 pt-24 pr-44 pb-18 pl-36">
           <div className="relative flex max-w-2xl items-center gap-10">
             <div className="group relative flex flex-col items-end gap-6 drop-shadow-xl drop-shadow-[#ffd67c]">
               <div className="pointer-events-none relative z-1 size-36 overflow-hidden rounded-lg transition-all select-none group-hover:opacity-0">
