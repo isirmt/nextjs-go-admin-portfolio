@@ -280,7 +280,7 @@ export default function RealtimeWorld() {
           <WorkClickPhysics />
         </Canvas>
       </div>
-      <div className="font-dot absolute top-6 right-6 flex items-center gap-1 text-xl">
+      <div className="font-dot absolute top-6 right-6 flex items-center gap-2 rounded-full border border-[#ccc] bg-white/60 px-4 py-1 text-xl leading-none text-[#333] backdrop-blur-2xl select-none">
         <span className="size-3 animate-pulse rounded-full bg-[#f06363]" />
         <span>LIVE</span>
       </div>
