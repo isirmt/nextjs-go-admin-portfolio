@@ -1,7 +1,7 @@
 # isirmt Portfolio
 
-- Next.js(Tailwind CSS)
-- Go (WebSocket)
+- Next.js (Tailwind CSS, Three.js)
+- Go (Echo, Gorm, WebSocket)
 - PostgreSQL
 
 ## requirements
@@ -13,7 +13,7 @@
 at root dir,
 
 ```bash
-docker compose -f compose.dev.yml up -d backend web
+docker compose -f compose.dev.yml up -d backend web --force-recreate
 ```
 
 you'll be able to access at `http://localhost:3000`.

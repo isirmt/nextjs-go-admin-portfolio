@@ -11,7 +11,7 @@ services:
       - pg_dev:/var/lib/postgresql/data
       - ./db/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U app -d appdb"]
+      test: [ "CMD-SHELL", "pg_isready -U app -d appdb" ]
       interval: 5s
       timeout: 5s
       retries: 20
@@ -24,8 +24,14 @@ services:
       NODE_ENV: development
       HOSTNAME: "0.0.0.0"
       PORT: "3000"
-      DATABASE_URL: "postgresql://app:app_password@db:5432/appdb"
+      BACKEND_BASE_URL: http://backend:4000
+      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      ADMIN_ALLOWED_EMAILS: ${ADMIN_ALLOWED_EMAILS}
       ADMIN_SECRET: ${ADMIN_SECRET}
+      AUTH_TRUST_HOST: true
     volumes:
       - ./frontend:/app
       - node_modules_dev:/app/node_modules
@@ -36,20 +42,16 @@ services:
   backend:
     image: golang:1.23-bookworm
     working_dir: /app
-    command:
-      [
-        "bash",
-        "-c",
-        "go mod download && go install github.com/air-verse/air@v1.52.3 && air -c .air.toml",
-      ]
+    command: [ "bash", "-c", "go mod download && go install github.com/air-verse/air@v1.52.3 && air -c .air.toml" ]
     environment:
       DATABASE_URL: "postgres://app:app_password@db:5432/appdb"
       ALLOWED_ORIGIN: "http://localhost:3000"
       ADMIN_SECRET: ${ADMIN_SECRET}
+      UPLOAD_DIR: /uploads
     volumes:
       - ./backend:/app
       - go_mod_cache:/go/pkg/mod
-      - ./uploads:/app/uploads
+      - ./uploads:/uploads
     depends_on:
       db:
         condition: service_healthy
