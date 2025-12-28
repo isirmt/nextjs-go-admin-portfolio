@@ -108,7 +108,7 @@ function FallingBoxBody({
 
 function WorkClickPhysics() {
   const { works } = useWorksContext();
-  const { viewport } = useThree();
+  const { viewport, size } = useThree();
   const [boxes, setBoxes] = useState<FallingBox[]>([]);
   const lastSeqRef = useRef(0);
   const retryRef = useRef(0);
@@ -122,6 +122,8 @@ function WorkClickPhysics() {
   const spawnY = viewport.height / 2 + boxSize * 1.2;
   const wallThickness = boxSize * 0.6;
   const wallDepth = Math.max(BOX_DEPTH, boxSize * 0.4);
+  const pixelToWorld = viewport.height / size.height;
+  const floorOffset = pixelToWorld * 96;
 
   const colorMap = useMemo(() => {
     const map = new Map<string, string>();
@@ -226,7 +228,11 @@ function WorkClickPhysics() {
       <RigidBody type="fixed" colliders={false}>
         <CuboidCollider
           args={[viewport.width / 2, wallThickness / 2, wallDepth / 2]}
-          position={[0, -viewport.height / 2 - wallThickness / 2, 0]}
+          position={[
+            0,
+            -viewport.height / 2 - wallThickness / 2 + floorOffset,
+            0,
+          ]}
         />
         <CuboidCollider
           args={[wallThickness / 2, viewport.height / 2, wallDepth / 2]}
