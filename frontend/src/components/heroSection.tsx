@@ -18,10 +18,24 @@ export default function HeroSection() {
   return (
     <React.Fragment>
       <HorizontalViewer />
+      <div className="pointer-events-none absolute flex size-full items-center justify-center text-[#aaa]">
+        {selectingWork ? (
+          <div className="absolute flex flex-col gap-2 text-center">
+            <div className="font-noto text-8xl font-bold tracking-wide text-[#9991e7]">
+              {selectingWork.title}
+            </div>
+            {/* <div className="font-noto text-2xl">詳細を表示</div> */}
+          </div>
+        ) : (
+          <div className="font-dot absolute text-[10rem] leading-none">
+            isirmt
+          </div>
+        )}
+      </div>
       <div className="pointer-events-none absolute top-0 left-0 size-full bg-[linear-gradient(0deg,transparent_calc(100%-1px),#000_calc(100%-1px)),linear-gradient(90deg,transparent_calc(100%-1px),#000_calc(100%-1px))] bg-size-[64px_64px] opacity-10" />
       <RealtimeWorld />
       <Link
-        className="group absolute right-0 bottom-24 size-[300px] bg-[#faf0f2] transition-all [clip-path:polygon(100%_0%,100%_100%,0%_100%)] hover:bg-[#ffe0e5]"
+        className="group absolute right-0 bottom-24 z-10 size-[300px] bg-[#faf0f2] transition-all [clip-path:polygon(100%_0%,100%_100%,0%_100%)] hover:bg-[#ffe0e5]"
         href="https://itomiri.com"
         target="_blank"
         rel="noopener"
@@ -164,18 +178,6 @@ export default function HeroSection() {
           </svg>
         </div>
       </Link>
-      <div className="pointer-events-none absolute flex size-full items-center justify-center">
-        {selectingWork ? (
-          <div className="absolute flex flex-col gap-2 text-center text-[#222]">
-            <div className="font-noto text-6xl font-bold tracking-wide">
-              {selectingWork.title}
-            </div>
-            <div className="font-noto text-2xl">詳細を表示</div>
-          </div>
-        ) : (
-          <div className="font-dot absolute text-8xl leading-none">isirmt</div>
-        )}
-      </div>
     </React.Fragment>
   );
 }
