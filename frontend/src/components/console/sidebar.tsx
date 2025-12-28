@@ -10,14 +10,6 @@ export default function ConsoleSidebar() {
           <li>
             <Link
               className="block w-full rounded px-4 py-2 text-lg font-semibold transition-all hover:bg-[#dcf7fd]"
-              href={`/console/`}
-            >
-              ホーム
-            </Link>
-          </li>
-          <li>
-            <Link
-              className="block w-full rounded px-4 py-2 text-lg font-semibold transition-all hover:bg-[#dcf7fd]"
               href={`/console/works/`}
             >
               投稿管理

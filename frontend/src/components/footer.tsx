@@ -26,8 +26,8 @@ export default function Footer() {
         ref={sketchContainerRef}
         className="pointer-events-none absolute top-0 left-0 z-0 h-full w-full"
       />
-      <div className="relative z-2 flex flex-col items-center pt-12">
-        <section className="flex flex-col items-center justify-center py-12">
+      <div className="relative z-2 flex flex-col items-center pt-20">
+        <section className="flex flex-col items-center justify-center gap-2 py-12">
           <div
             className={`text-4xl text-white transition ${delaGothicOne.className} ${getSpotlightSide() !== "none" && "drop-shadow-2xl"}`}
           >

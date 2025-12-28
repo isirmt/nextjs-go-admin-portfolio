@@ -231,7 +231,7 @@ export default function WorksList() {
   return (
     <React.Fragment>
       <div
-        className={`relative flex flex-col items-center justify-center overflow-x-hidden bg-[#f8f8f8] px-20 pt-20 pb-40`}
+        className={`relative flex flex-col items-center justify-center overflow-x-hidden bg-[#fafafa] px-20 pt-20 pb-60`}
       >
         <CloudLarge className="animate-up-down absolute bottom-[5%] left-[10%] size-36 [animation-delay:.13s] [animation-duration:1s]" />
         <CloudLarge className="animate-up-down absolute right-[30%] bottom-[35%] size-36 [animation-delay:.23s] [animation-duration:2s]" />
