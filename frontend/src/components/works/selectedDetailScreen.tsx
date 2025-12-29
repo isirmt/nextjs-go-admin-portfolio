@@ -116,7 +116,10 @@ export default function SelectedDetailScreen({
                       </div>
                       <div className="flex flex-col gap-2 px-4 py-4">
                         {selectedLastWork?.urls.map((workUrl, urlIdx) => (
-                          <div className="flex items-end gap-2" key={urlIdx}>
+                          <div
+                            className="flex flex-wrap items-end gap-2"
+                            key={urlIdx}
+                          >
                             <Link
                               target="_blank"
                               rel="noopener"
