@@ -19,9 +19,13 @@ export default function HeroSection() {
 
   return (
     <React.Fragment>
-      <VerticalViewer />
       <div
-        className={`absolute top-0 left-0 size-full overflow-hidden bg-white transition-all duration-300 ${selectingWork ? "opacity-100" : "opacity-0"}`}
+        className={`absolute top-0 left-0 size-full transition-all duration-300 ${selectingWork ? "opacity-0" : "opacity-100"}`}
+      >
+        <VerticalViewer />
+      </div>
+      <div
+        className={`absolute top-0 left-0 size-full overflow-hidden bg-white transition-all duration-300 ${selectingWork ? "opacity-100 delay-300" : "opacity-0"}`}
       >
         {selectingWork && (
           <img
@@ -34,7 +38,7 @@ export default function HeroSection() {
       <div className="pointer-events-none absolute flex size-full -translate-y-10 items-center justify-center text-[#111111] drop-shadow-md drop-shadow-[#aaa]">
         {selectingWork ? (
           <div className="absolute flex w-full flex-col gap-2 px-10 text-center lg:px-20">
-            <div className="font-noto relative max-w-full text-6xl font-bold tracking-wide whitespace-nowrap text-[#751aab] md:text-8xl">
+            <div className="font-noto relative max-w-full text-6xl font-bold whitespace-nowrap text-[#751aab] md:text-8xl">
               <MarqueeText
                 speedFactor={120}
                 pauseSeconds={0.5}
