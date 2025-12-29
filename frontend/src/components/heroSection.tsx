@@ -19,6 +19,9 @@ export default function HeroSection() {
 
   return (
     <React.Fragment>
+      <h1 className="hidden" aria-hidden="true">
+        色彩と体験
+      </h1>
       <div
         className={`absolute top-0 left-0 size-full transition-all duration-300 ${selectingWork ? "opacity-0" : "opacity-100"}`}
       >

@@ -3,7 +3,7 @@
 import { useInViewAnimation } from "@/hooks/useInViewAnimation";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import React, { useEffect, useRef, useState, type CSSProperties } from "react";
 
 const ORBIT_COUNT = 20;
 const ORBIT_DURATION = 60;
@@ -106,7 +106,12 @@ export default function ProfileCard({ age }: ProfileCardProps) {
         <div className="pointer-events-none absolute -right-9 -bottom-9 z-100 aspect-square size-30 rotate-20 bg-[url('/star_y.png')] bg-contain bg-center bg-no-repeat drop-shadow-[#ffd67c]" />
         <div className="pointer-events-none absolute right-6 bottom-15 z-100 aspect-square size-17 scale-y-134 rotate-11 bg-[url('/star_y.png')] bg-contain bg-center bg-no-repeat drop-shadow drop-shadow-[#ffd67c] -hue-rotate-20" />
         <div className="font-dot absolute -top-10 left-12 flex flex-col items-center justify-center lg:left-24">
-          <div className="text-6xl leading-none tracking-wider">入本聖也</div>
+          <h2
+            id="profile"
+            className="scroll-mt-16 text-6xl leading-none tracking-wider"
+          >
+            入本聖也
+          </h2>
           <div className="text-3xl leading-none font-semibold tracking-wide">
             seiya irimoto
           </div>

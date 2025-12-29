@@ -9,10 +9,14 @@ export function SectionText() {
     });
 
   return (
-    <div
+    <h2
+      id="works"
       ref={lineAnimationRef}
-      className="relative mt-10 mb-30 flex flex-col items-center gap-4 drop-shadow-2xl drop-shadow-[#a9e4e4]"
+      className="relative mt-10 mb-30 flex scroll-mt-10 flex-col items-center gap-4 drop-shadow-2xl drop-shadow-[#a9e4e4]"
     >
+      <div className="hidden" aria-hidden="true">
+        WORKS
+      </div>
       <svg
         className={`animate-iv-line w-96 ${isLineActive ? "is-active" : ""}`}
         viewBox="0 0 852.65 170.1"
@@ -201,7 +205,7 @@ export function SectionText() {
         />
       </svg>
       <div className="text-[#777] select-none">isirmt&nbsp;の足跡</div>
-    </div>
+    </h2>
   );
 }
 
