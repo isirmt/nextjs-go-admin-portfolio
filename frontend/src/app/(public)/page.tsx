@@ -8,6 +8,33 @@ import React, { Suspense } from "react";
 import Navigation from "@/components/navigation";
 import HeroSection from "@/components/heroSection";
 import { SelectingCubeContextProvider } from "@/contexts/selectingCubeContext";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "isirmt - 色彩と体験 | 入本聖也",
+  description: "isirmtのポートフォリオサイト。制作物を掲載しています。",
+  openGraph: {
+    url: "/",
+    type: "website",
+    siteName: "入本聖也 - isirmt",
+    description: "isirmtのポートフォリオサイト。制作物を掲載しています。",
+    title: "isirmt - 色彩と体験 | 入本聖也",
+    images: {
+      url: "/opengraph-image.png",
+      width: 1200,
+      height: 630,
+    },
+  },
+  twitter: {
+    card: "summary_large_image",
+    creator: "@isirmt",
+    site: "@isirmt",
+    title: "isirmt - 色彩と体験 | 入本聖也",
+  },
+  alternates: {
+    canonical: "/",
+  },
+};
 
 const myAreas = [
   "フロントエンド・クライアント実装",

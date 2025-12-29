@@ -6,6 +6,7 @@ import ScrollbarWidthSetter from "@/components/scrollbarWidthSetter";
 export const metadata: Metadata = {
   title: "isirmt - 色彩と体験 | 入本聖也",
   description: "isirmtのポートフォリオサイト。制作物を掲載しています。",
+  metadataBase: new URL(process.env.NEXTAUTH_URL || "http://localhost:3000"),
 };
 
 export default function RootLayout({
