@@ -91,7 +91,7 @@ export default function Home() {
                 className="relative w-full overflow-x-hidden"
               >
                 <ProfileCard age={age} />
-                <div className="relative -mt-6 grid grid-cols-2 gap-20 bg-[#c6f4ff] px-40 pt-32 pb-20">
+                <div className="relative -mt-6 grid grid-cols-1 gap-14 bg-[#c6f4ff] px-10 pt-32 pb-20 lg:grid-cols-2 lg:gap-20 lg:px-40">
                   <DetailBox label="分野" array={myAreas} />
                   <DetailBox
                     label="フレームワーク・ツール等"

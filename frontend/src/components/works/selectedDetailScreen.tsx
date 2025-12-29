@@ -60,7 +60,7 @@ export default function SelectedDetailScreen({
                 {selectedLastWork?.title}
               </div>
             </div>
-            <div className="relative mb-14 grid min-h-full flex-1 grid-cols-2 gap-10 pt-10">
+            <div className="relative mb-14 grid min-h-full flex-1 grid-cols-1 gap-10 pt-10 lg:grid-cols-2">
               <div className="relative flex flex-col gap-6">
                 <div className="relative -top-2 rounded-lg bg-[#666] px-6 py-4 text-white after:absolute after:-top-15 after:left-7 after:z-200 after:block after:size-0 after:border-[30px_10px] after:border-[transparent_transparent_#666_transparent] after:content-['']">
                   {selectedLastWork?.comment}
