@@ -11,6 +11,7 @@ import {
   RigidBody,
   type RapierRigidBody,
 } from "@react-three/rapier";
+import { useSearchParams } from "next/navigation";
 import React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -291,6 +292,32 @@ function WorkClickPhysics() {
 }
 
 export default function RealtimeWorld() {
+  const searchParams = useSearchParams();
+  const isLock = searchParams.get("lock") === "true";
+
+  const [isStoppingScroll, setIsStoppingScroll] = useState<boolean>(isLock);
+
+  useEffect(() => {
+    if (!isStoppingScroll) {
+      return;
+    }
+    const { style } = document.body;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    const previousOverflow = style.overflow;
+    const previousOverscroll = style.overscrollBehavior;
+    const previousTouchAction = style.touchAction;
+    const previousPaddingRight = style.paddingRight;
+    style.overflow = "hidden";
+    style.overscrollBehavior = "contain";
+    style.touchAction = "none";
+    return () => {
+      style.overflow = previousOverflow;
+      style.overscrollBehavior = previousOverscroll;
+      style.touchAction = previousTouchAction;
+      style.paddingRight = previousPaddingRight;
+    };
+  }, [isStoppingScroll]);
+
   return (
     <React.Fragment>
       <div className="absolute top-0 left-0 size-full saturate-200">
@@ -307,9 +334,20 @@ export default function RealtimeWorld() {
           <WorkClickPhysics />
         </Canvas>
       </div>
-      <div className="font-dot absolute top-6 right-6 flex items-center gap-2 rounded-full border border-[#ccc] bg-white/60 px-4 py-1 text-xl leading-none text-[#333] shadow-md shadow-[#ccc] backdrop-blur-2xl select-none">
-        <span className="size-3 animate-pulse rounded-full bg-[#f06363]" />
-        <span>LIVE</span>
+      <div className="absolute top-6 right-6 flex flex-row-reverse gap-4">
+        <div className="font-dot relative flex items-center gap-2 rounded-full border border-[#ccc] bg-white/60 px-4 py-1 text-xl leading-none text-[#333] shadow-md shadow-[#ccc] backdrop-blur-2xl select-none">
+          <span className="size-3 animate-pulse rounded-full bg-[#f06363]" />
+          <span>LIVE</span>
+        </div>
+        <button
+          onClick={() => setIsStoppingScroll((prev) => !prev)}
+          className="font-dot pointer-events-auto relative flex cursor-pointer items-center gap-2 rounded-full border border-[#ccc] bg-white/60 px-4 py-1 text-xl leading-none text-[#333] shadow-md shadow-[#ccc] backdrop-blur-2xl select-none hover:border-[#777]"
+        >
+          <span
+            className={`size-3 rounded-full ${isStoppingScroll ? "bg-[#f06363]" : "bg-[#8ff0ab]"}`}
+          />
+          <span>TOGGLE SCROLL</span>
+        </button>
       </div>
     </React.Fragment>
   );
