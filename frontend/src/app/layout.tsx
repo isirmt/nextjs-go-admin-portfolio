@@ -4,11 +4,17 @@ import { notoSansJp } from "@/lib/fonts";
 import ScrollbarWidthSetter from "@/components/scrollbarWidthSetter";
 import { GoogleTagManager } from "@next/third-parties/google";
 
-export const metadata: Metadata = {
-  title: "isirmt - 色彩と体験 | 入本聖也",
-  description: "isirmtのポートフォリオサイト。制作物を掲載しています。",
-  metadataBase: new URL(process.env.NEXTAUTH_URL || "http://localhost:3000"),
-};
+export const dynamic = "force-dynamic";
+
+export function generateMetadata(): Metadata {
+  const metadataBase = process.env.NEXTAUTH_URL || "http://localhost:3000";
+
+  return {
+    title: "isirmt - 色彩と体験 | 入本聖也",
+    description: "isirmtのポートフォリオサイト。制作物を掲載しています。",
+    metadataBase: new URL(metadataBase),
+  };
+}
 
 export default function RootLayout({
   children,
