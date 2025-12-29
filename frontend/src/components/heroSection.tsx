@@ -1,11 +1,13 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useSelectingCubeContext } from "@/contexts/selectingCubeContext";
 import RealtimeWorld from "./realtimeWorld";
-import HorizontalViewer from "./works/horizontalViewer";
+import VerticalViewer from "./works/verticalViewer";
 import React, { useMemo } from "react";
 import { useWorksContext } from "@/contexts/worksContext";
 import Link from "next/link";
+import MarqueeText from "./marqueeText";
 
 export default function HeroSection() {
   const { works } = useWorksContext();
@@ -17,17 +19,34 @@ export default function HeroSection() {
 
   return (
     <React.Fragment>
-      <HorizontalViewer />
-      <div className="pointer-events-none absolute flex size-full items-center justify-center text-[#aaa]">
+      <VerticalViewer />
+      <div
+        className={`absolute top-0 left-0 size-full overflow-hidden bg-white transition-all duration-300 ${selectingWork ? "opacity-100" : "opacity-0"}`}
+      >
+        {selectingWork && (
+          <img
+            alt={`${selectingWork.title}`}
+            className="size-full object-cover opacity-25"
+            src={`/api/images/${selectingWork.thumbnail_image_id}/raw`}
+          />
+        )}
+      </div>
+      <div className="pointer-events-none absolute flex size-full items-center justify-center text-[#111111] drop-shadow-md drop-shadow-[#aaa]">
         {selectingWork ? (
-          <div className="absolute flex flex-col gap-2 text-center">
-            <div className="font-noto text-8xl font-bold tracking-wide text-[#9991e7]">
-              {selectingWork.title}
+          <div className="absolute flex w-full flex-col gap-2 px-10 text-center lg:px-20">
+            <div className="font-noto relative max-w-full text-6xl font-bold tracking-wide whitespace-nowrap text-[#751aab] md:text-8xl">
+              <MarqueeText
+                speedFactor={120}
+                pauseSeconds={0.5}
+                text={selectingWork.title}
+              />
+              <div className="absolute left-[50%] translate-x-[-50%] translate-y-4 text-2xl text-[#222]">
+                詳細を表示
+              </div>
             </div>
-            {/* <div className="font-noto text-2xl">詳細を表示</div> */}
           </div>
         ) : (
-          <div className="font-dot absolute text-[10rem] leading-none">
+          <div className="font-dot absolute text-[6rem] leading-none md:text-[10rem]">
             isirmt
           </div>
         )}

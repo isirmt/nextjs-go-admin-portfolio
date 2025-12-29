@@ -55,7 +55,7 @@ function FallingBoxBody({
   const { setSelectingCubeId, emitCubeClick } = useSelectingCubeContext();
   const bodyRef = useRef<RapierRigidBody | null>(null);
   const [isHovering, setIsHovering] = useState(false);
-  const lighterColor = useMemo(() => lightenHex(color, 0.4), [color]);
+  const lighterColor = useMemo(() => lightenHex(color, 0.1), [color]);
 
   useEffect(() => {
     const body = bodyRef.current;
@@ -107,7 +107,7 @@ function FallingBoxBody({
         }}
       >
         <boxGeometry args={[boxSize, boxSize, wallDepth]} />
-        <meshStandardMaterial color={isHovering ? color : lighterColor} />
+        <meshStandardMaterial color={isHovering ? "#751aab" : lighterColor} />
       </mesh>
     </RigidBody>
   );
@@ -307,7 +307,7 @@ export default function RealtimeWorld() {
           <WorkClickPhysics />
         </Canvas>
       </div>
-      <div className="font-dot absolute top-6 right-6 flex items-center gap-2 rounded-full border border-[#ccc] bg-white/60 px-4 py-1 text-xl leading-none text-[#333] backdrop-blur-2xl select-none">
+      <div className="font-dot absolute top-6 right-6 flex items-center gap-2 rounded-full border border-[#ccc] bg-white/60 px-4 py-1 text-xl leading-none text-[#333] shadow-md shadow-[#ccc] backdrop-blur-2xl select-none">
         <span className="size-3 animate-pulse rounded-full bg-[#f06363]" />
         <span>LIVE</span>
       </div>
