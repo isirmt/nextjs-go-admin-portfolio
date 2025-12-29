@@ -293,7 +293,7 @@ function WorkClickPhysics() {
 export default function RealtimeWorld() {
   return (
     <React.Fragment>
-      <div className="absolute top-0 left-0 size-full">
+      <div className="absolute top-0 left-0 size-full saturate-200">
         <Canvas
           onContextMenu={(e) => e.preventDefault()}
           orthographic

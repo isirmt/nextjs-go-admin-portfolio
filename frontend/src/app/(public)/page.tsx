@@ -81,7 +81,7 @@ export default function Home() {
             <SelectingCubeContextProvider>
               <section
                 aria-label="top-view"
-                className="relative h-dvh w-full bg-gray-50"
+                className="relative h-[calc(100dvh+72px)] w-full bg-[#fafafa]"
               >
                 <HeroSection />
               </section>

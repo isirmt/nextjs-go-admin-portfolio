@@ -21,12 +21,12 @@ export default function VerticalViewer() {
   } as CSSProperties;
 
   return (
-    <div className="absolute top-0 left-0 size-full overflow-hidden px-4 opacity-30 lg:px-20 lg:opacity-50">
+    <div className="absolute top-0 hidden h-[50dvh] w-full overflow-hidden border-b-2 border-[#444] px-4 opacity-100 lg:left-20 lg:block lg:max-w-[28vw]">
       <div className="animate-vertical-loop flex flex-col" style={marqueeStyle}>
         {loopImages.map((image, imageIdx) => (
           <img
             alt={`${image.file_name}`}
-            className="pointer-events-none my-2.5 w-full max-w-full lg:my-5 lg:max-w-[28vw]"
+            className="pointer-events-none my-2.5 w-full lg:my-5"
             key={`${image.id}-${imageIdx}`}
             src={`/api/images/${image.id}/raw`}
           />
