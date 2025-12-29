@@ -17,9 +17,9 @@ export default async function ConsoleHeader() {
       <div className="flex w-1/3 items-center justify-start lg:hidden">
         <ConsoleMenuButton />
       </div>
-      <div className="font-dot flex w-1/3 items-center justify-center gap-2 text-2xl">
-        <span>ISIRMT.COM</span>
-        <span className="bg-[#054a5c] px-2 text-xl text-[#c6f4ff]">
+      <div className="font-dot flex w-1/3 items-center justify-center gap-1 text-lg md:gap-2 md:text-2xl">
+        <span className="hidden sm:block">ISIRMT.COM</span>
+        <span className="bg-[#054a5c] px-2 text-base text-[#c6f4ff] md:text-xl">
           CONSOLE
         </span>
       </div>

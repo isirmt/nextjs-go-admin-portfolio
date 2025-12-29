@@ -42,7 +42,7 @@ export default function ImagesViewer() {
         <p className="font-semibold text-[#7e11d1]">登録済み画像</p>
         {error && <span className="text-sm text-[#e04787]">{error}</span>}
       </div>
-      <div className="flex flex-wrap gap-4">
+      <div className="flex flex-wrap justify-center gap-4">
         {images.map((image, imageIdx) => {
           const isDeleting = deletingImageId === image.id;
           return (
