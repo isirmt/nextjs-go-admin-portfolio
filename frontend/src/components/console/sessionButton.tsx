@@ -31,7 +31,7 @@ export default function SessionButton() {
       className="cursor-pointer"
       onClick={() => signIn("google", { callbackUrl: "/console/works" })}
     >
-      Googleでログイン
+      ログイン
     </button>
   );
 }

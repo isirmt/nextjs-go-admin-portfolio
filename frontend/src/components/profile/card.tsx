@@ -3,7 +3,7 @@
 import { useInViewAnimation } from "@/hooks/useInViewAnimation";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import React, { useEffect, useRef, useState, type CSSProperties } from "react";
 
 const ORBIT_COUNT = 20;
 const ORBIT_DURATION = 60;
@@ -105,8 +105,13 @@ export default function ProfileCard({ age }: ProfileCardProps) {
         <div className="pointer-events-none absolute -bottom-9 -left-9 z-100 aspect-square size-30 scale-y-155 -rotate-10 bg-[url('/star_y.png')] bg-contain bg-center bg-no-repeat drop-shadow-[#ffd67c] -hue-rotate-40" />
         <div className="pointer-events-none absolute -right-9 -bottom-9 z-100 aspect-square size-30 rotate-20 bg-[url('/star_y.png')] bg-contain bg-center bg-no-repeat drop-shadow-[#ffd67c]" />
         <div className="pointer-events-none absolute right-6 bottom-15 z-100 aspect-square size-17 scale-y-134 rotate-11 bg-[url('/star_y.png')] bg-contain bg-center bg-no-repeat drop-shadow drop-shadow-[#ffd67c] -hue-rotate-20" />
-        <div className="font-dot absolute -top-10 left-24 flex flex-col items-center justify-center">
-          <div className="text-6xl leading-none tracking-wider">入本聖也</div>
+        <div className="font-dot absolute -top-10 left-12 flex flex-col items-center justify-center lg:left-24">
+          <h2
+            id="profile"
+            className="scroll-mt-16 text-6xl leading-none tracking-wider"
+          >
+            入本聖也
+          </h2>
           <div className="text-3xl leading-none font-semibold tracking-wide">
             seiya irimoto
           </div>
@@ -116,9 +121,9 @@ export default function ProfileCard({ age }: ProfileCardProps) {
           className="relative w-fit overflow-hidden rounded-tr-[5rem] rounded-br-3xl"
         >
           <div className="pointer-events-none absolute top-0 left-0 z-0 size-full bg-[url('/noise_color_128.png')] opacity-20 mix-blend-multiply" />
-          <div className="relative flex flex-col gap-10 pt-24 pr-44 pb-18 pl-36">
-            <div className="relative flex max-w-2xl items-center gap-10">
-              <div className="group relative flex flex-col items-end gap-6 drop-shadow-xl drop-shadow-[#ffd67c]">
+          <div className="relative flex flex-col gap-10 pt-24 pr-10 pb-18 pl-13 lg:pr-44 lg:pl-36">
+            <div className="relative flex max-w-2xl flex-col items-center gap-16 md:flex-row md:gap-10">
+              <div className="group relative flex flex-col items-end gap-6 pr-6 drop-shadow-xl drop-shadow-[#ffd67c] md:pr-0">
                 <div className="pointer-events-none relative z-1 size-36 overflow-hidden rounded-lg transition-all select-none group-hover:opacity-0">
                   <Image
                     src={"/isirmt_icon.webp"}

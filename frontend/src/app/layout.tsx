@@ -4,8 +4,8 @@ import { notoSansJp } from "@/lib/fonts";
 import ScrollbarWidthSetter from "@/components/scrollbarWidthSetter";
 
 export const metadata: Metadata = {
-  title: "isirmt(入本 聖也)",
-  description: "isirmtのポートフォリオ",
+  title: "isirmt - 色彩と体験 | 入本聖也",
+  description: "isirmtのポートフォリオサイト。制作物を掲載しています。",
 };
 
 export default function RootLayout({

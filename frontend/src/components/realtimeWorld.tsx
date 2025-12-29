@@ -11,6 +11,7 @@ import {
   RigidBody,
   type RapierRigidBody,
 } from "@react-three/rapier";
+import { useSearchParams } from "next/navigation";
 import React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -30,8 +31,11 @@ type FallingBox = {
   spin: number;
 };
 
+const MAX_BOXES = 30;
 const DEFAULT_COLOR = "#6dd3ce";
 const BOX_DEPTH = 0.25;
+const AUTO_SPAWN_COUNT = 5;
+const AUTO_SPAWN_INTERVAL_MS = 3000;
 
 const createBoxId = (workId: string) =>
   `${workId}-${Date.now().toString(36)}-${Math.random()
@@ -55,7 +59,7 @@ function FallingBoxBody({
   const { setSelectingCubeId, emitCubeClick } = useSelectingCubeContext();
   const bodyRef = useRef<RapierRigidBody | null>(null);
   const [isHovering, setIsHovering] = useState(false);
-  const lighterColor = useMemo(() => lightenHex(color, 0.4), [color]);
+  const lighterColor = useMemo(() => lightenHex(color, 0.1), [color]);
 
   useEffect(() => {
     const body = bodyRef.current;
@@ -107,13 +111,13 @@ function FallingBoxBody({
         }}
       >
         <boxGeometry args={[boxSize, boxSize, wallDepth]} />
-        <meshStandardMaterial color={isHovering ? color : lighterColor} />
+        <meshStandardMaterial color={isHovering ? "#751aab" : lighterColor} />
       </mesh>
     </RigidBody>
   );
 }
 
-function WorkClickPhysics() {
+function WorkClickPhysics({ onSpawnEnded }: { onSpawnEnded?: () => void }) {
   const { works } = useWorksContext();
   const { viewport, size } = useThree();
   const [boxes, setBoxes] = useState<FallingBox[]>([]);
@@ -121,6 +125,8 @@ function WorkClickPhysics() {
   const retryRef = useRef(0);
   const reconnectTimerRef = useRef<number | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
+  const shouldReconnectRef = useRef(true);
+  const autoSpawnStartedRef = useRef(false);
   const boxSize = useMemo(() => {
     const base = viewport.width > 0 ? viewport.width / 10 : 1;
     return Math.min(1, Math.max(0.5, base));
@@ -188,18 +194,21 @@ function WorkClickPhysics() {
       ];
       const torque: [number, number, number] = [0, 0, randomInRange(-3.5, 3.5)];
       const spin = randomInRange(-10, 10);
-      setBoxes((prev) => [
-        ...prev,
-        {
-          id: createBoxId(workId),
-          workId,
-          position,
-          velocity,
-          impulse,
-          torque,
-          spin,
-        },
-      ]);
+      setBoxes((prev) => {
+        if (prev.length >= MAX_BOXES) return prev;
+        return [
+          ...prev,
+          {
+            id: createBoxId(workId),
+            workId,
+            position,
+            velocity,
+            impulse,
+            torque,
+            spin,
+          },
+        ];
+      });
     },
     [boxSize, spawnX, spawnY],
   );
@@ -233,7 +242,7 @@ function WorkClickPhysics() {
       };
 
       ws.onclose = () => {
-        if (disposed) return;
+        if (disposed || !shouldReconnectRef.current) return;
         const retryCount = retryRef.current;
         const delay = Math.min(10000, 500 * 2 ** retryCount);
         retryRef.current = Math.min(retryCount + 1, 6);
@@ -255,6 +264,37 @@ function WorkClickPhysics() {
       wsRef.current?.close();
     };
   }, [spawnBox]);
+
+  useEffect(() => {
+    if (boxes.length < MAX_BOXES) return;
+    if (!shouldReconnectRef.current) return;
+    shouldReconnectRef.current = false;
+    onSpawnEnded?.();
+    if (reconnectTimerRef.current) {
+      window.clearTimeout(reconnectTimerRef.current);
+    }
+    wsRef.current?.close();
+  }, [boxes.length, onSpawnEnded]);
+
+  useEffect(() => {
+    if (autoSpawnStartedRef.current) return;
+    if (works.length === 0) return;
+    autoSpawnStartedRef.current = true;
+    let runCount = 0;
+    const spawnOnce = () => {
+      const index = Math.floor(Math.random() * works.length);
+      const work = works[index];
+      if (!work) return;
+      spawnBox(work.id);
+      runCount += 1;
+      if (runCount >= AUTO_SPAWN_COUNT) {
+        window.clearInterval(timer);
+      }
+    };
+
+    const timer = window.setInterval(spawnOnce, AUTO_SPAWN_INTERVAL_MS);
+    return () => window.clearInterval(timer);
+  }, [spawnBox, works]);
 
   return (
     <Physics gravity={[0, -4.9, 0]} timeStep={1 / 60}>
@@ -291,9 +331,36 @@ function WorkClickPhysics() {
 }
 
 export default function RealtimeWorld() {
+  const searchParams = useSearchParams();
+  const isLock = searchParams.get("lock") === "true";
+
+  const [isStoppingScroll, setIsStoppingScroll] = useState<boolean>(isLock);
+  const [isSpawnEnded, setIsSpawnEnded] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!isStoppingScroll) {
+      return;
+    }
+    const { style } = document.body;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    const previousOverflow = style.overflow;
+    const previousOverscroll = style.overscrollBehavior;
+    const previousTouchAction = style.touchAction;
+    const previousPaddingRight = style.paddingRight;
+    style.overflow = "hidden";
+    style.overscrollBehavior = "contain";
+    style.touchAction = "none";
+    return () => {
+      style.overflow = previousOverflow;
+      style.overscrollBehavior = previousOverscroll;
+      style.touchAction = previousTouchAction;
+      style.paddingRight = previousPaddingRight;
+    };
+  }, [isStoppingScroll]);
+
   return (
     <React.Fragment>
-      <div className="absolute top-0 left-0 size-full">
+      <div className="absolute top-0 left-0 size-full saturate-200">
         <Canvas
           onContextMenu={(e) => e.preventDefault()}
           orthographic
@@ -304,12 +371,25 @@ export default function RealtimeWorld() {
         >
           <ambientLight intensity={1.5} />
           <directionalLight position={[3, 4, 5]} intensity={1} />
-          <WorkClickPhysics />
+          <WorkClickPhysics onSpawnEnded={() => setIsSpawnEnded(true)} />
         </Canvas>
       </div>
-      <div className="font-dot absolute top-6 right-6 flex items-center gap-2 rounded-full border border-[#ccc] bg-white/60 px-4 py-1 text-xl leading-none text-[#333] backdrop-blur-2xl select-none">
-        <span className="size-3 animate-pulse rounded-full bg-[#f06363]" />
-        <span>LIVE</span>
+      <div className="absolute top-6 right-6 flex flex-row-reverse gap-4">
+        <div className="font-dot relative flex items-center gap-2 rounded-full border border-[#ccc] bg-white/60 px-4 py-1 text-xl leading-none text-[#333] shadow-md shadow-[#ccc] backdrop-blur-2xl select-none">
+          <span
+            className={`size-3 rounded-full ${isSpawnEnded ? "bg-[#777]" : "animate-pulse bg-[#f06363]"}`}
+          />
+          <span>LIVE</span>
+        </div>
+        <button
+          onClick={() => setIsStoppingScroll((prev) => !prev)}
+          className="font-dot pointer-events-auto relative flex cursor-pointer items-center gap-2 rounded-full border border-[#ccc] bg-white/60 px-4 py-1 text-xl leading-none text-[#333] shadow-md shadow-[#ccc] backdrop-blur-2xl select-none hover:border-[#777]"
+        >
+          <span
+            className={`size-3 rounded-full ${isStoppingScroll ? "bg-[#f06363]" : "bg-[#8ff0ab]"}`}
+          />
+          <span>TOGGLE SCROLL</span>
+        </button>
       </div>
     </React.Fragment>
   );

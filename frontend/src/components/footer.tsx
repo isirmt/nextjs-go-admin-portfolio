@@ -33,9 +33,9 @@ export default function Footer() {
           >
             情報発信中サイト
           </div>
-          <div className="my-10 flex gap-0 text-white">
+          <div className="my-10 flex flex-col gap-14 text-white lg:flex-row lg:gap-0">
             <div
-              className="pr-10 transition hover:drop-shadow-2xl"
+              className="transition hover:drop-shadow-2xl lg:pr-10"
               onMouseEnter={() => handleSpotlightEnter("left")}
               onMouseLeave={handleSpotlightLeave}
               onFocus={() => handleSpotlightEnter("left")}
@@ -50,7 +50,7 @@ export default function Footer() {
               />
             </div>
             <div
-              className="pl-10 transition hover:drop-shadow-2xl"
+              className="transition hover:drop-shadow-2xl lg:pl-10"
               onMouseEnter={() => handleSpotlightEnter("right")}
               onMouseLeave={handleSpotlightLeave}
               onFocus={() => handleSpotlightEnter("right")}
@@ -70,13 +70,13 @@ export default function Footer() {
           className={`group relative flex w-full flex-col items-center ${getSpotlightSide() !== "none" && "drop-shadow-2xl"}`}
         >
           <div
-            className={`aspect-1233/110 w-full bg-[url('/name_footer.svg')] bg-center bg-no-repeat`}
+            className={`aspect-1233/110 w-full scale-y-150 bg-[url('/name_footer.svg')] bg-center bg-no-repeat lg:scale-y-100`}
           />
           <div
-            className={`group-hover:animate-jump absolute bottom-[calc(100vw*110/1233*0.7)] z-1 aspect-440/100 w-[7%] bg-[url('/glasses.png')] bg-contain bg-center bg-no-repeat ${getSpotlightSide() !== "none" && "animate-jump"}`}
+            className={`group-hover:animate-jump absolute bottom-[calc(100vw*110/1233*0.9)] z-1 aspect-440/100 w-[7%] bg-[url('/glasses.png')] bg-contain bg-center bg-no-repeat lg:bottom-[calc(100vw*110/1233*0.7)] ${getSpotlightSide() !== "none" && "animate-jump"}`}
           />
           <div
-            className={`absolute bottom-2 left-2 z-10 text-xs leading-none font-semibold text-black ${getSpotlightSide() !== "none" && "drop-shadow-2xl"}`}
+            className={`absolute bottom-2 left-2 z-10 flex flex-row-reverse gap-2 text-xs leading-none font-semibold text-black lg:flex-col`}
           >
             <Link
               href="/privacy-policy"

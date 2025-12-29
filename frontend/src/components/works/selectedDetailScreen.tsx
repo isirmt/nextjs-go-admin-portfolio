@@ -6,6 +6,7 @@ import { useTechInfoGetter } from "@/hooks/useTechInfoGetter";
 import { smoochSans } from "@/lib/fonts";
 import Link from "next/link";
 import { useEffect, useMemo, useRef } from "react";
+import MarqueeText from "../marqueeText";
 
 type SelectedDetailScreenProps = {
   selectingWorkId?: string;
@@ -56,11 +57,13 @@ export default function SelectedDetailScreen({
           <div className="absolute top-26 left-0 h-0 w-full border-b border-[#555]" />
           <section className="relative mx-auto flex min-h-dvh max-w-6xl flex-col px-10 pt-5 pb-10">
             <div>
-              <div className="text-7xl leading-none font-black whitespace-nowrap text-[#6354eb]">
-                {selectedLastWork?.title}
+              <div className="max-w-full text-7xl leading-none font-black whitespace-nowrap text-[#6354eb]">
+                <MarqueeText
+                  text={selectedLastWork?.title ?? "タイトル未設定"}
+                />
               </div>
             </div>
-            <div className="relative mb-14 grid min-h-full flex-1 grid-cols-2 gap-10 pt-10">
+            <div className="relative mb-14 grid min-h-full flex-1 grid-cols-1 gap-10 pt-10 lg:grid-cols-2">
               <div className="relative flex flex-col gap-6">
                 <div className="relative -top-2 rounded-lg bg-[#666] px-6 py-4 text-white after:absolute after:-top-15 after:left-7 after:z-200 after:block after:size-0 after:border-[30px_10px] after:border-[transparent_transparent_#666_transparent] after:content-['']">
                   {selectedLastWork?.comment}

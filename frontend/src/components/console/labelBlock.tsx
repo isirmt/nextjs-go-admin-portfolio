@@ -11,7 +11,7 @@ type LabelTextProps = {
 export function LabelBox({ children, isLong }: LabelBoxProps) {
   return (
     <div
-      className={`flex flex-col gap-2 px-2 ${isLong ? "col-span-2" : "col-span-1"}`}
+      className={`flex w-full flex-col gap-2 px-2 ${isLong ? "col-span-1 lg:col-span-2" : "col-span-1"}`}
     >
       {children}
     </div>
