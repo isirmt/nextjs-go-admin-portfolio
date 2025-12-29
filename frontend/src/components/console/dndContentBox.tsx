@@ -25,8 +25,8 @@ export default function DndContentBox() {
         className={`flex w-full flex-col items-center justify-center gap-3 border-2 border-dotted px-6 py-3 font-semibold text-[#7e11d1] transition-all duration-200 select-none ${isDragging ? "bg-[#dcbff3]" : "bg-[#f6eaff]"}`}
       >
         <div className="text-3xl">画像登録</div>
-        <div className="flex items-center justify-center gap-3">
-          <div className="flex size-30 items-center justify-center border-2 border-dotted text-center text-2xl leading-none">
+        <div className="flex flex-col items-center justify-center gap-3 md:flex-row">
+          <div className="flex h-24 w-30 items-center justify-center border-2 border-dotted text-center text-2xl leading-none md:size-30">
             ドラッグ
             <br />&<br />
             ドロップ
@@ -34,7 +34,7 @@ export default function DndContentBox() {
           <div>または</div>
           <button
             onClick={openFileDialog}
-            className="flex size-30 cursor-pointer items-center justify-center border-2 border-dotted text-center text-2xl leading-none transition-all duration-200 hover:bg-[#dcbff3]"
+            className="flex h-24 w-30 cursor-pointer items-center justify-center border-2 border-dotted text-center text-2xl leading-none transition-all duration-200 hover:bg-[#dcbff3] md:size-30"
           >
             ファイルを
             <br />

@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { notoSansJp } from "@/lib/fonts";
 import ScrollbarWidthSetter from "@/components/scrollbarWidthSetter";
+import { GoogleTagManager } from "@next/third-parties/google";
 
 export const metadata: Metadata = {
   title: "isirmt - 色彩と体験 | 入本聖也",
   description: "isirmtのポートフォリオサイト。制作物を掲載しています。",
+  metadataBase: new URL(process.env.NEXTAUTH_URL || "http://localhost:3000"),
 };
 
 export default function RootLayout({
@@ -15,6 +17,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
+      {process.env.GOOGLE_TAG_MANAGER_ID && (
+        <GoogleTagManager gtmId={process.env.GOOGLE_TAG_MANAGER_ID} />
+      )}
       <head>
         <meta name="application-name" content="Folims" />
       </head>

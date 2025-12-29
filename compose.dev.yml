@@ -32,6 +32,7 @@ services:
       ADMIN_ALLOWED_EMAILS: ${ADMIN_ALLOWED_EMAILS}
       ADMIN_SECRET: ${ADMIN_SECRET}
       AUTH_TRUST_HOST: true
+      GOOGLE_TAG_MANAGER_ID: ${GOOGLE_TAG_MANAGER_ID}
     volumes:
       - ./frontend:/app
       - node_modules_dev:/app/node_modules
