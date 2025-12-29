@@ -4,7 +4,7 @@ import { TechsProvider } from "@/contexts/techsContext";
 import { WorksProvider } from "@/contexts/worksContext";
 import { delaGothicOne } from "@/lib/fonts";
 import ProfileCard from "@/components/profile/card";
-import React from "react";
+import React, { Suspense } from "react";
 import Navigation from "@/components/navigation";
 import HeroSection from "@/components/heroSection";
 import { SelectingCubeContextProvider } from "@/contexts/selectingCubeContext";
@@ -83,7 +83,9 @@ export default function Home() {
                 aria-label="top-view"
                 className="relative h-[calc(100dvh+72px)] w-full bg-[#fafafa]"
               >
-                <HeroSection />
+                <Suspense fallback={null}>
+                  <HeroSection />
+                </Suspense>
               </section>
               <Navigation />
               <section
