@@ -74,14 +74,14 @@ export function InformationSite({
   siteDescription,
 }: SiteOptions & Options) {
   return (
-    <div className="flex flex-col gap-2.5">
+    <div className="relative flex max-w-full flex-col gap-2.5 px-6 lg:px-0">
       <Link
         href={siteUrl}
         target="_blank"
         rel="noopener"
-        className="group flex flex-col gap-2.5"
+        className="group relative flex flex-col gap-2.5"
       >
-        <div className="aspect-1200/630 w-96 overflow-hidden rounded-lg bg-white">
+        <div className="aspect-1200/630 max-w-full overflow-hidden rounded-lg bg-white lg:w-96">
           <Image
             src={siteImagePath}
             width={1200}

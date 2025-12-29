@@ -21,7 +21,7 @@ export default function VerticalViewer() {
   } as CSSProperties;
 
   return (
-    <div className="absolute top-0 hidden h-[50dvh] w-full overflow-hidden border-b-2 border-[#444] px-4 opacity-100 lg:left-20 lg:block lg:max-w-[28vw]">
+    <div className="absolute top-0 hidden h-[50dvh] w-full overflow-hidden border-b border-[#ccc] px-4 opacity-100 lg:left-20 lg:block lg:max-w-[28vw]">
       <div className="animate-vertical-loop flex flex-col" style={marqueeStyle}>
         {loopImages.map((image, imageIdx) => (
           <img
