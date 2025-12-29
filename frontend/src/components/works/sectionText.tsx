@@ -18,7 +18,7 @@ export function SectionText() {
         WORKS
       </div>
       <svg
-        className={`animate-iv-line w-96 ${isLineActive ? "is-active" : ""}`}
+        className={`animate-iv-line w-72 lg:w-96 ${isLineActive ? "is-active" : ""}`}
         viewBox="0 0 852.65 170.1"
         style={totalLineStyle(12, 0.05)}
       >
@@ -112,7 +112,7 @@ export function SectionText() {
         />
       </svg>
       <svg
-        className={`animate-iv-line absolute top-0 left-0 w-96 ${isLineActive ? "is-active" : ""}`}
+        className={`animate-iv-line absolute top-0 left-0 w-72 lg:w-96 ${isLineActive ? "is-active" : ""}`}
         viewBox="0 0 852.65 170.1"
         style={totalLineStyle(12, 0.1)}
       >
