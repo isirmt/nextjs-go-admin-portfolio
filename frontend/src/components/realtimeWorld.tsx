@@ -33,6 +33,8 @@ type FallingBox = {
 
 const DEFAULT_COLOR = "#6dd3ce";
 const BOX_DEPTH = 0.25;
+const AUTO_SPAWN_COUNT = 5;
+const AUTO_SPAWN_INTERVAL_MS = 3000;
 
 const createBoxId = (workId: string) =>
   `${workId}-${Date.now().toString(36)}-${Math.random()
@@ -122,6 +124,7 @@ function WorkClickPhysics() {
   const retryRef = useRef(0);
   const reconnectTimerRef = useRef<number | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
+  const autoSpawnStartedRef = useRef(false);
   const boxSize = useMemo(() => {
     const base = viewport.width > 0 ? viewport.width / 10 : 1;
     return Math.min(1, Math.max(0.5, base));
@@ -256,6 +259,26 @@ function WorkClickPhysics() {
       wsRef.current?.close();
     };
   }, [spawnBox]);
+
+  useEffect(() => {
+    if (autoSpawnStartedRef.current) return;
+    if (works.length === 0) return;
+    autoSpawnStartedRef.current = true;
+    let runCount = 0;
+    const spawnOnce = () => {
+      const index = Math.floor(Math.random() * works.length);
+      const work = works[index];
+      if (!work) return;
+      spawnBox(work.id);
+      runCount += 1;
+      if (runCount >= AUTO_SPAWN_COUNT) {
+        window.clearInterval(timer);
+      }
+    };
+
+    const timer = window.setInterval(spawnOnce, AUTO_SPAWN_INTERVAL_MS);
+    return () => window.clearInterval(timer);
+  }, [spawnBox, works]);
 
   return (
     <Physics gravity={[0, -4.9, 0]} timeStep={1 / 60}>
