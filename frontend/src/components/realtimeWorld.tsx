@@ -360,7 +360,7 @@ export default function RealtimeWorld() {
 
   return (
     <React.Fragment>
-      <div className="absolute top-0 left-0 size-full saturate-200">
+      <div className="absolute top-0 left-0 size-full">
         <Canvas
           onContextMenu={(e) => e.preventDefault()}
           orthographic
