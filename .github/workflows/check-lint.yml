@@ -28,3 +28,19 @@ jobs:
       - name: Run lint
         working-directory: frontend
         run: pnpm lint
+
+  lint-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: backend/go.mod
+          cache: true
+
+      - name: Run go vet
+        working-directory: backend
+        run: go vet ./...
