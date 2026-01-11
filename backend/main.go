@@ -507,6 +507,7 @@ func (pSrv *server) serveImageContent(c echo.Context, image *model.CommonImage) 
 
 	c.Response().Header().Set(echo.HeaderContentType, image.MimeType)
 	c.Response().Header().Set(echo.HeaderContentLength, strconv.FormatInt(image.FileSize, 10))
+	c.Response().Header().Set(echo.HeaderCacheControl, "public, max-age=31536000")
 
 	http.ServeContent(c.Response(), c.Request(), image.FileName, fileInfo.ModTime(), file)
 	return nil
