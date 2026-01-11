@@ -1,6 +1,6 @@
 {
-  "name": "isirmt_nextjs_portfolio",
-  "version": "0.1.0",
+  "name": "nextjs-go-admin-portfolio",
+  "version": "0.6.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
