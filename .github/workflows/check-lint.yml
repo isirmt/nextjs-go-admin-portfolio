@@ -44,3 +44,13 @@ jobs:
       - name: Run go vet
         working-directory: backend
         run: go vet ./...
+
+      - name: Check gofmt
+        working-directory: backend
+        run: |
+          files=$(gofmt -l .)
+          if [ -n "$files" ]; then
+            echo "gofmt required:"
+            echo "$files"
+            exit 1
+          fi
