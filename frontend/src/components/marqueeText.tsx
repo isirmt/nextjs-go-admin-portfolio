@@ -1,9 +1,6 @@
 "use client";
 import React, { useCallback, useEffect, useRef } from "react";
 
-// カウンタ
-let __marqueeId = 0;
-
 const clamp = (value: number, min: number, max: number) =>
   Math.min(Math.max(value, min), max);
 
@@ -27,11 +24,6 @@ export default function MarqueeText({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const innerRef = useRef<HTMLDivElement | null>(null);
   const animationRef = useRef<Animation | null>(null);
-  const idRef = useRef<string>("");
-
-  if (!idRef.current) {
-    idRef.current = `marq-${++__marqueeId}`;
-  }
 
   const calcAnimation = useCallback(() => {
     const c = containerRef.current;
@@ -86,7 +78,7 @@ export default function MarqueeText({
   return (
     <div
       ref={containerRef}
-      className={`${idRef.current} ${containerClassName}`}
+      className={containerClassName}
       style={{ overflow: "hidden", display: "block", ...containerStyle }}
       title={text}
     >
