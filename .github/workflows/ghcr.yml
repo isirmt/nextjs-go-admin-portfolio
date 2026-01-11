@@ -36,7 +36,9 @@ jobs:
 
       - name: Read version from frontend/package.json
         id: version
-        run: echo "version=$(node -p \"require('./frontend/package.json').version\")" >> "$GITHUB_OUTPUT"
+        run: |
+          VERSION=$(node -p 'require("./frontend/package.json").version')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Check tag exists (web)
         id: check_web
