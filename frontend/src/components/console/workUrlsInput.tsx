@@ -35,9 +35,13 @@ export default function WorkUrlsInput({ items, onChange }: WorkUrlsInputProps) {
     [items, onChange],
   );
 
-  const handleAddItem = useCallback(() => {
-    onChange([...items, createEmptyWorkUrlItem()]);
-  }, [items, onChange]);
+  const handleAddItem = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault();
+      onChange([...items, createEmptyWorkUrlItem()]);
+    },
+    [items, onChange],
+  );
 
   const handleRemove = useCallback(
     (id: string) => {
@@ -102,6 +106,7 @@ export default function WorkUrlsInput({ items, onChange }: WorkUrlsInputProps) {
         </div>
       ))}
       <button
+        type="button"
         onClick={handleAddItem}
         className="flex size-8 cursor-pointer items-center justify-center border border-[#7e11d1] text-xl leading-none font-bold text-[#7e11d1] transition hover:bg-[#7e11d1] hover:text-white"
       >
