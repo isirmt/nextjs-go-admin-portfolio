@@ -64,6 +64,8 @@ services:
     environment:
       DATABASE_URL: "postgres://app:app_password@db:5432/appdb"
       EMBEDDING_MODEL: intfloat/multilingual-e5-small
+    ports:
+      - "8000:8000"
     depends_on:
       db:
         condition: service_healthy
