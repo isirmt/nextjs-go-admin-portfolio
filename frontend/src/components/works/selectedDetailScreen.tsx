@@ -41,7 +41,7 @@ export default function SelectedDetailScreen({
 
   return (
     <div
-      className={`fixed top-0 left-0 z-100 size-full transition-opacity ${selectingWorkId ? "pointer-events-auto bg-[#eee]/70 opacity-100 backdrop-blur-md backdrop-saturate-50 delay-450" : "pointer-events-none opacity-0 backdrop-blur-none delay-0"}`}
+      className={`fixed top-0 left-0 z-100 size-full transition-opacity ${selectingWorkId ? "pointer-events-auto bg-white/85 opacity-100 backdrop-blur-md backdrop-saturate-50 delay-450" : "pointer-events-none opacity-0 backdrop-blur-none delay-0"}`}
     >
       <div
         className="pointer-events-none fixed top-0 left-0 z-1 h-full bg-[linear-gradient(to_bottom,transparent_calc(100dvh-250px),rgba(255,255,255,1))]"
@@ -53,7 +53,7 @@ export default function SelectedDetailScreen({
         className={`size-full ${selectingWorkId ? "overflow-y-scroll overscroll-contain" : "overflow-y-hidden"}`}
       >
         <div className="relative min-h-full">
-          <div className="pointer-events-none absolute top-0 left-0 z-0 size-full bg-[url('/noise_color_128.png')] opacity-20 mix-blend-multiply" />
+          <div className="pointer-events-none absolute top-0 left-0 z-0 size-full bg-[url('/noise_color_128.png')] opacity-10 mix-blend-multiply" />
           <div className="absolute top-26 left-0 h-0 w-full border-b border-[#555]" />
           <section className="relative mx-auto flex min-h-dvh max-w-6xl flex-col px-10 pt-5 pb-10">
             <div>
