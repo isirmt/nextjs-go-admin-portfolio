@@ -53,3 +53,5 @@ Caddyfile
 .gocache
 
 uploads
+
+/*.sql
