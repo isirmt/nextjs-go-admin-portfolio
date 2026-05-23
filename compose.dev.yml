@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:16-alpine
+    image: pgvector/pgvector:pg16
     environment:
       POSTGRES_USER: app
       POSTGRES_PASSWORD: app_password
@@ -56,6 +56,18 @@ services:
     depends_on:
       db:
         condition: service_healthy
+
+  embedding:
+    build:
+      context: ./embedding
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: "postgres://app:app_password@db:5432/appdb"
+      EMBEDDING_MODEL: intfloat/multilingual-e5-small
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
 
   adminer:
     image: adminer:4
