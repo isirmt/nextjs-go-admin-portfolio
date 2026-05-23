@@ -105,6 +105,8 @@ function WorkCard({
             src={`/api/images/${work.thumbnail_image_id}/raw`}
             className={`pointer-events-none size-72 object-cover transition-all duration-200 ease-out ${isSelected ? "skew-x-1 brightness-120 duration-100" : "group-hover:scale-110 group-hover:skew-x-1 group-hover:brightness-110"}`}
             alt={thumbnailAlt}
+            loading="lazy"
+            decoding="async"
           />
         </div>
         <div
