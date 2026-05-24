@@ -995,6 +995,7 @@ func (pSrv *server) handleCreateWork(c echo.Context) error {
 
 	thumbnailCopy := thumbnailID
 	accentCopy := accentColor
+	searchDirty := true
 
 	work := &model.IsirmtWork{
 		Title:            title,
@@ -1003,6 +1004,7 @@ func (pSrv *server) handleCreateWork(c echo.Context) error {
 		Description:      descriptionPtr,
 		ThumbnailImageID: &thumbnailCopy,
 		CreatedAt:        &publishedTime,
+		SearchDirty:      &searchDirty,
 	}
 
 	if err := pSrv.q.Transaction(func(tx *query.Query) error {
@@ -1196,6 +1198,8 @@ func (pSrv *server) handleUpdateWork(c echo.Context) error {
 			"description":        descriptionPtr,
 			"thumbnail_image_id": thumbnailID,
 			"created_at":         publishedTime,
+			"search_dirty":       true,
+			"search_index_error": nil,
 		}); err != nil {
 			return err
 		}
