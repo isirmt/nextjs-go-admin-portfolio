@@ -13,7 +13,7 @@ def fetch_dirty_works() -> list[dict]:
         w.title,
         w,comment,
         w.description,
-        AARRAY(
+        ARRAY(
           SELECT ts.name
           FROM isirmt_work_tech_stacks wt
           JOIN common_tech_stacks ts
