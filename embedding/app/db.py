@@ -11,7 +11,7 @@ def fetch_dirty_works() -> list[dict]:
       SELECT
         w.id,
         w.title,
-        w,comment,
+        w.comment,
         w.description,
         ARRAY(
           SELECT ts.name
