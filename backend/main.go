@@ -28,15 +28,18 @@ import (
 )
 
 type server struct {
-	db            *gorm.DB
-	q             *query.Query
-	uploadDir     string
-	allowedOrigin string
-	maxUploadSize uint32
-	adminSecret   string
-	clickLimiter  *clickLimiter
-	wsHub         *wsHub
-	wsSeq         uint64
+	db                   *gorm.DB
+	q                    *query.Query
+	uploadDir            string
+	allowedOrigin        string
+	maxUploadSize        uint32
+	adminSecret          string
+	embeddingBaseURL     string
+	searchEmbeddingModel string
+	httpClient           *http.Client
+	clickLimiter         *clickLimiter
+	wsHub                *wsHub
+	wsSeq                uint64
 }
 
 type createWorkURL struct {
@@ -89,6 +92,22 @@ type workResponse struct {
 	Images           []workImageResponse     `json:"images"`
 	Urls             []workURLResponse       `json:"urls"`
 	TechStacks       []workTechStackResponse `json:"tech_stacks"`
+}
+
+type embedRequest struct {
+	Texts     []string `json:"texts"`
+	InputType string   `json:"input_type"`
+}
+
+type embedResponse struct {
+	Model      string      `json:"model"`
+	Dimensions int         `json:"dimensions"`
+	Vectors    [][]float64 `json:"vectors"`
+}
+
+type searchWorkHit struct {
+	WorkID   string
+	Distance float64
 }
 
 type workClickEvent struct {
@@ -251,14 +270,17 @@ func main() {
 	}
 
 	pSrv := &server{
-		db:            gormDb,
-		q:             query.Use(gormDb),
-		uploadDir:     uploadDir,
-		allowedOrigin: os.Getenv("ALLOWED_ORIGIN"),
-		maxUploadSize: 20 << 20, // 20 MiB
-		adminSecret:   adminSecret,
-		clickLimiter:  createClickLimiter(2*time.Second, 10000, time.Minute),
-		wsHub:         createWsHub(),
+		db:                   gormDb,
+		q:                    query.Use(gormDb),
+		uploadDir:            uploadDir,
+		allowedOrigin:        os.Getenv("ALLOWED_ORIGIN"),
+		maxUploadSize:        20 << 20, // 20 MiB
+		adminSecret:          adminSecret,
+		embeddingBaseURL:     strings.TrimRight(os.Getenv("EMBEDDING_BASE_URL"), "/"),
+		searchEmbeddingModel: getEnv("SEARCH_EMBEDDING_MODEL", "intfloat/multilingual-e5-small"),
+		httpClient:           &http.Client{Timeout: 60 * time.Second},
+		clickLimiter:         createClickLimiter(2*time.Second, 10000, time.Minute),
+		wsHub:                createWsHub(),
 	}
 
 	router := echo.New()
@@ -281,6 +303,7 @@ func main() {
 	epTechStacks.POST("", pSrv.requireAdmin(pSrv.handleCreateTechStack))
 	epWorks := router.Group("/works")
 	epWorks.GET("", pSrv.handleGetWorks)
+	epWorks.GET("/search", pSrv.handleSearchWorks)
 	epWorks.POST("", pSrv.requireAdmin(pSrv.handleCreateWork))
 	epWorks.POST("/:id/clicks", pSrv.handleCreateWorkClick)
 	epWorks.PUT("/:id", pSrv.requireAdmin(pSrv.handleUpdateWork))
@@ -590,13 +613,62 @@ func (pSrv *server) handleCreateTechStack(c echo.Context) error {
 	return c.JSON(http.StatusCreated, newStack)
 }
 
-func (pSrv *server) handleGetWorks(c echo.Context) error {
-	ctx := c.Request().Context()
-
-	works, err := pSrv.q.IsirmtWork.WithContext(ctx).Order(pSrv.q.IsirmtWork.CreatedAt.Desc()).Find()
-	if err != nil {
-		return c.String(500, "failed to fetch works")
+func (pSrv *server) embedQuery(ctx context.Context, queryText string) ([]float64, error) {
+	if pSrv.embeddingBaseURL == "" {
+		return nil, errors.New("embedding base url is not configured")
 	}
+
+	payload := embedRequest{
+		Texts:     []string{queryText},
+		InputType: "query",
+	}
+
+	body, err := json.Marshal(payload)
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequestWithContext(
+		ctx,
+		http.MethodPost,
+		pSrv.embeddingBaseURL+"/embed",
+		strings.NewReader(string(body)),
+	)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	client := pSrv.httpClient
+	if client == nil {
+		client = http.DefaultClient
+	}
+
+	res, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		return nil, errors.New("embedding service returned non-200 status: " + res.Status)
+	}
+
+	var parsed embedResponse
+	if err := json.NewDecoder(res.Body).Decode(&parsed); err != nil {
+		return nil, err
+	}
+	if len(parsed.Vectors) == 0 {
+		return nil, errors.New("embedding service returned empty vectors")
+	}
+	if parsed.Dimensions != 384 {
+		return nil, errors.New("embedding vector dimensions mismatch")
+	}
+
+	return parsed.Vectors[0], nil
+}
+
+func (pSrv *server) respondWorks(c echo.Context, works []*model.IsirmtWork) error {
+	ctx := c.Request().Context()
 
 	if len(works) == 0 {
 		return c.JSON(http.StatusOK, []workResponse{})
@@ -604,7 +676,13 @@ func (pSrv *server) handleGetWorks(c echo.Context) error {
 
 	workIDs := make([]string, 0, len(works))
 	for _, work := range works {
-		workIDs = append(workIDs, *work.ID)
+		if work.ID != nil {
+			workIDs = append(workIDs, *work.ID)
+		}
+	}
+
+	if len(workIDs) == 0 {
+		return c.JSON(http.StatusOK, []workResponse{})
 	}
 
 	imagesMap := make(map[string][]workImageResponse, len(workIDs))
@@ -649,6 +727,10 @@ func (pSrv *server) handleGetWorks(c echo.Context) error {
 
 	responses := make([]workResponse, 0, len(works))
 	for _, work := range works {
+		if work.ID == nil {
+			continue
+		}
+
 		createdAt := ""
 		if work.CreatedAt != nil {
 			createdAt = work.CreatedAt.UTC().Format(time.RFC3339Nano)
@@ -683,6 +765,17 @@ func (pSrv *server) handleGetWorks(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, responses)
+}
+
+func (pSrv *server) handleGetWorks(c echo.Context) error {
+	ctx := c.Request().Context()
+
+	works, err := pSrv.q.IsirmtWork.WithContext(ctx).Order(pSrv.q.IsirmtWork.CreatedAt.Desc()).Find()
+	if err != nil {
+		return c.String(500, "failed to fetch works")
+	}
+
+	return pSrv.respondWorks(c, works)
 }
 
 func (pSrv *server) broadcastWorkClick(workID string) {
@@ -726,6 +819,66 @@ func (pSrv *server) handleCreateWorkClick(c echo.Context) error {
 
 	pSrv.broadcastWorkClick(workID)
 	return c.NoContent(http.StatusCreated)
+}
+
+func (pSrv *server) handleSearchWorks(c echo.Context) error {
+	queryText := strings.TrimSpace(c.QueryParam("q"))
+	if queryText == "" {
+		return c.String(http.StatusBadRequest, "query parameter 'q' is required")
+	}
+
+	limit := 10
+	if rawLimit := strings.TrimSpace(c.QueryParam("limit")); rawLimit != "" {
+		parsedLimit, err := strconv.Atoi(rawLimit)
+		if err != nil {
+			return c.String(http.StatusBadRequest, "limit must be number")
+		}
+		limit = parsedLimit
+	}
+
+	ctx := c.Request().Context()
+
+	vector, err := pSrv.embedQuery(ctx, queryText)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "failed to embed query")
+	}
+
+	hits, err := pSrv.searchWorkIDs(ctx, vector, limit)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "failed to search works")
+	}
+
+	if len(hits) == 0 {
+		return c.JSON(http.StatusOK, []workResponse{})
+	}
+
+	workIDs := make([]string, 0, len(hits))
+	for _, hit := range hits {
+		workIDs = append(workIDs, hit.WorkID)
+	}
+
+	works, err := pSrv.q.IsirmtWork.WithContext(ctx).
+		Where(pSrv.q.IsirmtWork.ID.In(workIDs...)).
+		Find()
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "failed to fetch works")
+	}
+
+	workByID := make(map[string]*model.IsirmtWork, len(works))
+	for _, work := range works {
+		if work.ID != nil {
+			workByID[*work.ID] = work
+		}
+	}
+
+	orderedWorks := make([]*model.IsirmtWork, 0, len(hits))
+	for _, hit := range hits {
+		if work := workByID[hit.WorkID]; work != nil {
+			orderedWorks = append(orderedWorks, work)
+		}
+	}
+
+	return pSrv.respondWorks(c, orderedWorks)
 }
 
 func (pSrv *server) handleCreateWork(c echo.Context) error {
@@ -1152,4 +1305,58 @@ func corsConfig(allowedOrigin string) middleware.CORSConfig {
 	}
 
 	return cfg
+}
+
+func formatVector(vector []float64) string {
+	parts := make([]string, 0, len(vector))
+	for _, value := range vector {
+		parts = append(parts, strconv.FormatFloat(value, 'f', -1, 64))
+	}
+	return "[" + strings.Join(parts, ",") + "]"
+}
+
+func (pSrv *server) searchWorkIDs(ctx context.Context, vector []float64, limit int) ([]searchWorkHit, error) {
+	if limit <= 0 {
+		limit = 10
+	}
+	if limit > 50 {
+		limit = 50
+	}
+
+	vectorText := formatVector(vector)
+
+	type row struct {
+		WorkID   string  `gorm:"column:work_id"`
+		Distance float64 `gorm:"column:distance"`
+	}
+
+	var rows []row
+	err := pSrv.db.WithContext(ctx).Raw(
+		`
+		SELECT
+			work_id,
+			MIN(embedding <=> ?::vector) AS distance
+		FROM isirmt_work_search_chunks
+		WHERE embedding_model = ?
+		GROUP BY work_id
+		ORDER BY distance ASC
+		LIMIT ?
+		`,
+		vectorText,
+		pSrv.searchEmbeddingModel,
+		limit,
+	).Scan(&rows).Error
+	if err != nil {
+		return nil, err
+	}
+
+	hits := make([]searchWorkHit, 0, len(rows))
+	for _, row := range rows {
+		hits = append(hits, searchWorkHit{
+			WorkID:   row.WorkID,
+			Distance: row.Distance,
+		})
+	}
+
+	return hits, nil
 }

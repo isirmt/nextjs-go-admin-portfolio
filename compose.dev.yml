@@ -49,6 +49,8 @@ services:
       ALLOWED_ORIGIN: "http://localhost:3000"
       ADMIN_SECRET: ${ADMIN_SECRET}
       UPLOAD_DIR: /uploads
+      EMBEDDING_BASE_URL: http://embedding:8000
+      SEARCH_EMBEDDING_MODEL: intfloat/multilingual-e5-small
     volumes:
       - ./backend:/app
       - go_mod_cache:/go/pkg/mod
