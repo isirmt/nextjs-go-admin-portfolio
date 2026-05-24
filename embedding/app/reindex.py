@@ -3,7 +3,8 @@ import hashlib
 from dataclasses import asdict, dataclass
 from typing import Any
 
-from app.db import fetch_dirty_works
+from app.db import fetch_dirty_works, save_search_chunks
+from app.embedder import MODEL_ID, embed_passages
 
 
 @dataclass(frozen=True)
@@ -74,7 +75,23 @@ def main() -> None:
 
     print(f"dirty works: {len(works)}")
     print(f"chunks: {len(chunks)}")
-    print(json.dumps([asdict(chunk) for chunk in chunks[:6]], ensure_ascii=False, indent=2))
+
+    if not chunks:
+        return
+
+    vectors = embed_passages([chunk.content for chunk in chunks])
+    rows = [
+        {
+            **asdict(chunk),
+            "embedding": vector,
+        }
+        for chunk, vector in zip(chunks, vectors, strict=True)
+    ]
+
+    work_ids = sorted({str(work["id"]) for work in works})
+    save_search_chunks(work_ids, rows, MODEL_ID)
+
+    print(f"saved chunks: {len(rows)}")
 
 
 if __name__ == "__main__":
