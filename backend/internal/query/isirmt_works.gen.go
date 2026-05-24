@@ -35,6 +35,9 @@ func newIsirmtWork(db *gorm.DB, opts ...gen.DOOption) isirmtWork {
 	_isirmtWork.AccentColor = field.NewString(tableName, "accent_color")
 	_isirmtWork.Description = field.NewString(tableName, "description")
 	_isirmtWork.ThumbnailImageID = field.NewString(tableName, "thumbnail_image_id")
+	_isirmtWork.SearchDirty = field.NewBool(tableName, "search_dirty")
+	_isirmtWork.SearchIndexedAt = field.NewTime(tableName, "search_indexed_at")
+	_isirmtWork.SearchIndexError = field.NewString(tableName, "search_index_error")
 
 	_isirmtWork.fillFieldMap()
 
@@ -52,6 +55,9 @@ type isirmtWork struct {
 	AccentColor      field.String
 	Description      field.String
 	ThumbnailImageID field.String
+	SearchDirty      field.Bool
+	SearchIndexedAt  field.Time
+	SearchIndexError field.String
 
 	fieldMap map[string]field.Expr
 }
@@ -75,6 +81,9 @@ func (i *isirmtWork) updateTableName(table string) *isirmtWork {
 	i.AccentColor = field.NewString(table, "accent_color")
 	i.Description = field.NewString(table, "description")
 	i.ThumbnailImageID = field.NewString(table, "thumbnail_image_id")
+	i.SearchDirty = field.NewBool(table, "search_dirty")
+	i.SearchIndexedAt = field.NewTime(table, "search_indexed_at")
+	i.SearchIndexError = field.NewString(table, "search_index_error")
 
 	i.fillFieldMap()
 
@@ -101,7 +110,7 @@ func (i *isirmtWork) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (i *isirmtWork) fillFieldMap() {
-	i.fieldMap = make(map[string]field.Expr, 7)
+	i.fieldMap = make(map[string]field.Expr, 10)
 	i.fieldMap["id"] = i.ID
 	i.fieldMap["title"] = i.Title
 	i.fieldMap["comment"] = i.Comment
@@ -109,6 +118,9 @@ func (i *isirmtWork) fillFieldMap() {
 	i.fieldMap["accent_color"] = i.AccentColor
 	i.fieldMap["description"] = i.Description
 	i.fieldMap["thumbnail_image_id"] = i.ThumbnailImageID
+	i.fieldMap["search_dirty"] = i.SearchDirty
+	i.fieldMap["search_indexed_at"] = i.SearchIndexedAt
+	i.fieldMap["search_index_error"] = i.SearchIndexError
 }
 
 func (i isirmtWork) clone(db *gorm.DB) isirmtWork {
