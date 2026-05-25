@@ -73,7 +73,7 @@ export default function SearchWindow() {
   return (
     <div
       ref={containerRef}
-      className="pointer-events-none fixed top-0 left-0 z-100 flex size-full flex-col items-end gap-6 bg-transparent p-6"
+      className={`pointer-events-none fixed top-0 left-0 z-100 flex size-full flex-col items-end gap-6 p-6 transition-all ${isOpen ? "bg-black/10 backdrop-blur-sm" : "bg-transparent"}`}
     >
       <div
         className="relative z-10 h-12 w-78 max-w-full"
