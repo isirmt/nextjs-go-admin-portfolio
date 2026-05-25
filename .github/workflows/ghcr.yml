@@ -97,3 +97,32 @@ jobs:
           push: true
           tags: ${{ steps.meta_backend.outputs.tags }}
           labels: ${{ steps.meta_backend.outputs.labels }}
+
+      - name: Check tag exists (embedding)
+        id: check_embedding
+        run: |
+          if docker manifest inspect ghcr.io/${{ github.repository }}-embedding:${{ steps.version.outputs.version }} > /dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: meta (embedding)
+        id: meta_embedding
+        uses: docker/metadata-action@v5
+        if: steps.check_embedding.outputs.exists != 'true'
+        with:
+          images: ghcr.io/${{ github.repository }}-embedding
+          tags: |
+            type=raw,value=${{ steps.version.outputs.version }}
+            type=raw,value=latest,enable=${{ inputs.push_latest }}
+
+      - name: Build and push (embedding)
+        uses: docker/build-push-action@v5
+        if: steps.check_embedding.outputs.exists != 'true'
+        with:
+          context: ./embedding
+          file: ./embedding/Dockerfile
+          push: true
+          tags: ${{ steps.meta_embedding.outputs.tags }}
+          labels: ${{ steps.meta_embedding.outputs.labels }}

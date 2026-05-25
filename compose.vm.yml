@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:16-alpine
+    image: pgvector/pgvector:pg16
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -42,8 +42,32 @@ services:
       ALLOWED_ORIGIN: ${ALLOWED_ORIGIN}
       ADMIN_SECRET: ${ADMIN_SECRET}
       UPLOAD_DIR: /uploads
+      EMBEDDING_BASE_URL: http://embedding:8000
+      SEARCH_EMBEDDING_MODEL: intfloat/multilingual-e5-small
     volumes:
       - ./uploads:/uploads
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      embedding:
+        condition: service_healthy
+
+  embedding:
+    image: ghcr.io/isirmt/nextjs-go-admin-portfolio-embedding:latest
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      EMBEDDING_MODEL: intfloat/multilingual-e5-small
+      HF_TOKEN: ${HF_TOKEN}
+      HF_HOME: /hf-cache
+      REINDEX_INTERVAL_SECONDS: ${REINDEX_INTERVAL_SECONDS:-600}
+    volumes:
+      - hf_cache:/hf-cache
+    healthcheck:
+      test: [ "CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/healthz', timeout=5)\"" ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
     restart: unless-stopped
     depends_on:
       db:
@@ -70,3 +94,4 @@ volumes:
   pg_prod:
   caddy_data:
   caddy_config:
+  hf_cache:
