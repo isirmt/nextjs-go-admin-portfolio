@@ -5,6 +5,7 @@ import { useSelectingCubeContext } from "@/contexts/selectingCubeContext";
 import { useScrollbarControl } from "@/hooks/useScrollbarControl";
 import { Work } from "@/types/works/common";
 import { useEffect, useRef, useState } from "react";
+import SearchIcon from "../searchIcon";
 
 const SEARCH_DELAY = 300; // ms
 const SEARCH_API_URL = "/api/works/search";
@@ -78,8 +79,11 @@ export default function SearchWindow() {
           value={searchTerm}
           onFocus={() => setIsOpen(true)}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className={`font-noto pointer-events-auto block h-12 w-full rounded-full border border-[#ccc] px-4 py-1 text-[#333] shadow-md shadow-[#ccc] backdrop-blur-2xl outline-none hover:border-[#6354EB] focus:border-[#6354EB] active:border-[#6354EB] ${isOpen ? "bg-white" : "bg-white/60"}`}
+          className={`font-noto pointer-events-auto block h-12 w-full rounded-full border border-[#ccc] py-1 pr-4 pl-12.5 text-[#333] shadow-md shadow-[#ccc] backdrop-blur-2xl outline-none hover:border-[#6354EB] focus:border-[#6354EB] active:border-[#6354EB] ${isOpen ? "bg-white" : "bg-white/60"}`}
         />
+        <div className="absolute top-2.5 left-3.5 z-10">
+          <SearchIcon color="#666" size={32} />
+        </div>
       </div>
       {isOpen && (
         <div
