@@ -374,7 +374,7 @@ export default function RealtimeWorld() {
           <WorkClickPhysics onSpawnEnded={() => setIsSpawnEnded(true)} />
         </Canvas>
       </div>
-      <div className="absolute top-6 right-6 flex flex-row-reverse gap-4">
+      <div className="absolute top-24 right-6 flex flex-row-reverse gap-4">
         <div className="font-dot relative flex items-center gap-2 rounded-full border border-[#ccc] bg-white/60 px-4 py-1 text-xl leading-none text-[#333] shadow-md shadow-[#ccc] backdrop-blur-2xl select-none">
           <span
             className={`size-3 rounded-full ${isSpawnEnded ? "bg-[#777]" : "animate-pulse bg-[#f06363]"}`}

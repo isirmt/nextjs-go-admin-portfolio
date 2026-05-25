@@ -9,6 +9,7 @@ import Navigation from "@/components/navigation";
 import HeroSection from "@/components/heroSection";
 import { SelectingCubeContextProvider } from "@/contexts/selectingCubeContext";
 import { Metadata } from "next";
+import SearchWindow from "@/components/works/searchWindow";
 
 export const metadata: Metadata = {
   title: "isirmt - 色彩と体験 | 入本聖也",
@@ -106,6 +107,7 @@ export default function Home() {
         <WorksProvider>
           <TechsProvider>
             <SelectingCubeContextProvider>
+              <SearchWindow />
               <section
                 aria-label="top-view"
                 className="relative h-[calc(100dvh+72px)] w-full bg-[#fafafa]"
@@ -117,7 +119,7 @@ export default function Home() {
               <Navigation />
               <section
                 aria-label="profile"
-                className="relative w-full overflow-x-hidden"
+                className="relative w-full overflow-x-hidden overflow-y-visible"
               >
                 <ProfileCard age={age} />
                 <div className="relative -mt-6 grid grid-cols-1 gap-14 bg-[#c6f4ff] px-10 pt-32 pb-20 lg:grid-cols-2 lg:gap-20 lg:px-40">

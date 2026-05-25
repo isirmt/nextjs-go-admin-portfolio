@@ -19,6 +19,9 @@ type IsirmtWork struct {
 	AccentColor      *string    `gorm:"column:accent_color;type:character(7);not null;default:#000000" json:"accent_color"`
 	Description      *string    `gorm:"column:description;type:text" json:"description"`
 	ThumbnailImageID *string    `gorm:"column:thumbnail_image_id;type:uuid" json:"thumbnail_image_id"`
+	SearchDirty      *bool      `gorm:"column:search_dirty;type:boolean;not null;default:true" json:"search_dirty"`
+	SearchIndexedAt  *time.Time `gorm:"column:search_indexed_at;type:timestamp with time zone" json:"search_indexed_at"`
+	SearchIndexError *string    `gorm:"column:search_index_error;type:text" json:"search_index_error"`
 }
 
 // TableName IsirmtWork's table name

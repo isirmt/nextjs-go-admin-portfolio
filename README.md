@@ -41,6 +41,7 @@ ADMIN_ALLOWED_EMAILS= /* COMMA SEPARATED ADMIN EMAILS e.g. hoge@example.com,hoge
 ADMIN_SECRET= /* RANDOM STRING for backend admin auth */
 ALLOWED_ORIGIN= /* if you want to restrict frontend access e.g. https://example.com */
 GOOGLE_TAG_MANAGER_ID= /* NOT required, GOOGLE TAG MANAGER ID e.g. GTM-XXXXXXX */
+HF_TOKEN= /* NOT required, Hugging Face Access Token */
 ```
 
 if you want checking logs... (realtime)

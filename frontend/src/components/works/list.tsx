@@ -14,6 +14,7 @@ import React, {
   useState,
 } from "react";
 import { useInViewAnimation } from "@/hooks/useInViewAnimation";
+import { useScrollbarControl } from "@/hooks/useScrollbarControl";
 import { useTechInfoGetter } from "@/hooks/useTechInfoGetter";
 import { smoochSans } from "@/lib/fonts";
 import { SectionText } from "./sectionText";
@@ -133,7 +134,7 @@ function WorkCard({
         {techsInfo.map((stack, techIdx) => (
           <div
             key={techIdx}
-            className={`hover:translate-0.5"} relative flex scale-y-110 items-center gap-3 overflow-hidden bg-[#2a7186] px-2 py-px tracking-[.1rem] shadow-[.125rem_.125rem_0_0_#67c8e6] transition-all duration-150`}
+            className={`relative flex scale-y-110 items-center gap-3 overflow-hidden bg-[#2a7186] px-2 py-px tracking-[.1rem] shadow-[.125rem_.125rem_0_0_#67c8e6] transition-all duration-150`}
           >
             <span className="font-dot text-lg leading-none text-[#98e3fa]">
               {stack.name}
@@ -183,30 +184,7 @@ export default function WorksList() {
     }
   }, []);
 
-  useEffect(() => {
-    if (!selectingWorkId) {
-      return;
-    }
-    const { style } = document.body;
-    const previousOverflow = style.overflow;
-    const previousOverscroll = style.overscrollBehavior;
-    const previousTouchAction = style.touchAction;
-    const previousPaddingRight = style.paddingRight;
-    const scrollbarWidth =
-      window.innerWidth - document.documentElement.clientWidth;
-    style.overflow = "hidden";
-    style.overscrollBehavior = "contain";
-    style.touchAction = "none";
-    if (scrollbarWidth > 0) {
-      style.paddingRight = `${scrollbarWidth}px`;
-    }
-    return () => {
-      style.overflow = previousOverflow;
-      style.overscrollBehavior = previousOverscroll;
-      style.touchAction = previousTouchAction;
-      style.paddingRight = previousPaddingRight;
-    };
-  }, [selectingWorkId]);
+  useScrollbarControl(Boolean(selectingWorkId));
 
   useEffect(() => {
     if (!clickedCubeId || clickNonce === 0) {

@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:16-alpine
+    image: pgvector/pgvector:pg16
     environment:
       POSTGRES_USER: app
       POSTGRES_PASSWORD: app_password
@@ -49,6 +49,8 @@ services:
       ALLOWED_ORIGIN: "http://localhost:3000"
       ADMIN_SECRET: ${ADMIN_SECRET}
       UPLOAD_DIR: /uploads
+      EMBEDDING_BASE_URL: http://embedding:8000
+      SEARCH_EMBEDDING_MODEL: intfloat/multilingual-e5-small
     volumes:
       - ./backend:/app
       - go_mod_cache:/go/pkg/mod
@@ -56,6 +58,25 @@ services:
     depends_on:
       db:
         condition: service_healthy
+
+  embedding:
+    build:
+      context: ./embedding
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: "postgres://app:app_password@db:5432/appdb"
+      EMBEDDING_MODEL: intfloat/multilingual-e5-small
+      HF_TOKEN: ${HF_TOKEN}
+      HF_HOME: /hf-cache
+      REINDEX_INTERVAL_SECONDS: ${REINDEX_INTERVAL_SECONDS:-600}
+    volumes:
+      - hf_cache_dev:/hf-cache
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
 
   adminer:
     image: adminer:4
@@ -83,3 +104,4 @@ volumes:
   pg_dev:
   node_modules_dev:
   go_mod_cache:
+  hf_cache_dev:
