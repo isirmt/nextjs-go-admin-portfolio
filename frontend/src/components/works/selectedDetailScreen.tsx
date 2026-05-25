@@ -124,11 +124,11 @@ export default function SelectedDetailScreen({
                               target="_blank"
                               rel="noopener"
                               href={workUrl.url}
-                              className="inline-block w-fit border-b text-lg leading-none text-[#361ea0] hover:text-[#361ea0]/70"
+                              className="inline-block w-fit truncate border-b text-lg leading-none text-[#361ea0] hover:text-[#361ea0]/70"
                             >
                               {workUrl.label}
                             </Link>
-                            <div className="text-xs leading-none text-[#555]">
+                            <div className="truncate text-xs leading-none text-[#555]">
                               {workUrl.url}
                             </div>
                           </div>
