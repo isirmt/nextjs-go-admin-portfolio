@@ -28,11 +28,24 @@ export default function SearchWindow() {
       }
     };
 
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "/" && !isOpen) {
+        event.preventDefault();
+        setIsOpen(true);
+        containerRef.current?.querySelector("input")?.focus();
+      } else if (event.key === "Escape" && isOpen) {
+        setIsOpen(false);
+        containerRef.current?.querySelector("input")?.blur();
+      }
+    };
+
     document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
     };
-  }, []);
+  }, [isOpen]);
 
   useEffect(() => {
     if (searchTerm.trim() === "") return;
@@ -95,7 +108,7 @@ export default function SearchWindow() {
             }}
           />
         </div>
-        {!isOpen && (
+        {!isOpen && searchTerm.trim() === "" && (
           <div className="absolute top-3.25 left-13 z-10 flex items-center gap-1">
             <div
               className={`relative flex scale-y-110 items-center gap-3 overflow-hidden rounded-sm bg-[#ccc] px-1 py-px tracking-[.1rem] shadow-[0_.125rem_0_0_#bbb] transition-all duration-150 select-none`}
