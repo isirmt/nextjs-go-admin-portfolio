@@ -33,7 +33,7 @@ export default function Footer() {
           >
             情報発信中サイト
           </div>
-          <div className="my-10 flex flex-col gap-14 text-white lg:flex-row lg:gap-0">
+          <div className="my-10 flex min-w-0 flex-col gap-14 text-white lg:flex-row lg:gap-0">
             <div
               className="transition hover:drop-shadow-2xl lg:pr-10"
               onMouseEnter={() => handleSpotlightEnter("left")}

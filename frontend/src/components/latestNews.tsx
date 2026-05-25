@@ -54,9 +54,12 @@ export function LatestNews({ feedUrl }: Options) {
   }, [feedUrl]);
 
   return (
-    <div className="">
+    <div className="relative w-full">
       {feedData?.title ? (
-        <Link className="hover:border-b" href={feedData.link}>
+        <Link
+          className="block w-72 truncate hover:border-b sm:w-96"
+          href={feedData.link}
+        >
           {feedData.title}
         </Link>
       ) : (
@@ -74,14 +77,14 @@ export function InformationSite({
   siteDescription,
 }: SiteOptions & Options) {
   return (
-    <div className="relative mx-auto flex max-w-full flex-col gap-2.5 px-6 lg:mx-0 lg:px-0">
+    <div className="relative mx-auto flex max-w-full min-w-0 flex-col gap-2.5 px-6 lg:mx-0 lg:px-0">
       <Link
         href={siteUrl}
         target="_blank"
         rel="noopener"
         className="group relative flex flex-col gap-2.5"
       >
-        <div className="aspect-1200/630 max-w-full overflow-hidden rounded-lg bg-white sm:w-96">
+        <div className="aspect-1200/630 w-72 max-w-full overflow-hidden rounded-lg bg-white sm:w-96">
           <Image
             src={siteImagePath}
             width={1200}
