@@ -83,6 +83,7 @@ export default function SearchWindow() {
           value={searchTerm}
           onFocus={() => setIsOpen(true)}
           onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder={isOpen ? "キーワードを入力" : ""}
           className={`font-noto pointer-events-auto block h-12 w-full rounded-full border border-[#ccc] py-1 pr-4 pl-12.5 text-[#333] shadow-md shadow-[#ccc] backdrop-blur-2xl outline-none hover:border-[#6354EB] focus:border-[#6354EB] active:border-[#6354EB] ${isOpen ? "bg-white" : "bg-white/60"}`}
         />
         <div className="absolute top-2.5 left-3.5 z-10">
@@ -94,6 +95,18 @@ export default function SearchWindow() {
             }}
           />
         </div>
+        {!isOpen && (
+          <div className="absolute top-3.25 left-13 z-10 flex items-center gap-1">
+            <div
+              className={`relative flex scale-y-110 items-center gap-3 overflow-hidden rounded-sm bg-[#ccc] px-1 py-px tracking-[.1rem] shadow-[0_.125rem_0_0_#bbb] transition-all duration-150 select-none`}
+            >
+              <span className="font-dot text-lg leading-none text-[#555]">
+                /
+              </span>
+            </div>
+            <span className="text-[#333]">を押してスマート検索</span>
+          </div>
+        )}
       </div>
       {isOpen && (
         <div
