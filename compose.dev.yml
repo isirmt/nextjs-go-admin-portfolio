@@ -67,6 +67,10 @@ services:
       DATABASE_URL: "postgres://app:app_password@db:5432/appdb"
       EMBEDDING_MODEL: intfloat/multilingual-e5-small
       HF_TOKEN: ${HF_TOKEN}
+      HF_HOME: /hf-cache
+      REINDEX_INTERVAL_SECONDS: ${REINDEX_INTERVAL_SECONDS:-600}
+    volumes:
+      - hf_cache_dev:/hf-cache
     ports:
       - "8000:8000"
     depends_on:
@@ -100,3 +104,4 @@ volumes:
   pg_dev:
   node_modules_dev:
   go_mod_cache:
+  hf_cache_dev:
