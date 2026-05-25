@@ -1,16 +1,19 @@
 export default function SearchIcon({
   color,
   size,
+  style,
 }: {
   color?: string;
   size?: number;
+  style?: React.CSSProperties;
 }) {
   return (
     <svg
       style={{
-        stroke: color ?? "currentColor",
+        fill: color ?? "currentColor",
         height: size ?? 24,
         width: size ?? 24,
+        ...style,
       }}
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 128.82 128.82"

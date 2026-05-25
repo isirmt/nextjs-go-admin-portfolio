@@ -16,6 +16,7 @@ export default function SearchWindow() {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [hitWorks, setHitWorks] = useState<Work[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const { scrollbarWidth } = useScrollbarControl(isOpen);
@@ -36,6 +37,7 @@ export default function SearchWindow() {
   useEffect(() => {
     if (searchTerm.trim() === "") return;
 
+    setIsSearching(true);
     const handler = setTimeout(() => {
       const fetchSearchResults = async () => {
         try {
@@ -55,6 +57,8 @@ export default function SearchWindow() {
             "検索エラー:",
             error instanceof Error ? error.message : error,
           );
+        } finally {
+          setIsSearching(false);
         }
       };
 
@@ -82,7 +86,13 @@ export default function SearchWindow() {
           className={`font-noto pointer-events-auto block h-12 w-full rounded-full border border-[#ccc] py-1 pr-4 pl-12.5 text-[#333] shadow-md shadow-[#ccc] backdrop-blur-2xl outline-none hover:border-[#6354EB] focus:border-[#6354EB] active:border-[#6354EB] ${isOpen ? "bg-white" : "bg-white/60"}`}
         />
         <div className="absolute top-2.5 left-3.5 z-10">
-          <SearchIcon color="#666" size={32} />
+          <SearchIcon
+            color={isOpen ? (isSearching ? "#aaa" : "#6354EB") : "#666"}
+            size={32}
+            style={{
+              transition: "all 0.3s",
+            }}
+          />
         </div>
       </div>
       {isOpen && (
