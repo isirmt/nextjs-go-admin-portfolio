@@ -2,6 +2,7 @@
 "use client";
 
 import { useSelectingCubeContext } from "@/contexts/selectingCubeContext";
+import { useScrollbarControl } from "@/hooks/useScrollbarControl";
 import { Work } from "@/types/works/common";
 import { useEffect, useRef, useState } from "react";
 
@@ -15,6 +16,8 @@ export default function SearchWindow() {
   const [searchTerm, setSearchTerm] = useState("");
   const [hitWorks, setHitWorks] = useState<Work[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const { scrollbarWidth } = useScrollbarControl(isOpen);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -72,7 +75,10 @@ export default function SearchWindow() {
       ref={containerRef}
       className="pointer-events-none fixed top-0 left-0 z-100 flex size-full flex-col items-end gap-6 bg-transparent p-6"
     >
-      <div className="relative z-10 h-12 w-78 max-w-full">
+      <div
+        className="relative z-10 h-12 w-78 max-w-full"
+        style={{ marginRight: isOpen ? scrollbarWidth : 0 }}
+      >
         <input
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}

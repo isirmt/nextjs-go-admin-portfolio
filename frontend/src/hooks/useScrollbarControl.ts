@@ -1,8 +1,11 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export function useScrollbarControl(enabled: boolean) {
+  const [scrollbarWidth, setScrollbarWidth] = useState(0);
+
   useEffect(() => {
     if (!enabled) {
       return;
@@ -15,6 +18,8 @@ export function useScrollbarControl(enabled: boolean) {
     const previousPaddingRight = style.paddingRight;
     const scrollbarWidth =
       window.innerWidth - document.documentElement.clientWidth;
+
+    setScrollbarWidth(scrollbarWidth);
 
     style.overflow = "hidden";
     style.overscrollBehavior = "contain";
@@ -30,4 +35,12 @@ export function useScrollbarControl(enabled: boolean) {
       style.paddingRight = previousPaddingRight;
     };
   }, [enabled]);
+
+  useEffect(() => {
+    const scrollbarWidth =
+      window.innerWidth - document.documentElement.clientWidth;
+    setScrollbarWidth(scrollbarWidth);
+  }, []);
+
+  return { scrollbarWidth } as const;
 }
