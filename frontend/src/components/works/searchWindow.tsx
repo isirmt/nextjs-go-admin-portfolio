@@ -109,15 +109,17 @@ export default function SearchWindow() {
           />
         </div>
         {!isOpen && searchTerm.trim() === "" && (
-          <div className="absolute top-3.25 left-13 z-10 flex items-center gap-1">
+          <div className="pointer-events-none absolute top-3.25 left-13 z-10 flex items-center gap-1">
             <div
-              className={`relative flex scale-y-110 items-center gap-3 overflow-hidden rounded-sm bg-[#ccc] px-1 py-px tracking-[.1rem] shadow-[0_.125rem_0_0_#bbb] transition-all duration-150 select-none`}
+              className={`relative flex scale-y-110 items-center gap-3 overflow-hidden rounded-sm bg-[#ddd] px-1 py-px tracking-[.1rem] shadow-[0_.125rem_0_0_#bbb] transition-all duration-150 select-none`}
             >
               <span className="font-dot text-lg leading-none text-[#555]">
                 /
               </span>
             </div>
-            <span className="text-[#333]">を押してスマート検索</span>
+            <span className="tracking-wider text-[#333]">
+              を押してスマート検索
+            </span>
           </div>
         )}
       </div>
@@ -134,7 +136,7 @@ export default function SearchWindow() {
               {hitWorks.map((work) => (
                 <li
                   key={work.id}
-                  className="relative flex cursor-pointer items-center gap-4 rounded p-2 hover:bg-[#eee]/85 hover:backdrop-blur-2xl"
+                  className="relative flex cursor-pointer items-center gap-4 overflow-hidden rounded p-2 hover:bg-[#eee]/85 hover:backdrop-blur-2xl"
                   onClick={() => {
                     emitCubeClick(work.id);
                     setIsOpen(false);
@@ -153,6 +155,12 @@ export default function SearchWindow() {
                     </div>
                     <div className="w-full truncate">{work.description}</div>
                   </div>
+                  <div
+                    className="absolute top-0 right-0 size-6 [clip-path:polygon(0_0,100%_0,100%_100%)]"
+                    style={{
+                      backgroundColor: work.accent_color,
+                    }}
+                  />
                 </li>
               ))}
             </ul>
