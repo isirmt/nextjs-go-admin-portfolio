@@ -21,13 +21,8 @@ export default function SearchWindow() {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
-      ) {
+      if (event.target === containerRef.current) {
         setIsOpen(false);
-      } else {
-        setIsOpen(true);
       }
     };
 
@@ -73,7 +68,7 @@ export default function SearchWindow() {
   return (
     <div
       ref={containerRef}
-      className={`pointer-events-none fixed top-0 left-0 z-100 flex size-full flex-col items-end gap-6 p-6 transition-all ${isOpen ? "bg-black/10 backdrop-blur-sm" : "bg-transparent"}`}
+      className={`fixed top-0 left-0 z-100 flex size-full flex-col items-end gap-6 p-6 transition-colors ${isOpen ? "pointer-events-auto bg-black/10 backdrop-blur-sm" : "pointer-events-none bg-transparent"}`}
     >
       <div
         className="relative z-10 h-12 w-78 max-w-full"
@@ -81,16 +76,17 @@ export default function SearchWindow() {
       >
         <input
           value={searchTerm}
+          onFocus={() => setIsOpen(true)}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className={`font-noto pointer-events-auto block h-12 w-full rounded-full border border-[#ccc] px-4 py-1 text-[#333] shadow-md shadow-[#ccc] backdrop-blur-2xl outline-none hover:border-[#777] focus:border-[#777] active:border-[#777] ${isOpen ? "bg-white" : "bg-white/60"}`}
+          className={`font-noto pointer-events-auto block h-12 w-full rounded-full border border-[#ccc] px-4 py-1 text-[#333] shadow-md shadow-[#ccc] backdrop-blur-2xl outline-none hover:border-[#6354EB] focus:border-[#6354EB] active:border-[#6354EB] ${isOpen ? "bg-white" : "bg-white/60"}`}
         />
       </div>
       {isOpen && (
         <div
           className={`pointer-events-auto relative z-0 max-h-[calc(100vh-8rem)] w-120 max-w-full overflow-y-auto rounded border border-[#ccc] bg-white/85 p-4 backdrop-blur-2xl`}
         >
-          {hitWorks.length === 0 ? (
-            <p className="text-center text-gray-500">
+          {searchTerm.trim() === "" || hitWorks.length === 0 ? (
+            <p className="text-center text-gray-500 select-none">
               作品が見つかりませんでした
             </p>
           ) : (
@@ -106,7 +102,7 @@ export default function SearchWindow() {
                 >
                   <img
                     src={`/api/images/${work.thumbnail_image_id}/raw`}
-                    className={`pointer-events-none size-16 rounded object-cover transition-all`}
+                    className={`pointer-events-none size-16 rounded object-cover transition-all select-none`}
                     alt={`${work.title}検索サムネイル`}
                     loading="lazy"
                     decoding="async"
