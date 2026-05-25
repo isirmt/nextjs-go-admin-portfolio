@@ -14,6 +14,7 @@ import React, {
   useState,
 } from "react";
 import { useInViewAnimation } from "@/hooks/useInViewAnimation";
+import { useScrollbarControl } from "@/hooks/useScrollbarControl";
 import { useTechInfoGetter } from "@/hooks/useTechInfoGetter";
 import { smoochSans } from "@/lib/fonts";
 import { SectionText } from "./sectionText";
@@ -183,30 +184,7 @@ export default function WorksList() {
     }
   }, []);
 
-  useEffect(() => {
-    if (!selectingWorkId) {
-      return;
-    }
-    const { style } = document.body;
-    const previousOverflow = style.overflow;
-    const previousOverscroll = style.overscrollBehavior;
-    const previousTouchAction = style.touchAction;
-    const previousPaddingRight = style.paddingRight;
-    const scrollbarWidth =
-      window.innerWidth - document.documentElement.clientWidth;
-    style.overflow = "hidden";
-    style.overscrollBehavior = "contain";
-    style.touchAction = "none";
-    if (scrollbarWidth > 0) {
-      style.paddingRight = `${scrollbarWidth}px`;
-    }
-    return () => {
-      style.overflow = previousOverflow;
-      style.overscrollBehavior = previousOverscroll;
-      style.touchAction = previousTouchAction;
-      style.paddingRight = previousPaddingRight;
-    };
-  }, [selectingWorkId]);
+  useScrollbarControl(Boolean(selectingWorkId));
 
   useEffect(() => {
     if (!clickedCubeId || clickNonce === 0) {
