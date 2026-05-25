@@ -119,7 +119,7 @@ export default function Home() {
               <Navigation />
               <section
                 aria-label="profile"
-                className="relative w-full overflow-x-hidden"
+                className="relative w-full overflow-x-hidden overflow-y-visible"
               >
                 <ProfileCard age={age} />
                 <div className="relative -mt-6 grid grid-cols-1 gap-14 bg-[#c6f4ff] px-10 pt-32 pb-20 lg:grid-cols-2 lg:gap-20 lg:px-40">
