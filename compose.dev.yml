@@ -9,7 +9,6 @@ services:
       - "5432:5432"
     volumes:
       - pg_dev:/var/lib/postgresql/data
-      - ./db/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U app -d appdb" ]
       interval: 5s
@@ -77,6 +76,16 @@ services:
       db:
         condition: service_healthy
     restart: unless-stopped
+
+  migrate:
+    image: migrate/migrate:4
+    command: ["-path", "/migrations", "-database", "postgres://app:app_password@db:5432/appdb?sslmode=disable", "up"]
+    volumes:
+      - ./db/migrations:/migrations:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
 
   adminer:
     image: adminer:4
