@@ -18,7 +18,9 @@
 at root dir,
 
 ```bash
-docker compose -f compose.dev.yml up -d backend web caddy adminer --force-recreate
+docker compose -f compose.dev.yml up -d db
+docker compose -f compose.dev.yml run --rm migrate
+docker compose -f compose.dev.yml up -d backend web caddy adminer embedding --force-recreate
 ```
 
 you'll be able to access at `http://localhost:3000`.
@@ -31,7 +33,7 @@ create .env file (like .env.example) at ROOT DIR
 POSTGRES_USER= /* (prod only) POSTGRE SQL USER */
 POSTGRES_PASSWORD= /* (prod only) POSTGRE SQL PASSWORD */
 POSTGRES_DB= /* (prod only) POSTGRE SQL DATABASE NAME */
-DATABASE_URL= /* (prod only) postgresql://user:password@db:5432/dbname */
+DATABASE_URL= /* (prod only) postgresql://user:password@db:5432/dbname?sslmode=disable */
 BACKEND_BASE_URL= /* (prod only) http://backend:4000 */
 NEXTAUTH_URL= /* (prod only) YOUR DOMAIN e.g. https://example.com */
 NEXTAUTH_SECRET= /* RANDOM STRING for NEXTAUTH */
@@ -42,6 +44,7 @@ ADMIN_SECRET= /* RANDOM STRING for backend admin auth */
 ALLOWED_ORIGIN= /* if you want to restrict frontend access e.g. https://example.com */
 GOOGLE_TAG_MANAGER_ID= /* NOT required, GOOGLE TAG MANAGER ID e.g. GTM-XXXXXXX */
 HF_TOKEN= /* NOT required, Hugging Face Access Token */
+REINDEX_INTERVAL_SECONDS= /* NOT required, default 600 */
 ```
 
 if you want checking logs... (realtime)
@@ -56,7 +59,13 @@ if you modified golang packages, run this
 docker compose -f compose.dev.yml run --rm backend bash -c "go mod tidy"
 ```
 
-if you update sql scheme, run this
+if you update sql scheme, add a migration under `db/migrations`, then run this
+
+```bash
+docker compose -f compose.dev.yml run --rm migrate
+```
+
+if you update gorm generated query files, run this
 
 ```bash
 docker compose -f compose.dev.yml run --rm --user $(id -u):$(id -g) --env GOCACHE=/tmp/go-build --env GOMODCACHE=/tmp/go-mod-cache backend bash -c "mkdir -p /tmp/go-build /tmp/go-mod-cache && go mod download && go run ./cmd/gen/main.go"
@@ -75,5 +84,15 @@ docker compose -f compose.vm.yml pull
 ```
 
 ```bash
+docker compose -f compose.vm.yml up -d db
+docker compose -f compose.vm.yml run --rm migrate
 docker compose -f compose.vm.yml up -d
 ```
+
+GitHub Actions deployment uses `.github/workflows/deploy-vm.yml`.
+Set repository secrets:
+
+- `VM_HOST`
+- `VM_USER`
+- `VM_SSH_KEY`
+- `VM_APP_DIR`
