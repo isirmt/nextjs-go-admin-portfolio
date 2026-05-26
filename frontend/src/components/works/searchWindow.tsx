@@ -18,6 +18,7 @@ export default function SearchWindow() {
   const [hitWorks, setHitWorks] = useState<Work[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const searchRequestIdRef = useRef(0);
 
   const { scrollbarWidth } = useScrollbarControl(isOpen);
 
@@ -48,30 +49,49 @@ export default function SearchWindow() {
   }, [isOpen]);
 
   useEffect(() => {
-    if (searchTerm.trim() === "") return;
+    const query = searchTerm.trim();
+    const requestId = searchRequestIdRef.current + 1;
+    searchRequestIdRef.current = requestId;
+
+    if (query === "") {
+      setHitWorks([]);
+      setIsSearching(false);
+      return;
+    }
 
     setIsSearching(true);
+    const abortController = new AbortController();
+
     const handler = setTimeout(() => {
       const fetchSearchResults = async () => {
         try {
           const url = new URL(SEARCH_API_URL, window.location.origin);
-          url.searchParams.append(SEARCH_QUERY_KEY, searchTerm);
+          url.searchParams.append(SEARCH_QUERY_KEY, query);
 
-          const response = await fetch(url.toString());
+          const response = await fetch(url.toString(), {
+            signal: abortController.signal,
+          });
           if (!response.ok) {
             const message = (await response.text()) || "検索に失敗しました";
             throw new Error(message);
           }
           const results = (await response.json()) as Work[];
-          setHitWorks(results);
-          console.log("検索結果:", results);
+
+          if (searchRequestIdRef.current === requestId) {
+            setHitWorks(results);
+          }
         } catch (error) {
+          if (abortController.signal.aborted) {
+            return;
+          }
           console.error(
             "検索エラー:",
             error instanceof Error ? error.message : error,
           );
         } finally {
-          setIsSearching(false);
+          if (searchRequestIdRef.current === requestId) {
+            setIsSearching(false);
+          }
         }
       };
 
@@ -80,6 +100,7 @@ export default function SearchWindow() {
 
     return () => {
       clearTimeout(handler);
+      abortController.abort();
     };
   }, [searchTerm]);
 
