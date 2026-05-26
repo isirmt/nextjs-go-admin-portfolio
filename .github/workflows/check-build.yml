@@ -49,3 +49,19 @@ jobs:
       - name: Run go test
         working-directory: backend
         run: go test ./...
+
+  test-migrations:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Start database
+        run: docker compose -f compose.dev.yml up -d db
+
+      - name: Run migrations
+        run: docker compose -f compose.dev.yml run --rm migrate
+
+      - name: Stop database
+        if: always()
+        run: docker compose -f compose.dev.yml down -v
