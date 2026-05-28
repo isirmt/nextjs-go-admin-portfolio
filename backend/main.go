@@ -303,6 +303,7 @@ func main() {
 	epTechStacks.POST("", pSrv.requireAdmin(pSrv.handleCreateTechStack))
 	epWorks := router.Group("/works")
 	epWorks.GET("", pSrv.handleGetWorks)
+	epWorks.GET("/ranking", pSrv.handleGetRankingWorks)
 	epWorks.GET("/search", pSrv.handleSearchWorks)
 	epWorks.POST("", pSrv.requireAdmin(pSrv.handleCreateWork))
 	epWorks.POST("/:id/clicks", pSrv.handleCreateWorkClick)
@@ -819,6 +820,31 @@ func (pSrv *server) handleCreateWorkClick(c echo.Context) error {
 
 	pSrv.broadcastWorkClick(workID)
 	return c.NoContent(http.StatusCreated)
+}
+
+func (pSrv *server) handleGetRankingWorks(c echo.Context) error {
+	limit := 10
+	if rawLimit := strings.TrimSpace(c.QueryParam("limit")); rawLimit != "" {
+		parsedLimit, err := strconv.Atoi(rawLimit)
+		if err != nil {
+			return c.String(http.StatusBadRequest, "limit must be number")
+		}
+		limit = parsedLimit
+	}
+
+	ctx := c.Request().Context()
+	works, err := pSrv.q.IsirmtWork.WithContext(ctx).
+		LeftJoin(pSrv.q.IsirmtWorkClick, pSrv.q.IsirmtWorkClick.WorkID.EqCol(pSrv.q.IsirmtWork.ID)).
+		Group(pSrv.q.IsirmtWork.ID).
+		Order(pSrv.q.IsirmtWorkClick.ID.Count().Desc()).
+		Order(pSrv.q.IsirmtWork.CreatedAt.Desc()).
+		Limit(limit).
+		Find()
+	if err != nil {
+		return c.String(500, "failed to fetch ranking works")
+	}
+
+	return pSrv.respondWorks(c, works)
 }
 
 func (pSrv *server) handleSearchWorks(c echo.Context) error {
