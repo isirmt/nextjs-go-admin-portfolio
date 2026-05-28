@@ -6,10 +6,51 @@ import { useScrollbarControl } from "@/hooks/useScrollbarControl";
 import { Work } from "@/types/works/common";
 import { useEffect, useRef, useState } from "react";
 import SearchIcon from "../searchIcon";
+import React from "react";
 
 const SEARCH_DELAY = 300; // ms
 const SEARCH_API_URL = "/api/works/search";
+const RANKING_API_URL = "/api/works/ranking";
 const SEARCH_QUERY_KEY = "q";
+
+function WorkSearchResultItem({
+  work,
+  emitCubeClick,
+  setIsOpen,
+}: {
+  work: Work;
+  emitCubeClick: (id: string) => void;
+  setIsOpen: (isOpen: boolean) => void;
+}) {
+  return (
+    <li
+      key={work.id}
+      className="relative flex cursor-pointer items-center gap-4 overflow-hidden rounded p-2 hover:bg-[#eee]/85 hover:backdrop-blur-2xl"
+      onClick={() => {
+        emitCubeClick(work.id);
+        setIsOpen(false);
+      }}
+    >
+      <img
+        src={`/api/images/${work.thumbnail_image_id}/raw`}
+        className={`pointer-events-none size-16 rounded object-cover transition-all select-none`}
+        alt={`${work.title}検索サムネイル`}
+        loading="lazy"
+        decoding="async"
+      />
+      <div className="min-w-0 flex-1">
+        <div className="text w-full truncate font-medium">{work.title}</div>
+        <div className="w-full truncate">{work.description}</div>
+      </div>
+      <div
+        className="absolute top-0 right-0 size-6 [clip-path:polygon(0_0,100%_0,100%_100%)]"
+        style={{
+          backgroundColor: work.accent_color,
+        }}
+      />
+    </li>
+  );
+}
 
 export default function SearchWindow() {
   const { emitCubeClick } = useSelectingCubeContext();
@@ -19,6 +60,7 @@ export default function SearchWindow() {
   const [isSearching, setIsSearching] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const searchRequestIdRef = useRef(0);
+  const [rankingWorks, setRankingWorks] = useState<Work[]>([]);
 
   const { scrollbarWidth } = useScrollbarControl(isOpen);
 
@@ -104,6 +146,30 @@ export default function SearchWindow() {
     };
   }, [searchTerm]);
 
+  useEffect(() => {
+    const fetchRankingWorks = async () => {
+      try {
+        const url = new URL(RANKING_API_URL, window.location.origin);
+
+        const response = await fetch(url.toString());
+        if (!response.ok) {
+          const message =
+            (await response.text()) || "ランキングの取得に失敗しました";
+          throw new Error(message);
+        }
+        const results = (await response.json()) as Work[];
+        setRankingWorks(results);
+      } catch (error) {
+        console.error(
+          "ランキング取得エラー:",
+          error instanceof Error ? error.message : error,
+        );
+      }
+    };
+
+    fetchRankingWorks();
+  }, []);
+
   return (
     <div
       ref={containerRef}
@@ -148,41 +214,35 @@ export default function SearchWindow() {
         <div
           className={`pointer-events-auto relative z-0 max-h-[calc(100vh-8rem)] w-120 max-w-full overflow-y-auto rounded border border-[#ccc] bg-white/85 p-4 backdrop-blur-2xl`}
         >
-          {searchTerm.trim() === "" || hitWorks.length === 0 ? (
+          {searchTerm.trim() === "" ? (
+            <React.Fragment>
+              <p className="font-dot my-2 text-center text-xl font-bold select-none">
+                Featured
+              </p>
+              <ul className="space-y-2">
+                {rankingWorks.map((work) => (
+                  <WorkSearchResultItem
+                    key={work.id}
+                    work={work}
+                    emitCubeClick={emitCubeClick}
+                    setIsOpen={setIsOpen}
+                  />
+                ))}
+              </ul>
+            </React.Fragment>
+          ) : hitWorks.length === 0 ? (
             <p className="text-center text-gray-500 select-none">
               作品が見つかりませんでした
             </p>
           ) : (
             <ul className="space-y-2">
               {hitWorks.map((work) => (
-                <li
+                <WorkSearchResultItem
                   key={work.id}
-                  className="relative flex cursor-pointer items-center gap-4 overflow-hidden rounded p-2 hover:bg-[#eee]/85 hover:backdrop-blur-2xl"
-                  onClick={() => {
-                    emitCubeClick(work.id);
-                    setIsOpen(false);
-                  }}
-                >
-                  <img
-                    src={`/api/images/${work.thumbnail_image_id}/raw`}
-                    className={`pointer-events-none size-16 rounded object-cover transition-all select-none`}
-                    alt={`${work.title}検索サムネイル`}
-                    loading="lazy"
-                    decoding="async"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <div className="text w-full truncate font-medium">
-                      {work.title}
-                    </div>
-                    <div className="w-full truncate">{work.description}</div>
-                  </div>
-                  <div
-                    className="absolute top-0 right-0 size-6 [clip-path:polygon(0_0,100%_0,100%_100%)]"
-                    style={{
-                      backgroundColor: work.accent_color,
-                    }}
-                  />
-                </li>
+                  work={work}
+                  emitCubeClick={emitCubeClick}
+                  setIsOpen={setIsOpen}
+                />
               ))}
             </ul>
           )}
