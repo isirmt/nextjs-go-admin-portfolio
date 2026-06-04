@@ -35,9 +35,15 @@ jobs:
           git fetch --prune
           git pull --ff-only
 
-          docker compose -f compose.vm.yml pull
-          docker compose -f compose.vm.yml up -d db
-          docker compose -f compose.vm.yml run --rm migrate
-          docker compose -f compose.vm.yml up -d
-          docker compose -f compose.vm.yml ps
+          COMPOSE_FILES="-f compose.vm.yml"
+
+          if [ -f compose.vm.local.yml ]; then
+            COMPOSE_FILES="$COMPOSE_FILES -f compose.vm.local.yml"
+          fi
+
+          docker compose $COMPOSE_FILES pull
+          docker compose $COMPOSE_FILES up -d db
+          docker compose $COMPOSE_FILES run --rm migrate
+          docker compose $COMPOSE_FILES up -d
+          docker compose $COMPOSE_FILES ps
           SCRIPT
