@@ -127,7 +127,7 @@ export default function Home() {
                     loading="lazy"
                     className="pointer-events-none absolute right-8 bottom-0 hidden w-100 max-w-full xl:block"
                     alt="miri_transparent"
-                    src="/miri_transparent.png"
+                    src="/miri_transparent.webp"
                   />
                   <span className="font-dot pointer-events-none absolute right-8 bottom-13 hidden bg-[#f43f5e] px-2.5 text-right text-3xl leading-none text-white select-none xl:block">
                     井筒&nbsp;ミリ
