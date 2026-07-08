@@ -46,10 +46,9 @@ jobs:
           docker compose $COMPOSE_FILES up -d db
 
           MIGRATE_LOG=$(mktemp)
-          set +e
-          docker compose $COMPOSE_FILES run --rm migrate 2>&1 | tee "$MIGRATE_LOG"
-          MIGRATE_STATUS=${PIPESTATUS[0]}
-          set -e
+          MIGRATE_STATUS=0
+          docker compose $COMPOSE_FILES run --rm migrate > "$MIGRATE_LOG" 2>&1 || MIGRATE_STATUS=$?
+          cat "$MIGRATE_LOG"
           if [ "$MIGRATE_STATUS" -ne 0 ] && ! grep -qi 'no change' "$MIGRATE_LOG"; then
             rm -f "$MIGRATE_LOG"
             exit "$MIGRATE_STATUS"
