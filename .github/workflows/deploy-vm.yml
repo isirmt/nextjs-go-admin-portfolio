@@ -43,7 +43,16 @@ jobs:
 
           docker compose $COMPOSE_FILES pull
           docker compose $COMPOSE_FILES up -d db
-          docker compose $COMPOSE_FILES run --rm migrate
+
+          set +e
+          MIGRATE_OUTPUT=$(docker compose $COMPOSE_FILES run --rm migrate 2>&1)
+          MIGRATE_STATUS=$?
+          set -e
+          printf '%s\n' "$MIGRATE_OUTPUT"
+          if [ "$MIGRATE_STATUS" -ne 0 ] && ! printf '%s\n' "$MIGRATE_OUTPUT" | grep -qi 'no change'; then
+            exit "$MIGRATE_STATUS"
+          fi
+
           echo "migrate completed"
           docker compose $COMPOSE_FILES up -d
           docker compose $COMPOSE_FILES ps
