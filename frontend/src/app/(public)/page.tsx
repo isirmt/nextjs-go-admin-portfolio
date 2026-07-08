@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import WorkConveyer from "@/components/works/list";
 import { ImagesProvider } from "@/contexts/imagesContext";
 import { TechsProvider } from "@/contexts/techsContext";
@@ -121,7 +122,18 @@ export default function Home() {
                 aria-label="profile"
                 className="relative w-full overflow-x-hidden overflow-y-visible"
               >
-                <ProfileCard age={age} />
+                <div className="relative flex flex-wrap items-end justify-start overflow-visible">
+                  <img
+                    loading="lazy"
+                    className="pointer-events-none absolute right-8 bottom-0 hidden w-100 max-w-full xl:block"
+                    alt="miri_transparent"
+                    src="/miri_transparent.png"
+                  />
+                  <span className="font-dot pointer-events-none absolute right-8 bottom-13 hidden bg-[#f43f5e] px-2.5 text-right text-3xl leading-none text-white select-none xl:block">
+                    井筒&nbsp;ミリ
+                  </span>
+                  <ProfileCard age={age} />
+                </div>
                 <div className="relative -mt-6 grid grid-cols-1 gap-14 bg-[#c6f4ff] px-10 pt-32 pb-20 lg:grid-cols-2 lg:gap-20 lg:px-40">
                   <DetailBox label="分野" array={myAreas} />
                   <DetailBox
