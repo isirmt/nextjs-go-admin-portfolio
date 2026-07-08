@@ -46,4 +46,10 @@ jobs:
           docker compose $COMPOSE_FILES run --rm migrate
           docker compose $COMPOSE_FILES up -d
           docker compose $COMPOSE_FILES ps
+
+          docker system df
+          docker image prune -f
+          docker builder prune -f --filter "until=168h"
+          docker system df
+
           SCRIPT
