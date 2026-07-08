@@ -21,7 +21,7 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H "$VM_HOST" >> ~/.ssh/known_hosts
 
-      - name: Pull, migrate, and restart
+      - name: Pull images
         env:
           VM_HOST: ${{ secrets.VM_HOST }}
           VM_USER: ${{ secrets.VM_USER }}
@@ -43,6 +43,25 @@ jobs:
 
           docker compose $COMPOSE_FILES pull
           docker compose $COMPOSE_FILES images
+          SCRIPT
+
+      - name: Migrate database
+        env:
+          VM_HOST: ${{ secrets.VM_HOST }}
+          VM_USER: ${{ secrets.VM_USER }}
+          VM_APP_DIR: ${{ secrets.VM_APP_DIR }}
+        run: |
+          ssh "$VM_USER@$VM_HOST" "VM_APP_DIR='$VM_APP_DIR' bash -s" <<'SCRIPT'
+          set -euo pipefail
+
+          cd "$VM_APP_DIR"
+
+          COMPOSE_FILES="-f compose.vm.yml"
+
+          if [ -f compose.vm.local.yml ]; then
+            COMPOSE_FILES="$COMPOSE_FILES -f compose.vm.local.yml"
+          fi
+
           docker compose $COMPOSE_FILES up -d db
 
           MIGRATE_LOG=$(mktemp)
@@ -55,11 +74,41 @@ jobs:
           fi
           rm -f "$MIGRATE_LOG"
           echo "migrate completed"
+          SCRIPT
+
+      - name: Start app services
+        env:
+          VM_HOST: ${{ secrets.VM_HOST }}
+          VM_USER: ${{ secrets.VM_USER }}
+          VM_APP_DIR: ${{ secrets.VM_APP_DIR }}
+        run: |
+          ssh "$VM_USER@$VM_HOST" "VM_APP_DIR='$VM_APP_DIR' bash -s" <<'SCRIPT'
+          set -euo pipefail
+
+          cd "$VM_APP_DIR"
+
+          COMPOSE_FILES="-f compose.vm.yml"
+
+          if [ -f compose.vm.local.yml ]; then
+            COMPOSE_FILES="$COMPOSE_FILES -f compose.vm.local.yml"
+          fi
 
           APP_SERVICES=$(docker compose $COMPOSE_FILES config --services | grep -Ev '^(db|migrate)$')
           docker compose $COMPOSE_FILES up -d --force-recreate --no-deps $APP_SERVICES
           docker compose $COMPOSE_FILES ps
           docker compose $COMPOSE_FILES images
+          SCRIPT
+
+      - name: Prune Docker
+        env:
+          VM_HOST: ${{ secrets.VM_HOST }}
+          VM_USER: ${{ secrets.VM_USER }}
+          VM_APP_DIR: ${{ secrets.VM_APP_DIR }}
+        run: |
+          ssh "$VM_USER@$VM_HOST" "VM_APP_DIR='$VM_APP_DIR' bash -s" <<'SCRIPT'
+          set -euo pipefail
+
+          cd "$VM_APP_DIR"
 
           docker system df
           docker image prune -f
