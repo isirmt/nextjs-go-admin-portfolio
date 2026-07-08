@@ -44,7 +44,18 @@ jobs:
           docker compose $COMPOSE_FILES pull
           docker compose $COMPOSE_FILES images
           docker compose $COMPOSE_FILES up -d db
-          docker compose $COMPOSE_FILES run --rm migrate
+
+          MIGRATE_LOG=$(mktemp)
+          set +e
+          docker compose $COMPOSE_FILES run --rm migrate 2>&1 | tee "$MIGRATE_LOG"
+          MIGRATE_STATUS=${PIPESTATUS[0]}
+          set -e
+          if [ "$MIGRATE_STATUS" -ne 0 ] && ! grep -qi 'no change' "$MIGRATE_LOG"; then
+            rm -f "$MIGRATE_LOG"
+            exit "$MIGRATE_STATUS"
+          fi
+          rm -f "$MIGRATE_LOG"
+          echo "migrate completed"
 
           APP_SERVICES=$(docker compose $COMPOSE_FILES config --services | grep -Ev '^(db|migrate)$')
           docker compose $COMPOSE_FILES up -d --force-recreate --no-deps $APP_SERVICES
