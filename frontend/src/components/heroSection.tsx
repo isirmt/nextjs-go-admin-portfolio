@@ -3,7 +3,6 @@
 
 import { useSelectingCubeContext } from "@/contexts/selectingCubeContext";
 import RealtimeWorld from "./realtimeWorld";
-import VerticalViewer from "./works/verticalViewer";
 import React, { useMemo } from "react";
 import { useWorksContext } from "@/contexts/worksContext";
 import Link from "next/link";
