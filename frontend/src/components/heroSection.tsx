@@ -25,7 +25,7 @@ export default function HeroSection() {
       <div
         className={`absolute top-0 left-0 size-full transition-all duration-300 ${selectingWork ? "opacity-0" : "opacity-100"}`}
       >
-        <VerticalViewer />
+        {/* <VerticalViewer /> */}
       </div>
       <div
         className={`absolute top-0 left-0 size-full overflow-hidden bg-white transition-all duration-300 ${selectingWork ? "opacity-100 delay-300" : "opacity-0"}`}
