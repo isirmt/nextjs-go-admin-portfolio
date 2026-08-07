@@ -1,6 +1,11 @@
 name: Deploy VM
 
 on:
+  workflow_run:
+    workflows: ["Build and Push Images"]
+    types: [completed]
+    branches: [master]
+
   workflow_dispatch:
 
 concurrency:
