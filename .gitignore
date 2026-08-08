@@ -57,3 +57,5 @@ uploads
 /*.sql
 
 .venv
+
+.env.sentry-build-plugin

@@ -10,7 +10,8 @@ RUN corepack enable
 COPY --from=deps /app/node_modules ./node_modules
 COPY . ./
 ENV NODE_ENV=production
-RUN pnpm build
+RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN,env=SENTRY_AUTH_TOKEN \
+    pnpm build
 
 FROM node:20-bookworm-slim AS runner
 WORKDIR /app
