@@ -11,19 +11,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type workImageResponse struct {
-	ID           string `json:"id"`
-	ImageID      string `json:"image_id"`
-	DisplayOrder int    `json:"display_order"`
-}
-
-type workURLResponse struct {
-	ID           string `json:"id"`
-	URL          string `json:"url"`
-	Label        string `json:"label"`
-	DisplayOrder int    `json:"display_order"`
-}
-
 type workResponse struct {
 	ID               string                   `json:"id"`
 	Title            string                   `json:"title"`
@@ -32,8 +19,8 @@ type workResponse struct {
 	AccentColor      string                   `json:"accent_color"`
 	Description      *string                  `json:"description"`
 	ThumbnailImageID *string                  `json:"thumbnail_image_id"`
-	Images           []workImageResponse      `json:"images"`
-	Urls             []workURLResponse        `json:"urls"`
+	Images           []*model.IsirmtWorkImage `json:"images"`
+	Urls             []*model.IsirmtWorkURL   `json:"urls"`
 	TechStacks       []*model.CommonTechStack `json:"tech_stacks"`
 }
 
@@ -58,23 +45,14 @@ func (pSrv *server) respondWorks(c echo.Context, works []*model.IsirmtWork) erro
 		}
 
 		workID := *work.ID
-		images := make([]workImageResponse, 0, len(work.WorkImages))
-		for _, image := range work.WorkImages {
-			images = append(images, workImageResponse{
-				ID:           *image.ID,
-				ImageID:      image.ImageID,
-				DisplayOrder: int(image.DisplayOrder),
-			})
+		images := work.WorkImages
+		if images == nil {
+			images = []*model.IsirmtWorkImage{}
 		}
 
-		urls := make([]workURLResponse, 0, len(work.URLs))
-		for _, url := range work.URLs {
-			urls = append(urls, workURLResponse{
-				ID:           *url.ID,
-				URL:          url.URL,
-				Label:        url.Label,
-				DisplayOrder: int(url.DisplayOrder),
-			})
+		urls := work.URLs
+		if urls == nil {
+			urls = []*model.IsirmtWorkURL{}
 		}
 
 		techStacks := work.TechStacks
