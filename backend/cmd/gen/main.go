@@ -42,12 +42,15 @@ func main() {
 	workImage := g.GenerateModel(
 		"isirmt_work_images",
 
+		gen.FieldJSONTag("work_id", "-"),
+
 		gen.FieldRelate(
 			field.BelongsTo,
 			"Image",
 			commonImage,
 			&field.RelateConfig{
 				RelatePointer: true,
+				JSONTag:       "-",
 				GORMTag: field.GormTag{
 					"foreignKey": []string{"ImageID"},
 					"references": []string{"ID"},

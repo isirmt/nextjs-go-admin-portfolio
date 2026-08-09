@@ -9,10 +9,10 @@ const TableNameIsirmtWorkImage = "isirmt_work_images"
 // IsirmtWorkImage mapped from table <isirmt_work_images>
 type IsirmtWorkImage struct {
 	ID           *string      `gorm:"column:id;type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
-	WorkID       string       `gorm:"column:work_id;type:uuid;not null" json:"work_id"`
+	WorkID       string       `gorm:"column:work_id;type:uuid;not null" json:"-"`
 	ImageID      string       `gorm:"column:image_id;type:uuid;not null" json:"image_id"`
 	DisplayOrder int32        `gorm:"column:display_order;type:integer;not null" json:"display_order"`
-	Image        *CommonImage `gorm:"foreignKey:ImageID;references:ID" json:"image"`
+	Image        *CommonImage `gorm:"foreignKey:ImageID;references:ID" json:"-"`
 }
 
 // TableName IsirmtWorkImage's table name
