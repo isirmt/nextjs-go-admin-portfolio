@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"realtime/internal/query"
@@ -30,7 +31,71 @@ type createWorkRequest struct {
 	Urls             []createWorkURL `json:"urls"`
 }
 
+type workRelations struct {
+	imageIDs     []string
+	techStackIDs []string
+	urls         []createWorkURL
+}
+
 var hexColorPattern = regexp.MustCompile(`^#[0-9a-fA-F]{6}$`)
+
+func createWorkRelations(ctx context.Context, tx *query.Query, workID string, relations workRelations) error {
+	if len(relations.imageIDs) > 0 {
+		images := make([]*model.IsirmtWorkImage, 0, len(relations.imageIDs))
+		for index, imageID := range relations.imageIDs {
+			images = append(images, &model.IsirmtWorkImage{
+				WorkID:       workID,
+				ImageID:      imageID,
+				DisplayOrder: int32(index),
+			})
+		}
+		if err := tx.IsirmtWorkImage.WithContext(ctx).Create(images...); err != nil {
+			return err
+		}
+	}
+
+	if len(relations.urls) > 0 {
+		urls := make([]*model.IsirmtWorkURL, 0, len(relations.urls))
+		for index, entry := range relations.urls {
+			urls = append(urls, &model.IsirmtWorkURL{
+				WorkID:       workID,
+				Label:        entry.Label,
+				URL:          entry.URL,
+				DisplayOrder: int32(index),
+			})
+		}
+		if err := tx.IsirmtWorkURL.WithContext(ctx).Create(urls...); err != nil {
+			return err
+		}
+	}
+
+	techStacks := make([]*model.IsirmtWorkTechStack, 0, len(relations.techStackIDs))
+	for _, techStackID := range relations.techStackIDs {
+		techStacks = append(techStacks, &model.IsirmtWorkTechStack{
+			WorkID:      workID,
+			TechStackID: techStackID,
+		})
+	}
+	if len(techStacks) > 0 {
+		return tx.IsirmtWorkTechStack.WithContext(ctx).Create(techStacks...)
+	}
+
+	return nil
+}
+
+func replaceWorkRelations(ctx context.Context, tx *query.Query, workID string, relations workRelations) error {
+	if _, err := tx.IsirmtWorkImage.WithContext(ctx).Where(tx.IsirmtWorkImage.WorkID.Eq(workID)).Delete(); err != nil {
+		return err
+	}
+	if _, err := tx.IsirmtWorkURL.WithContext(ctx).Where(tx.IsirmtWorkURL.WorkID.Eq(workID)).Delete(); err != nil {
+		return err
+	}
+	if _, err := tx.IsirmtWorkTechStack.WithContext(ctx).Where(tx.IsirmtWorkTechStack.WorkID.Eq(workID)).Delete(); err != nil {
+		return err
+	}
+
+	return createWorkRelations(ctx, tx, workID, relations)
+}
 
 func (pSrv *server) handleCreateWorkClick(c echo.Context) error {
 	workID := strings.TrimSpace(c.Param("id"))
@@ -183,6 +248,11 @@ func (pSrv *server) handleCreateWork(c echo.Context) error {
 		CreatedAt:        &publishedTime,
 		SearchDirty:      &searchDirty,
 	}
+	relations := workRelations{
+		imageIDs:     workImageIDs,
+		techStackIDs: techStackIDs,
+		urls:         filteredUrls,
+	}
 
 	if err := pSrv.q.Transaction(func(tx *query.Query) error {
 		if err := tx.IsirmtWork.WithContext(ctx).Create(work); err != nil {
@@ -193,49 +263,7 @@ func (pSrv *server) handleCreateWork(c echo.Context) error {
 		}
 		workID := *work.ID
 
-		if len(workImageIDs) > 0 {
-			images := make([]*model.IsirmtWorkImage, 0, len(workImageIDs))
-			for idx, imageID := range workImageIDs {
-				images = append(images, &model.IsirmtWorkImage{
-					WorkID:       workID,
-					ImageID:      imageID,
-					DisplayOrder: int32(idx),
-				})
-			}
-			if err := tx.IsirmtWorkImage.WithContext(ctx).Create(images...); err != nil {
-				return err
-			}
-		}
-
-		if len(filteredUrls) > 0 {
-			urlModels := make([]*model.IsirmtWorkURL, 0, len(filteredUrls))
-			for idx, entry := range filteredUrls {
-				urlModels = append(urlModels, &model.IsirmtWorkURL{
-					WorkID:       workID,
-					Label:        entry.Label,
-					URL:          entry.URL,
-					DisplayOrder: int32(idx),
-				})
-			}
-			if err := tx.IsirmtWorkURL.WithContext(ctx).Create(urlModels...); err != nil {
-				return err
-			}
-		}
-
-		if len(techStackIDs) > 0 {
-			techModels := make([]*model.IsirmtWorkTechStack, 0, len(techStackIDs))
-			for _, techID := range techStackIDs {
-				techModels = append(techModels, &model.IsirmtWorkTechStack{
-					WorkID:      workID,
-					TechStackID: techID,
-				})
-			}
-			if err := tx.IsirmtWorkTechStack.WithContext(ctx).Create(techModels...); err != nil {
-				return err
-			}
-		}
-
-		return nil
+		return createWorkRelations(ctx, tx, workID, relations)
 	}); err != nil {
 		return c.String(500, "failed to create work")
 	}
@@ -366,6 +394,11 @@ func (pSrv *server) handleUpdateWork(c echo.Context) error {
 			URL:   url,
 		})
 	}
+	relations := workRelations{
+		imageIDs:     workImageIDs,
+		techStackIDs: techStackIDs,
+		urls:         filteredUrls,
+	}
 
 	if err := pSrv.q.Transaction(func(tx *query.Query) error {
 		if _, err := tx.IsirmtWork.WithContext(ctx).Where(tx.IsirmtWork.ID.Eq(workID)).Updates(map[string]interface{}{
@@ -381,59 +414,7 @@ func (pSrv *server) handleUpdateWork(c echo.Context) error {
 			return err
 		}
 
-		if _, err := tx.IsirmtWorkImage.WithContext(ctx).Where(tx.IsirmtWorkImage.WorkID.Eq(workID)).Delete(); err != nil {
-			return err
-		}
-		if _, err := tx.IsirmtWorkURL.WithContext(ctx).Where(tx.IsirmtWorkURL.WorkID.Eq(workID)).Delete(); err != nil {
-			return err
-		}
-		if _, err := tx.IsirmtWorkTechStack.WithContext(ctx).Where(tx.IsirmtWorkTechStack.WorkID.Eq(workID)).Delete(); err != nil {
-			return err
-		}
-
-		if len(workImageIDs) > 0 {
-			images := make([]*model.IsirmtWorkImage, 0, len(workImageIDs))
-			for idx, imageID := range workImageIDs {
-				images = append(images, &model.IsirmtWorkImage{
-					WorkID:       workID,
-					ImageID:      imageID,
-					DisplayOrder: int32(idx),
-				})
-			}
-			if err := tx.IsirmtWorkImage.WithContext(ctx).Create(images...); err != nil {
-				return err
-			}
-		}
-
-		if len(filteredUrls) > 0 {
-			urlModels := make([]*model.IsirmtWorkURL, 0, len(filteredUrls))
-			for idx, entry := range filteredUrls {
-				urlModels = append(urlModels, &model.IsirmtWorkURL{
-					WorkID:       workID,
-					Label:        entry.Label,
-					URL:          entry.URL,
-					DisplayOrder: int32(idx),
-				})
-			}
-			if err := tx.IsirmtWorkURL.WithContext(ctx).Create(urlModels...); err != nil {
-				return err
-			}
-		}
-
-		if len(techStackIDs) > 0 {
-			techModels := make([]*model.IsirmtWorkTechStack, 0, len(techStackIDs))
-			for _, techID := range techStackIDs {
-				techModels = append(techModels, &model.IsirmtWorkTechStack{
-					WorkID:      workID,
-					TechStackID: techID,
-				})
-			}
-			if err := tx.IsirmtWorkTechStack.WithContext(ctx).Create(techModels...); err != nil {
-				return err
-			}
-		}
-
-		return nil
+		return replaceWorkRelations(ctx, tx, workID, relations)
 	}); err != nil {
 		return c.String(500, "failed to update work")
 	}
