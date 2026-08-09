@@ -1024,13 +1024,6 @@ func (pSrv *server) handleDeleteWork(c echo.Context) error {
 	return c.String(http.StatusOK, "ok")
 }
 
-func getEnv(key string, fallback string) string {
-	if v := os.Getenv(key); v != "" {
-		return v
-	}
-	return fallback
-}
-
 func corsConfig(allowedOrigin string) middleware.CORSConfig {
 	cfg := middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
