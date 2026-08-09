@@ -9,7 +9,7 @@ const TableNameIsirmtWorkURL = "isirmt_work_urls"
 // IsirmtWorkURL mapped from table <isirmt_work_urls>
 type IsirmtWorkURL struct {
 	ID           *string `gorm:"column:id;type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
-	WorkID       string  `gorm:"column:work_id;type:uuid;not null" json:"work_id"`
+	WorkID       string  `gorm:"column:work_id;type:uuid;not null" json:"-"`
 	URL          string  `gorm:"column:url;type:text;not null" json:"url"`
 	Label        string  `gorm:"column:label;type:text;not null" json:"label"`
 	DisplayOrder int32   `gorm:"column:display_order;type:integer;not null" json:"display_order"`

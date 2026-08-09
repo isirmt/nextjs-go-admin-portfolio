@@ -35,9 +35,14 @@ func main() {
 
 	commonImage := g.GenerateModel("common_images")
 	commonTechStack := g.GenerateModel("common_tech_stacks")
-	workURL := g.GenerateModel("isirmt_work_urls")
 	workTechStack := g.GenerateModel("isirmt_work_tech_stacks")
 	workClick := g.GenerateModel("isirmt_work_clicks")
+
+	workURL := g.GenerateModel(
+		"isirmt_work_urls",
+
+		gen.FieldJSONTag("work_id", "-"),
+	)
 
 	workImage := g.GenerateModel(
 		"isirmt_work_images",
