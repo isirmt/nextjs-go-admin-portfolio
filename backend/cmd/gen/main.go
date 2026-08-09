@@ -65,6 +65,7 @@ func main() {
 			workImage,
 			&field.RelateConfig{
 				RelateSlicePointer: true,
+				JSONTag:            "images",
 				GORMTag: field.GormTag{
 					"foreignKey": []string{"WorkID"},
 					"references": []string{"ID"},

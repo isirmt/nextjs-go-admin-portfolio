@@ -22,7 +22,7 @@ type IsirmtWork struct {
 	SearchDirty      *bool              `gorm:"column:search_dirty;type:boolean;not null;default:true" json:"search_dirty"`
 	SearchIndexedAt  *time.Time         `gorm:"column:search_indexed_at;type:timestamp with time zone" json:"search_indexed_at"`
 	SearchIndexError *string            `gorm:"column:search_index_error;type:text" json:"search_index_error"`
-	WorkImages       []*IsirmtWorkImage `gorm:"foreignKey:WorkID;references:ID" json:"work_images"`
+	WorkImages       []*IsirmtWorkImage `gorm:"foreignKey:WorkID;references:ID" json:"images"`
 	URLs             []*IsirmtWorkURL   `gorm:"foreignKey:WorkID;references:ID" json:"urls"`
 	TechStacks       []*CommonTechStack `gorm:"joinForeignKey:WorkID;joinReferences:TechStackID;many2many:isirmt_work_tech_stacks" json:"tech_stacks"`
 	ThumbnailImage   *CommonImage       `gorm:"foreignKey:ThumbnailImageID;references:ID" json:"thumbnail_image"`
