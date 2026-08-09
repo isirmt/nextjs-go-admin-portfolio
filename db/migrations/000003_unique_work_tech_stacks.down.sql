@@ -1,0 +1,1 @@
+DROP INDEX IF EXISTS uq_isirmt_work_tech_stacks_work_tech_stack;
