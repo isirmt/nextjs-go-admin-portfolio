@@ -75,17 +75,21 @@ func main() {
 	router.Use(middleware.CORSWithConfig(corsConfig(pSrv.allowedOrigin)))
 
 	router.GET("/healthz", pSrv.handleHealth)
+
 	router.GET("/ws", pSrv.handleWS)
+
 	epImages := router.Group("/images")
 	epImages.GET("", pSrv.handleGetImages)
 	epImages.POST("", pSrv.requireAdmin(pSrv.handleUploadImage))
 	epImages.GET("/:id", pSrv.handleGetImage)
 	epImages.GET("/:id/raw", pSrv.handleServeImage)
 	epImages.DELETE("/:id", pSrv.requireAdmin(pSrv.handleDeleteImage))
+
 	epTechStacks := router.Group("/tech-stacks")
 	epTechStacks.GET("", pSrv.handleGetTechStacks)
 	epTechStacks.GET("/:id", pSrv.handleGetTechStack)
 	epTechStacks.POST("", pSrv.requireAdmin(pSrv.handleCreateTechStack))
+
 	epWorks := router.Group("/works")
 	epWorks.GET("", pSrv.handleGetWorks)
 	epWorks.GET("/ranking", pSrv.handleGetRankingWorks)
