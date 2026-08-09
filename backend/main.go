@@ -232,16 +232,6 @@ func (pSrv *server) handleHealth(c echo.Context) error {
 	return c.String(200, "ok")
 }
 
-func (pSrv *server) requireAdmin(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		secret := c.Request().Header.Get("X-Admin-Secret")
-		if secret == "" || secret != pSrv.adminSecret {
-			return c.String(http.StatusForbidden, "admin authentication failed")
-		}
-		return next(c)
-	}
-}
-
 func (pSrv *server) handleGetImages(c echo.Context) error {
 	images, err := pSrv.q.CommonImage.WithContext(c.Request().Context()).Find()
 	if err != nil {
@@ -1022,18 +1012,4 @@ func (pSrv *server) handleDeleteWork(c echo.Context) error {
 	}
 
 	return c.String(http.StatusOK, "ok")
-}
-
-func corsConfig(allowedOrigin string) middleware.CORSConfig {
-	cfg := middleware.CORSConfig{
-		AllowOrigins: []string{"*"},
-		AllowMethods: []string{echo.GET, echo.POST, echo.PUT, echo.DELETE, echo.OPTIONS},
-		AllowHeaders: []string{"Content-Type", "Authorization"},
-	}
-
-	if allowedOrigin != "" && allowedOrigin != "*" {
-		cfg.AllowOrigins = []string{allowedOrigin}
-	}
-
-	return cfg
 }
