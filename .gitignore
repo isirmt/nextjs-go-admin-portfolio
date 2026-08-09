@@ -59,3 +59,6 @@ uploads
 .venv
 
 .env.sentry-build-plugin
+
+*storybook.log
+storybook-static
