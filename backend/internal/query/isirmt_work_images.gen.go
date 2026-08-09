@@ -32,6 +32,11 @@ func newIsirmtWorkImage(db *gorm.DB, opts ...gen.DOOption) isirmtWorkImage {
 	_isirmtWorkImage.WorkID = field.NewString(tableName, "work_id")
 	_isirmtWorkImage.ImageID = field.NewString(tableName, "image_id")
 	_isirmtWorkImage.DisplayOrder = field.NewInt32(tableName, "display_order")
+	_isirmtWorkImage.Image = isirmtWorkImageBelongsToImage{
+		db: db.Session(&gorm.Session{}),
+
+		RelationField: field.NewRelation("Image", "model.CommonImage"),
+	}
 
 	_isirmtWorkImage.fillFieldMap()
 
@@ -46,6 +51,7 @@ type isirmtWorkImage struct {
 	WorkID       field.String
 	ImageID      field.String
 	DisplayOrder field.Int32
+	Image        isirmtWorkImageBelongsToImage
 
 	fieldMap map[string]field.Expr
 }
@@ -94,21 +100,106 @@ func (i *isirmtWorkImage) GetFieldByName(fieldName string) (field.OrderExpr, boo
 }
 
 func (i *isirmtWorkImage) fillFieldMap() {
-	i.fieldMap = make(map[string]field.Expr, 4)
+	i.fieldMap = make(map[string]field.Expr, 5)
 	i.fieldMap["id"] = i.ID
 	i.fieldMap["work_id"] = i.WorkID
 	i.fieldMap["image_id"] = i.ImageID
 	i.fieldMap["display_order"] = i.DisplayOrder
+
 }
 
 func (i isirmtWorkImage) clone(db *gorm.DB) isirmtWorkImage {
 	i.isirmtWorkImageDo.ReplaceConnPool(db.Statement.ConnPool)
+	i.Image.db = db.Session(&gorm.Session{Initialized: true})
+	i.Image.db.Statement.ConnPool = db.Statement.ConnPool
 	return i
 }
 
 func (i isirmtWorkImage) replaceDB(db *gorm.DB) isirmtWorkImage {
 	i.isirmtWorkImageDo.ReplaceDB(db)
+	i.Image.db = db.Session(&gorm.Session{})
 	return i
+}
+
+type isirmtWorkImageBelongsToImage struct {
+	db *gorm.DB
+
+	field.RelationField
+}
+
+func (a isirmtWorkImageBelongsToImage) Where(conds ...field.Expr) *isirmtWorkImageBelongsToImage {
+	if len(conds) == 0 {
+		return &a
+	}
+
+	exprs := make([]clause.Expression, 0, len(conds))
+	for _, cond := range conds {
+		exprs = append(exprs, cond.BeCond().(clause.Expression))
+	}
+	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
+	return &a
+}
+
+func (a isirmtWorkImageBelongsToImage) WithContext(ctx context.Context) *isirmtWorkImageBelongsToImage {
+	a.db = a.db.WithContext(ctx)
+	return &a
+}
+
+func (a isirmtWorkImageBelongsToImage) Session(session *gorm.Session) *isirmtWorkImageBelongsToImage {
+	a.db = a.db.Session(session)
+	return &a
+}
+
+func (a isirmtWorkImageBelongsToImage) Model(m *model.IsirmtWorkImage) *isirmtWorkImageBelongsToImageTx {
+	return &isirmtWorkImageBelongsToImageTx{a.db.Model(m).Association(a.Name())}
+}
+
+func (a isirmtWorkImageBelongsToImage) Unscoped() *isirmtWorkImageBelongsToImage {
+	a.db = a.db.Unscoped()
+	return &a
+}
+
+type isirmtWorkImageBelongsToImageTx struct{ tx *gorm.Association }
+
+func (a isirmtWorkImageBelongsToImageTx) Find() (result *model.CommonImage, err error) {
+	return result, a.tx.Find(&result)
+}
+
+func (a isirmtWorkImageBelongsToImageTx) Append(values ...*model.CommonImage) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Append(targetValues...)
+}
+
+func (a isirmtWorkImageBelongsToImageTx) Replace(values ...*model.CommonImage) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Replace(targetValues...)
+}
+
+func (a isirmtWorkImageBelongsToImageTx) Delete(values ...*model.CommonImage) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Delete(targetValues...)
+}
+
+func (a isirmtWorkImageBelongsToImageTx) Clear() error {
+	return a.tx.Clear()
+}
+
+func (a isirmtWorkImageBelongsToImageTx) Count() int64 {
+	return a.tx.Count()
+}
+
+func (a isirmtWorkImageBelongsToImageTx) Unscoped() *isirmtWorkImageBelongsToImageTx {
+	a.tx = a.tx.Unscoped()
+	return &a
 }
 
 type isirmtWorkImageDo struct{ gen.DO }

@@ -118,7 +118,7 @@ func (pSrv *server) handleSearchWorks(c echo.Context) error {
 		workIDs = append(workIDs, hit.WorkID)
 	}
 
-	works, err := pSrv.q.IsirmtWork.WithContext(ctx).
+	works, err := pSrv.withWorkRelations(pSrv.q.IsirmtWork.WithContext(ctx)).
 		Where(pSrv.q.IsirmtWork.ID.In(workIDs...)).
 		Find()
 	if err != nil {

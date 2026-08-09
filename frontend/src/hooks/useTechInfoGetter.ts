@@ -16,7 +16,7 @@ export function useTechInfoGetter(techStacks: WorkTechStack[]) {
   const techsInfo = useMemo(
     () =>
       techStacks.flatMap((stack) => {
-        const tech = techsById.get(stack.tech_stack_id);
+        const tech = techsById.get(stack.id);
         return tech ? [tech] : [];
       }),
     [techStacks, techsById],

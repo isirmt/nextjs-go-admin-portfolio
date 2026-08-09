@@ -9,8 +9,8 @@ const TableNameIsirmtWorkTechStack = "isirmt_work_tech_stacks"
 // IsirmtWorkTechStack mapped from table <isirmt_work_tech_stacks>
 type IsirmtWorkTechStack struct {
 	ID          *string `gorm:"column:id;type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
-	WorkID      string  `gorm:"column:work_id;type:uuid;not null" json:"work_id"`
-	TechStackID string  `gorm:"column:tech_stack_id;type:uuid;not null" json:"tech_stack_id"`
+	WorkID      string  `gorm:"column:work_id;type:uuid;not null;uniqueIndex:uq_isirmt_work_tech_stacks_work_tech_stack,priority:1" json:"work_id"`
+	TechStackID string  `gorm:"column:tech_stack_id;type:uuid;not null;uniqueIndex:uq_isirmt_work_tech_stacks_work_tech_stack,priority:2" json:"tech_stack_id"`
 }
 
 // TableName IsirmtWorkTechStack's table name
