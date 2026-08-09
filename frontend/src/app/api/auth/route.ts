@@ -4,6 +4,13 @@ import { auth } from "@/lib/auth/options";
 const ADMIN_HEADER = "X-Admin-Secret";
 const ADMIN_SECRET = process.env.ADMIN_SECRET;
 const BACKEND_BASE_URL = process.env.BACKEND_BASE_URL;
+const ADMIN_API_PATH_PREFIXES = ["/images", "/works", "/tech-stacks"];
+
+function isAllowedAdminApiPath(apiUrl: string) {
+  return ADMIN_API_PATH_PREFIXES.some(
+    (prefix) => apiUrl === prefix || apiUrl.startsWith(`${prefix}/`),
+  );
+}
 
 async function proxy(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -13,8 +20,12 @@ async function proxy(request: Request) {
   if (!session) return new Response("Unauthorized", { status: 401 });
   if (!apiUrl)
     return new Response("parameter(api_url) is required", { status: 400 });
-  if (apiUrl.startsWith("http://") || apiUrl.startsWith("https://"))
-    return new Response("parameter(api_url) must be a relative path", {
+  const pathSegments = apiUrl.split("/");
+  if (
+    !isAllowedAdminApiPath(apiUrl) ||
+    pathSegments.some((segment) => segment === "." || segment === "..")
+  )
+    return new Response("parameter(api_url) is not allowed", {
       status: 400,
     });
   if (!isAllowedEmail(session.user?.email) || session.user?.role !== "admin")
@@ -27,7 +38,10 @@ async function proxy(request: Request) {
     return new Response("server configuration error", { status: 500 });
   }
 
-  const upstreamUrl = new URL(apiUrl, BACKEND_BASE_URL);
+  const safeApiUrl = pathSegments
+    .map((segment) => encodeURIComponent(segment))
+    .join("/");
+  const upstreamUrl = new URL(safeApiUrl, BACKEND_BASE_URL);
 
   const bodyAllowed = request.method !== "GET" && request.method !== "HEAD";
   const upstreamRequest = request.clone();
