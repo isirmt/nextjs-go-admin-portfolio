@@ -109,10 +109,6 @@ func main() {
 	}
 }
 
-func (pSrv *server) handleHealth(c echo.Context) error {
-	return c.String(200, "ok")
-}
-
 func (pSrv *server) handleGetTechStacks(c echo.Context) error {
 	ctx := c.Request().Context()
 	stacks, err := pSrv.q.CommonTechStack.WithContext(ctx).Order(pSrv.q.CommonTechStack.Name).Find()
