@@ -12,16 +12,20 @@ const TableNameIsirmtWork = "isirmt_works"
 
 // IsirmtWork mapped from table <isirmt_works>
 type IsirmtWork struct {
-	ID               *string    `gorm:"column:id;type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
-	Title            string     `gorm:"column:title;type:text;not null" json:"title"`
-	Comment          string     `gorm:"column:comment;type:text;not null" json:"comment"`
-	CreatedAt        *time.Time `gorm:"column:created_at;type:timestamp with time zone;not null;default:now()" json:"created_at"`
-	AccentColor      *string    `gorm:"column:accent_color;type:character(7);not null;default:#000000" json:"accent_color"`
-	Description      *string    `gorm:"column:description;type:text" json:"description"`
-	ThumbnailImageID *string    `gorm:"column:thumbnail_image_id;type:uuid" json:"thumbnail_image_id"`
-	SearchDirty      *bool      `gorm:"column:search_dirty;type:boolean;not null;default:true" json:"search_dirty"`
-	SearchIndexedAt  *time.Time `gorm:"column:search_indexed_at;type:timestamp with time zone" json:"search_indexed_at"`
-	SearchIndexError *string    `gorm:"column:search_index_error;type:text" json:"search_index_error"`
+	ID               *string            `gorm:"column:id;type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
+	Title            string             `gorm:"column:title;type:text;not null" json:"title"`
+	Comment          string             `gorm:"column:comment;type:text;not null" json:"comment"`
+	CreatedAt        *time.Time         `gorm:"column:created_at;type:timestamp with time zone;not null;default:now()" json:"created_at"`
+	AccentColor      *string            `gorm:"column:accent_color;type:character(7);not null;default:#000000" json:"accent_color"`
+	Description      *string            `gorm:"column:description;type:text" json:"description"`
+	ThumbnailImageID *string            `gorm:"column:thumbnail_image_id;type:uuid" json:"thumbnail_image_id"`
+	SearchDirty      *bool              `gorm:"column:search_dirty;type:boolean;not null;default:true" json:"search_dirty"`
+	SearchIndexedAt  *time.Time         `gorm:"column:search_indexed_at;type:timestamp with time zone" json:"search_indexed_at"`
+	SearchIndexError *string            `gorm:"column:search_index_error;type:text" json:"search_index_error"`
+	WorkImages       []*IsirmtWorkImage `gorm:"foreignKey:WorkID;references:ID" json:"work_images"`
+	URLs             []*IsirmtWorkURL   `gorm:"foreignKey:WorkID;references:ID" json:"urls"`
+	TechStacks       []*CommonTechStack `gorm:"joinForeignKey:WorkID;joinReferences:TechStackID;many2many:isirmt_work_tech_stacks" json:"tech_stacks"`
+	ThumbnailImage   *CommonImage       `gorm:"foreignKey:ThumbnailImageID;references:ID" json:"thumbnail_image"`
 }
 
 // TableName IsirmtWork's table name

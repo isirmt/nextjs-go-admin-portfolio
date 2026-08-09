@@ -38,6 +38,34 @@ func newIsirmtWork(db *gorm.DB, opts ...gen.DOOption) isirmtWork {
 	_isirmtWork.SearchDirty = field.NewBool(tableName, "search_dirty")
 	_isirmtWork.SearchIndexedAt = field.NewTime(tableName, "search_indexed_at")
 	_isirmtWork.SearchIndexError = field.NewString(tableName, "search_index_error")
+	_isirmtWork.WorkImages = isirmtWorkHasManyWorkImages{
+		db: db.Session(&gorm.Session{}),
+
+		RelationField: field.NewRelation("WorkImages", "model.IsirmtWorkImage"),
+		Image: struct {
+			field.RelationField
+		}{
+			RelationField: field.NewRelation("WorkImages.Image", "model.CommonImage"),
+		},
+	}
+
+	_isirmtWork.URLs = isirmtWorkHasManyURLs{
+		db: db.Session(&gorm.Session{}),
+
+		RelationField: field.NewRelation("URLs", "model.IsirmtWorkURL"),
+	}
+
+	_isirmtWork.TechStacks = isirmtWorkManyToManyTechStacks{
+		db: db.Session(&gorm.Session{}),
+
+		RelationField: field.NewRelation("TechStacks", "model.CommonTechStack"),
+	}
+
+	_isirmtWork.ThumbnailImage = isirmtWorkBelongsToThumbnailImage{
+		db: db.Session(&gorm.Session{}),
+
+		RelationField: field.NewRelation("ThumbnailImage", "model.CommonImage"),
+	}
 
 	_isirmtWork.fillFieldMap()
 
@@ -58,6 +86,13 @@ type isirmtWork struct {
 	SearchDirty      field.Bool
 	SearchIndexedAt  field.Time
 	SearchIndexError field.String
+	WorkImages       isirmtWorkHasManyWorkImages
+
+	URLs isirmtWorkHasManyURLs
+
+	TechStacks isirmtWorkManyToManyTechStacks
+
+	ThumbnailImage isirmtWorkBelongsToThumbnailImage
 
 	fieldMap map[string]field.Expr
 }
@@ -110,7 +145,7 @@ func (i *isirmtWork) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (i *isirmtWork) fillFieldMap() {
-	i.fieldMap = make(map[string]field.Expr, 10)
+	i.fieldMap = make(map[string]field.Expr, 14)
 	i.fieldMap["id"] = i.ID
 	i.fieldMap["title"] = i.Title
 	i.fieldMap["comment"] = i.Comment
@@ -121,16 +156,357 @@ func (i *isirmtWork) fillFieldMap() {
 	i.fieldMap["search_dirty"] = i.SearchDirty
 	i.fieldMap["search_indexed_at"] = i.SearchIndexedAt
 	i.fieldMap["search_index_error"] = i.SearchIndexError
+
 }
 
 func (i isirmtWork) clone(db *gorm.DB) isirmtWork {
 	i.isirmtWorkDo.ReplaceConnPool(db.Statement.ConnPool)
+	i.WorkImages.db = db.Session(&gorm.Session{Initialized: true})
+	i.WorkImages.db.Statement.ConnPool = db.Statement.ConnPool
+	i.URLs.db = db.Session(&gorm.Session{Initialized: true})
+	i.URLs.db.Statement.ConnPool = db.Statement.ConnPool
+	i.TechStacks.db = db.Session(&gorm.Session{Initialized: true})
+	i.TechStacks.db.Statement.ConnPool = db.Statement.ConnPool
+	i.ThumbnailImage.db = db.Session(&gorm.Session{Initialized: true})
+	i.ThumbnailImage.db.Statement.ConnPool = db.Statement.ConnPool
 	return i
 }
 
 func (i isirmtWork) replaceDB(db *gorm.DB) isirmtWork {
 	i.isirmtWorkDo.ReplaceDB(db)
+	i.WorkImages.db = db.Session(&gorm.Session{})
+	i.URLs.db = db.Session(&gorm.Session{})
+	i.TechStacks.db = db.Session(&gorm.Session{})
+	i.ThumbnailImage.db = db.Session(&gorm.Session{})
 	return i
+}
+
+type isirmtWorkHasManyWorkImages struct {
+	db *gorm.DB
+
+	field.RelationField
+
+	Image struct {
+		field.RelationField
+	}
+}
+
+func (a isirmtWorkHasManyWorkImages) Where(conds ...field.Expr) *isirmtWorkHasManyWorkImages {
+	if len(conds) == 0 {
+		return &a
+	}
+
+	exprs := make([]clause.Expression, 0, len(conds))
+	for _, cond := range conds {
+		exprs = append(exprs, cond.BeCond().(clause.Expression))
+	}
+	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
+	return &a
+}
+
+func (a isirmtWorkHasManyWorkImages) WithContext(ctx context.Context) *isirmtWorkHasManyWorkImages {
+	a.db = a.db.WithContext(ctx)
+	return &a
+}
+
+func (a isirmtWorkHasManyWorkImages) Session(session *gorm.Session) *isirmtWorkHasManyWorkImages {
+	a.db = a.db.Session(session)
+	return &a
+}
+
+func (a isirmtWorkHasManyWorkImages) Model(m *model.IsirmtWork) *isirmtWorkHasManyWorkImagesTx {
+	return &isirmtWorkHasManyWorkImagesTx{a.db.Model(m).Association(a.Name())}
+}
+
+func (a isirmtWorkHasManyWorkImages) Unscoped() *isirmtWorkHasManyWorkImages {
+	a.db = a.db.Unscoped()
+	return &a
+}
+
+type isirmtWorkHasManyWorkImagesTx struct{ tx *gorm.Association }
+
+func (a isirmtWorkHasManyWorkImagesTx) Find() (result []*model.IsirmtWorkImage, err error) {
+	return result, a.tx.Find(&result)
+}
+
+func (a isirmtWorkHasManyWorkImagesTx) Append(values ...*model.IsirmtWorkImage) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Append(targetValues...)
+}
+
+func (a isirmtWorkHasManyWorkImagesTx) Replace(values ...*model.IsirmtWorkImage) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Replace(targetValues...)
+}
+
+func (a isirmtWorkHasManyWorkImagesTx) Delete(values ...*model.IsirmtWorkImage) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Delete(targetValues...)
+}
+
+func (a isirmtWorkHasManyWorkImagesTx) Clear() error {
+	return a.tx.Clear()
+}
+
+func (a isirmtWorkHasManyWorkImagesTx) Count() int64 {
+	return a.tx.Count()
+}
+
+func (a isirmtWorkHasManyWorkImagesTx) Unscoped() *isirmtWorkHasManyWorkImagesTx {
+	a.tx = a.tx.Unscoped()
+	return &a
+}
+
+type isirmtWorkHasManyURLs struct {
+	db *gorm.DB
+
+	field.RelationField
+}
+
+func (a isirmtWorkHasManyURLs) Where(conds ...field.Expr) *isirmtWorkHasManyURLs {
+	if len(conds) == 0 {
+		return &a
+	}
+
+	exprs := make([]clause.Expression, 0, len(conds))
+	for _, cond := range conds {
+		exprs = append(exprs, cond.BeCond().(clause.Expression))
+	}
+	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
+	return &a
+}
+
+func (a isirmtWorkHasManyURLs) WithContext(ctx context.Context) *isirmtWorkHasManyURLs {
+	a.db = a.db.WithContext(ctx)
+	return &a
+}
+
+func (a isirmtWorkHasManyURLs) Session(session *gorm.Session) *isirmtWorkHasManyURLs {
+	a.db = a.db.Session(session)
+	return &a
+}
+
+func (a isirmtWorkHasManyURLs) Model(m *model.IsirmtWork) *isirmtWorkHasManyURLsTx {
+	return &isirmtWorkHasManyURLsTx{a.db.Model(m).Association(a.Name())}
+}
+
+func (a isirmtWorkHasManyURLs) Unscoped() *isirmtWorkHasManyURLs {
+	a.db = a.db.Unscoped()
+	return &a
+}
+
+type isirmtWorkHasManyURLsTx struct{ tx *gorm.Association }
+
+func (a isirmtWorkHasManyURLsTx) Find() (result []*model.IsirmtWorkURL, err error) {
+	return result, a.tx.Find(&result)
+}
+
+func (a isirmtWorkHasManyURLsTx) Append(values ...*model.IsirmtWorkURL) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Append(targetValues...)
+}
+
+func (a isirmtWorkHasManyURLsTx) Replace(values ...*model.IsirmtWorkURL) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Replace(targetValues...)
+}
+
+func (a isirmtWorkHasManyURLsTx) Delete(values ...*model.IsirmtWorkURL) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Delete(targetValues...)
+}
+
+func (a isirmtWorkHasManyURLsTx) Clear() error {
+	return a.tx.Clear()
+}
+
+func (a isirmtWorkHasManyURLsTx) Count() int64 {
+	return a.tx.Count()
+}
+
+func (a isirmtWorkHasManyURLsTx) Unscoped() *isirmtWorkHasManyURLsTx {
+	a.tx = a.tx.Unscoped()
+	return &a
+}
+
+type isirmtWorkManyToManyTechStacks struct {
+	db *gorm.DB
+
+	field.RelationField
+}
+
+func (a isirmtWorkManyToManyTechStacks) Where(conds ...field.Expr) *isirmtWorkManyToManyTechStacks {
+	if len(conds) == 0 {
+		return &a
+	}
+
+	exprs := make([]clause.Expression, 0, len(conds))
+	for _, cond := range conds {
+		exprs = append(exprs, cond.BeCond().(clause.Expression))
+	}
+	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
+	return &a
+}
+
+func (a isirmtWorkManyToManyTechStacks) WithContext(ctx context.Context) *isirmtWorkManyToManyTechStacks {
+	a.db = a.db.WithContext(ctx)
+	return &a
+}
+
+func (a isirmtWorkManyToManyTechStacks) Session(session *gorm.Session) *isirmtWorkManyToManyTechStacks {
+	a.db = a.db.Session(session)
+	return &a
+}
+
+func (a isirmtWorkManyToManyTechStacks) Model(m *model.IsirmtWork) *isirmtWorkManyToManyTechStacksTx {
+	return &isirmtWorkManyToManyTechStacksTx{a.db.Model(m).Association(a.Name())}
+}
+
+func (a isirmtWorkManyToManyTechStacks) Unscoped() *isirmtWorkManyToManyTechStacks {
+	a.db = a.db.Unscoped()
+	return &a
+}
+
+type isirmtWorkManyToManyTechStacksTx struct{ tx *gorm.Association }
+
+func (a isirmtWorkManyToManyTechStacksTx) Find() (result []*model.CommonTechStack, err error) {
+	return result, a.tx.Find(&result)
+}
+
+func (a isirmtWorkManyToManyTechStacksTx) Append(values ...*model.CommonTechStack) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Append(targetValues...)
+}
+
+func (a isirmtWorkManyToManyTechStacksTx) Replace(values ...*model.CommonTechStack) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Replace(targetValues...)
+}
+
+func (a isirmtWorkManyToManyTechStacksTx) Delete(values ...*model.CommonTechStack) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Delete(targetValues...)
+}
+
+func (a isirmtWorkManyToManyTechStacksTx) Clear() error {
+	return a.tx.Clear()
+}
+
+func (a isirmtWorkManyToManyTechStacksTx) Count() int64 {
+	return a.tx.Count()
+}
+
+func (a isirmtWorkManyToManyTechStacksTx) Unscoped() *isirmtWorkManyToManyTechStacksTx {
+	a.tx = a.tx.Unscoped()
+	return &a
+}
+
+type isirmtWorkBelongsToThumbnailImage struct {
+	db *gorm.DB
+
+	field.RelationField
+}
+
+func (a isirmtWorkBelongsToThumbnailImage) Where(conds ...field.Expr) *isirmtWorkBelongsToThumbnailImage {
+	if len(conds) == 0 {
+		return &a
+	}
+
+	exprs := make([]clause.Expression, 0, len(conds))
+	for _, cond := range conds {
+		exprs = append(exprs, cond.BeCond().(clause.Expression))
+	}
+	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
+	return &a
+}
+
+func (a isirmtWorkBelongsToThumbnailImage) WithContext(ctx context.Context) *isirmtWorkBelongsToThumbnailImage {
+	a.db = a.db.WithContext(ctx)
+	return &a
+}
+
+func (a isirmtWorkBelongsToThumbnailImage) Session(session *gorm.Session) *isirmtWorkBelongsToThumbnailImage {
+	a.db = a.db.Session(session)
+	return &a
+}
+
+func (a isirmtWorkBelongsToThumbnailImage) Model(m *model.IsirmtWork) *isirmtWorkBelongsToThumbnailImageTx {
+	return &isirmtWorkBelongsToThumbnailImageTx{a.db.Model(m).Association(a.Name())}
+}
+
+func (a isirmtWorkBelongsToThumbnailImage) Unscoped() *isirmtWorkBelongsToThumbnailImage {
+	a.db = a.db.Unscoped()
+	return &a
+}
+
+type isirmtWorkBelongsToThumbnailImageTx struct{ tx *gorm.Association }
+
+func (a isirmtWorkBelongsToThumbnailImageTx) Find() (result *model.CommonImage, err error) {
+	return result, a.tx.Find(&result)
+}
+
+func (a isirmtWorkBelongsToThumbnailImageTx) Append(values ...*model.CommonImage) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Append(targetValues...)
+}
+
+func (a isirmtWorkBelongsToThumbnailImageTx) Replace(values ...*model.CommonImage) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Replace(targetValues...)
+}
+
+func (a isirmtWorkBelongsToThumbnailImageTx) Delete(values ...*model.CommonImage) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Delete(targetValues...)
+}
+
+func (a isirmtWorkBelongsToThumbnailImageTx) Clear() error {
+	return a.tx.Clear()
+}
+
+func (a isirmtWorkBelongsToThumbnailImageTx) Count() int64 {
+	return a.tx.Count()
+}
+
+func (a isirmtWorkBelongsToThumbnailImageTx) Unscoped() *isirmtWorkBelongsToThumbnailImageTx {
+	a.tx = a.tx.Unscoped()
+	return &a
 }
 
 type isirmtWorkDo struct{ gen.DO }
