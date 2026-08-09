@@ -17,7 +17,7 @@ const initializeWorkValues = (work: Work) => {
       label: url.label,
       url: url.url,
     }));
-  const techIds = (work.tech_stacks ?? []).map((stack) => stack.tech_stack_id);
+  const techIds = (work.tech_stacks ?? []).map((stack) => stack.id);
 
   return {
     title: work.title,

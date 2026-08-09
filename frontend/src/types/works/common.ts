@@ -1,3 +1,5 @@
+import type { CommonTechStack } from "@/types/techStacks/common";
+
 export type WorkImage = {
   id: string;
   image_id: string;
@@ -11,10 +13,7 @@ export type WorkUrl = {
   display_order: number;
 };
 
-export type WorkTechStack = {
-  id: string;
-  tech_stack_id: string;
-};
+export type WorkTechStack = CommonTechStack;
 
 export type Work = {
   id: string;

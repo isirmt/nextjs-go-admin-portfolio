@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"realtime/internal/query"
 	"realtime/internal/query/model"
 	"strconv"
 	"strings"
@@ -23,82 +24,28 @@ type workURLResponse struct {
 	DisplayOrder int    `json:"display_order"`
 }
 
-type workTechStackResponse struct {
-	ID          string `json:"id"`
-	TechStackID string `json:"tech_stack_id"`
+type workResponse struct {
+	ID               string                   `json:"id"`
+	Title            string                   `json:"title"`
+	Comment          string                   `json:"comment"`
+	CreatedAt        string                   `json:"created_at"`
+	AccentColor      string                   `json:"accent_color"`
+	Description      *string                  `json:"description"`
+	ThumbnailImageID *string                  `json:"thumbnail_image_id"`
+	Images           []workImageResponse      `json:"images"`
+	Urls             []workURLResponse        `json:"urls"`
+	TechStacks       []*model.CommonTechStack `json:"tech_stacks"`
 }
 
-type workResponse struct {
-	ID               string                  `json:"id"`
-	Title            string                  `json:"title"`
-	Comment          string                  `json:"comment"`
-	CreatedAt        string                  `json:"created_at"`
-	AccentColor      string                  `json:"accent_color"`
-	Description      *string                 `json:"description"`
-	ThumbnailImageID *string                 `json:"thumbnail_image_id"`
-	Images           []workImageResponse     `json:"images"`
-	Urls             []workURLResponse       `json:"urls"`
-	TechStacks       []workTechStackResponse `json:"tech_stacks"`
+func (pSrv *server) withWorkRelations(workQuery query.IIsirmtWorkDo) query.IIsirmtWorkDo {
+	return workQuery.Preload(
+		pSrv.q.IsirmtWork.WorkImages.Order(pSrv.q.IsirmtWorkImage.DisplayOrder),
+		pSrv.q.IsirmtWork.URLs.Order(pSrv.q.IsirmtWorkURL.DisplayOrder),
+		pSrv.q.IsirmtWork.TechStacks,
+	)
 }
 
 func (pSrv *server) respondWorks(c echo.Context, works []*model.IsirmtWork) error {
-	ctx := c.Request().Context()
-
-	if len(works) == 0 {
-		return c.JSON(http.StatusOK, []workResponse{})
-	}
-
-	workIDs := make([]string, 0, len(works))
-	for _, work := range works {
-		if work.ID != nil {
-			workIDs = append(workIDs, *work.ID)
-		}
-	}
-
-	if len(workIDs) == 0 {
-		return c.JSON(http.StatusOK, []workResponse{})
-	}
-
-	imagesMap := make(map[string][]workImageResponse, len(workIDs))
-	urlsMap := make(map[string][]workURLResponse, len(workIDs))
-	techMap := make(map[string][]workTechStackResponse, len(workIDs))
-
-	workImages, err := pSrv.q.IsirmtWorkImage.WithContext(ctx).Where(pSrv.q.IsirmtWorkImage.WorkID.In(workIDs...)).Order(pSrv.q.IsirmtWorkImage.WorkID, pSrv.q.IsirmtWorkImage.DisplayOrder).Find()
-	if err != nil {
-		return c.String(500, "failed to fetch work images")
-	}
-	for _, img := range workImages {
-		imagesMap[img.WorkID] = append(imagesMap[img.WorkID], workImageResponse{
-			ID:           *img.ID,
-			ImageID:      img.ImageID,
-			DisplayOrder: int(img.DisplayOrder),
-		})
-	}
-
-	workUrls, err := pSrv.q.IsirmtWorkURL.WithContext(ctx).Where(pSrv.q.IsirmtWorkURL.WorkID.In(workIDs...)).Order(pSrv.q.IsirmtWorkURL.WorkID, pSrv.q.IsirmtWorkURL.DisplayOrder).Find()
-	if err != nil {
-		return c.String(500, "failed to fetch work urls")
-	}
-	for _, url := range workUrls {
-		urlsMap[url.WorkID] = append(urlsMap[url.WorkID], workURLResponse{
-			ID:           *url.ID,
-			URL:          url.URL,
-			Label:        url.Label,
-			DisplayOrder: int(url.DisplayOrder),
-		})
-	}
-
-	workTechs, err := pSrv.q.IsirmtWorkTechStack.WithContext(ctx).Where(pSrv.q.IsirmtWorkTechStack.WorkID.In(workIDs...)).Order(pSrv.q.IsirmtWorkTechStack.WorkID, pSrv.q.IsirmtWorkTechStack.ID).Find()
-	if err != nil {
-		return c.String(500, "failed to fetch work tech stacks")
-	}
-	for _, tech := range workTechs {
-		techMap[tech.WorkID] = append(techMap[tech.WorkID], workTechStackResponse{
-			ID:          *tech.ID,
-			TechStackID: tech.TechStackID,
-		})
-	}
-
 	responses := make([]workResponse, 0, len(works))
 	for _, work := range works {
 		if work.ID == nil {
@@ -111,17 +58,28 @@ func (pSrv *server) respondWorks(c echo.Context, works []*model.IsirmtWork) erro
 		}
 
 		workID := *work.ID
-		images := imagesMap[workID]
-		if images == nil {
-			images = []workImageResponse{}
+		images := make([]workImageResponse, 0, len(work.WorkImages))
+		for _, image := range work.WorkImages {
+			images = append(images, workImageResponse{
+				ID:           *image.ID,
+				ImageID:      image.ImageID,
+				DisplayOrder: int(image.DisplayOrder),
+			})
 		}
-		urls := urlsMap[workID]
-		if urls == nil {
-			urls = []workURLResponse{}
+
+		urls := make([]workURLResponse, 0, len(work.URLs))
+		for _, url := range work.URLs {
+			urls = append(urls, workURLResponse{
+				ID:           *url.ID,
+				URL:          url.URL,
+				Label:        url.Label,
+				DisplayOrder: int(url.DisplayOrder),
+			})
 		}
-		techs := techMap[workID]
-		if techs == nil {
-			techs = []workTechStackResponse{}
+
+		techStacks := work.TechStacks
+		if techStacks == nil {
+			techStacks = []*model.CommonTechStack{}
 		}
 
 		responses = append(responses, workResponse{
@@ -134,7 +92,7 @@ func (pSrv *server) respondWorks(c echo.Context, works []*model.IsirmtWork) erro
 			ThumbnailImageID: work.ThumbnailImageID,
 			Images:           images,
 			Urls:             urls,
-			TechStacks:       techs,
+			TechStacks:       techStacks,
 		})
 	}
 
@@ -144,7 +102,9 @@ func (pSrv *server) respondWorks(c echo.Context, works []*model.IsirmtWork) erro
 func (pSrv *server) handleGetWorks(c echo.Context) error {
 	ctx := c.Request().Context()
 
-	works, err := pSrv.q.IsirmtWork.WithContext(ctx).Order(pSrv.q.IsirmtWork.CreatedAt.Desc()).Find()
+	works, err := pSrv.withWorkRelations(pSrv.q.IsirmtWork.WithContext(ctx)).
+		Order(pSrv.q.IsirmtWork.CreatedAt.Desc()).
+		Find()
 	if err != nil {
 		return c.String(500, "failed to fetch works")
 	}
@@ -163,7 +123,7 @@ func (pSrv *server) handleGetRankingWorks(c echo.Context) error {
 	}
 
 	ctx := c.Request().Context()
-	works, err := pSrv.q.IsirmtWork.WithContext(ctx).
+	works, err := pSrv.withWorkRelations(pSrv.q.IsirmtWork.WithContext(ctx)).
 		LeftJoin(pSrv.q.IsirmtWorkClick, pSrv.q.IsirmtWorkClick.WorkID.EqCol(pSrv.q.IsirmtWork.ID)).
 		Group(pSrv.q.IsirmtWork.ID).
 		Order(pSrv.q.IsirmtWorkClick.ID.Count().Desc()).
