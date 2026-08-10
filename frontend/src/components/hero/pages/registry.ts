@@ -11,4 +11,8 @@ export const heroPages = [
     id: "sample",
     Component: SampleHeroPage,
   },
+  {
+    id: "sample2",
+    Component: SampleHeroPage,
+  },
 ] as const satisfies readonly HeroPageDefinition[];
