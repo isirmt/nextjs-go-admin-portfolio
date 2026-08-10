@@ -6,6 +6,7 @@ import {
   DotGothic16,
   Dela_Gothic_One,
   Smooch_Sans,
+  Kiwi_Maru,
 } from "next/font/google";
 
 // 既定のフォント
@@ -41,5 +42,11 @@ export const delaGothicOne = Dela_Gothic_One({
 
 export const smoochSans = Smooch_Sans({
   weight: ["400"],
+  subsets: ["latin"],
+});
+
+export const kiwiMaru = Kiwi_Maru({
+  variable: "--font-kiwi-maru",
+  weight: ["400", "500"],
   subsets: ["latin"],
 });

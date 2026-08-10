@@ -1,16 +1,14 @@
-/* eslint-disable @next/next/no-img-element */
 import WorkConveyer from "@/components/works/list";
 import { ImagesProvider } from "@/contexts/imagesContext";
 import { TechsProvider } from "@/contexts/techsContext";
 import { WorksProvider } from "@/contexts/worksContext";
-import { delaGothicOne } from "@/lib/fonts";
-import ProfileCard from "@/components/profile/card";
-import React, { Suspense } from "react";
+import { Suspense } from "react";
 import Navigation from "@/components/navigation";
 import HeroSection from "@/components/heroSection";
 import { SelectingCubeContextProvider } from "@/contexts/selectingCubeContext";
 import { Metadata } from "next";
 import SearchWindow from "@/components/works/searchWindow";
+import ProfileSection from "@/components/profile/section";
 
 export const metadata: Metadata = {
   title: "isirmt - 色彩と体験 | 入本聖也",
@@ -36,60 +34,6 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/",
   },
-};
-
-const myAreas = [
-  "フロントエンド・クライアント実装",
-  "バックエンド・システム設計",
-  "UI/UX設計",
-  "UIアニメーション",
-  "機械学習",
-];
-const myTools = [
-  "React",
-  "Next.js",
-  "Tailwind CSS",
-  "DxLib",
-  "OpenGL",
-  "Unity",
-  "Illustrator",
-  "Photoshop",
-];
-
-const DetailBox = ({
-  label,
-  array,
-  isApplyingEtc,
-}: {
-  label: string;
-  array: string[];
-  isApplyingEtc?: boolean;
-}) => {
-  return (
-    <div className="flex flex-col gap-3">
-      <div className={`text-2xl text-[#054a5c] ${delaGothicOne.className}`}>
-        {label}
-      </div>
-      <ul className="ml-8 flex flex-wrap gap-3 text-[#054a5c]">
-        {array.map((item, itemIdx) => (
-          <li key={itemIdx} className="flex items-center gap-2">
-            {item}
-            {itemIdx < array.length - 1 && (
-              <span className="text-[#9395a8] select-none">/</span>
-            )}
-          </li>
-        ))}
-        {isApplyingEtc && (
-          <React.Fragment>
-            <li className="flex items-center gap-2">
-              <span className="text-[#9395a8] select-none">/</span>
-              etc...
-            </li>
-          </React.Fragment>
-        )}
-      </ul>
-    </div>
-  );
 };
 
 export default function Home() {
@@ -118,31 +62,7 @@ export default function Home() {
                 </Suspense>
               </section>
               <Navigation />
-              <section
-                aria-label="profile"
-                className="relative w-full overflow-x-hidden overflow-y-visible"
-              >
-                <div className="relative flex flex-wrap items-end justify-start overflow-visible">
-                  <img
-                    loading="lazy"
-                    className="pointer-events-none absolute right-8 bottom-0 hidden w-100 max-w-full xl:block"
-                    alt="miri_transparent"
-                    src="/miri_transparent.webp"
-                  />
-                  <span className="font-dot pointer-events-none absolute right-8 bottom-13 hidden bg-[#f43f5e] px-2.5 text-right text-3xl leading-none text-white select-none xl:block">
-                    井筒&nbsp;ミリ
-                  </span>
-                  <ProfileCard age={age} />
-                </div>
-                <div className="relative -mt-6 grid grid-cols-1 gap-14 bg-[#c6f4ff] px-10 pt-32 pb-20 lg:grid-cols-2 lg:gap-20 lg:px-40">
-                  <DetailBox label="分野" array={myAreas} />
-                  <DetailBox
-                    label="フレームワーク・ツール等"
-                    array={myTools}
-                    isApplyingEtc
-                  />
-                </div>
-              </section>
+              <ProfileSection age={age} />
               <section aria-label="works-display" className="relative w-full">
                 <WorkConveyer />
               </section>

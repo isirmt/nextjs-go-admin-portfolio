@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useSelectingCubeContext } from "@/contexts/selectingCubeContext";
@@ -7,6 +6,7 @@ import React, { useMemo } from "react";
 import { useWorksContext } from "@/contexts/worksContext";
 import Link from "next/link";
 import MarqueeText from "./marqueeText";
+import { kiwiMaru } from "@/lib/fonts";
 
 export default function HeroSection() {
   const { works } = useWorksContext();
@@ -26,21 +26,12 @@ export default function HeroSection() {
       >
         {/* <VerticalViewer /> */}
       </div>
-      <div
-        className={`absolute top-0 left-0 size-full overflow-hidden bg-white transition-all duration-300 ${selectingWork ? "opacity-100 delay-300" : "opacity-0"}`}
-      >
-        {selectingWork && (
-          <img
-            alt={`${selectingWork.title}`}
-            className="size-full object-cover opacity-25"
-            src={`/api/images/${selectingWork.thumbnail_image_id}/raw`}
-          />
-        )}
-      </div>
-      <div className="pointer-events-none absolute flex size-full -translate-y-10 items-center justify-center text-[#111111] drop-shadow-md drop-shadow-[#aaa]">
+      <div className="pointer-events-none absolute flex size-full -translate-y-10 items-center justify-center text-[#111111] drop-shadow-[#aaa]">
         {selectingWork ? (
           <div className="absolute flex w-full flex-col gap-2 px-10 text-center lg:px-20">
-            <div className="font-noto relative max-w-full text-6xl font-bold whitespace-nowrap text-[#751aab] md:text-8xl">
+            <div
+              className={`${kiwiMaru.className} relative max-w-full text-6xl font-medium whitespace-nowrap text-[#751aab] md:text-8xl`}
+            >
               <MarqueeText
                 speedFactor={120}
                 pauseSeconds={0.5}

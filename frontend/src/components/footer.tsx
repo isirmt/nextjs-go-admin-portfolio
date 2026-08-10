@@ -3,29 +3,29 @@
 import { delaGothicOne } from "@/lib/fonts";
 import { InformationSite } from "./latestNews";
 import { useSpotlightSketch } from "@/hooks/useSpotlightSketch";
+import { useSineClipPath } from "@/hooks/useSineClipPath";
 import Link from "next/link";
 
 export default function Footer() {
   const {
-    footerRef,
     sketchContainerRef,
     handleSpotlightEnter,
     handleSpotlightLeave,
     getSpotlightSide,
   } = useSpotlightSketch();
+  const waveRef = useSineClipPath<HTMLDivElement>();
 
   return (
-    <footer
-      ref={footerRef}
-      className="relative -mt-20 overflow-hidden bg-transparent select-none"
-    >
+    <footer className="relative -mt-20 overflow-hidden bg-transparent select-none">
       <div className="absolute left-[10%] z-1 aspect-946/2472 h-full bg-[url('/footer_stripe.svg')] bg-center bg-no-repeat opacity-5 bg-blend-saturation" />
       <div className="absolute left-[70%] z-1 aspect-946/2472 h-full bg-[url('/footer_stripe.svg')] bg-center bg-no-repeat opacity-12 bg-blend-saturation" />
       <div className="absolute left-[90%] z-1 aspect-946/2472 h-full bg-[url('/footer_stripe.svg')] bg-center bg-no-repeat opacity-8 bg-blend-saturation" />
       <div
-        ref={sketchContainerRef}
+        ref={waveRef}
         className="pointer-events-none absolute top-0 left-0 z-0 h-full w-full"
-      />
+      >
+        <div ref={sketchContainerRef} className="h-full w-full" />
+      </div>
       <div className="relative z-2 flex flex-col items-center pt-20">
         <section className="flex flex-col items-center justify-center gap-2 py-12">
           <div
