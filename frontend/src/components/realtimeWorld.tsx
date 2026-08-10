@@ -3,6 +3,7 @@
 import { useSelectingCubeContext } from "@/contexts/selectingCubeContext";
 import { useWorksContext } from "@/contexts/worksContext";
 import { lightenHex } from "@/lib/sketch/colorChanger";
+import { useTexture } from "@react-three/drei";
 import { Canvas, useThree } from "@react-three/fiber";
 import {
   CuboidCollider,
@@ -13,7 +14,15 @@ import {
 } from "@react-three/rapier";
 import { useSearchParams } from "next/navigation";
 import React from "react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { SRGBColorSpace, type Texture } from "three";
 
 type WorkClickEvent = {
   type: "work_click";
@@ -45,16 +54,41 @@ const createBoxId = (workId: string) =>
 const randomInRange = (min: number, max: number) =>
   min + Math.random() * (max - min);
 
+const configureThumbnailTexture = (texture: Texture) => {
+  texture.colorSpace = SRGBColorSpace;
+  texture.needsUpdate = true;
+};
+
+function FallingBoxMaterial({
+  color,
+  isHovering,
+  thumbnailUrl,
+}: {
+  color: string;
+  isHovering: boolean;
+  thumbnailUrl: string;
+}) {
+  const texture = useTexture(thumbnailUrl, configureThumbnailTexture);
+
+  return isHovering ? (
+    <meshBasicMaterial map={texture} color="#ffffff" toneMapped={false} />
+  ) : (
+    <meshStandardMaterial color={color} />
+  );
+}
+
 function FallingBoxBody({
   box,
   boxSize,
   wallDepth,
   color,
+  thumbnailUrl,
 }: {
   box: FallingBox;
   boxSize: number;
   wallDepth: number;
   color: string;
+  thumbnailUrl?: string;
 }) {
   const { setSelectingCubeId, emitCubeClick } = useSelectingCubeContext();
   const bodyRef = useRef<RapierRigidBody | null>(null);
@@ -111,7 +145,17 @@ function FallingBoxBody({
         }}
       >
         <boxGeometry args={[boxSize, boxSize, wallDepth]} />
-        <meshStandardMaterial color={isHovering ? "#751aab" : lighterColor} />
+        {thumbnailUrl ? (
+          <Suspense fallback={<meshStandardMaterial color={lighterColor} />}>
+            <FallingBoxMaterial
+              color={lighterColor}
+              isHovering={isHovering}
+              thumbnailUrl={thumbnailUrl}
+            />
+          </Suspense>
+        ) : (
+          <meshStandardMaterial color={lighterColor} />
+        )}
       </mesh>
     </RigidBody>
   );
@@ -164,10 +208,15 @@ function WorkClickPhysics({ onSpawnEnded }: { onSpawnEnded?: () => void }) {
     ]);
   }, [triangleSize, wallDepth]);
 
-  const colorMap = useMemo(() => {
-    const map = new Map<string, string>();
+  const appearanceMap = useMemo(() => {
+    const map = new Map<string, { color: string; thumbnailUrl?: string }>();
     works.forEach((work) => {
-      map.set(work.id, work.accent_color);
+      map.set(work.id, {
+        color: work.accent_color,
+        thumbnailUrl: work.thumbnail_image_id
+          ? `/api/images/${encodeURIComponent(work.thumbnail_image_id)}/raw`
+          : undefined,
+      });
     });
     return map;
   }, [works]);
@@ -317,15 +366,19 @@ function WorkClickPhysics({ onSpawnEnded }: { onSpawnEnded?: () => void }) {
         />
       </RigidBody>
 
-      {boxes.map((box) => (
-        <FallingBoxBody
-          key={box.id}
-          box={box}
-          boxSize={boxSize}
-          wallDepth={wallDepth}
-          color={colorMap.get(box.workId) ?? DEFAULT_COLOR}
-        />
-      ))}
+      {boxes.map((box) => {
+        const appearance = appearanceMap.get(box.workId);
+        return (
+          <FallingBoxBody
+            key={box.id}
+            box={box}
+            boxSize={boxSize}
+            wallDepth={wallDepth}
+            color={appearance?.color ?? DEFAULT_COLOR}
+            thumbnailUrl={appearance?.thumbnailUrl}
+          />
+        );
+      })}
     </Physics>
   );
 }
