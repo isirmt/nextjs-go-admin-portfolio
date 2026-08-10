@@ -4,7 +4,7 @@ import { TechsProvider } from "@/contexts/techsContext";
 import { WorksProvider } from "@/contexts/worksContext";
 import { Suspense } from "react";
 import Navigation from "@/components/navigation";
-import HeroSection from "@/components/heroSection";
+import HeroSection from "@/components/hero/section";
 import { SelectingCubeContextProvider } from "@/contexts/selectingCubeContext";
 import { Metadata } from "next";
 import SearchWindow from "@/components/works/searchWindow";
