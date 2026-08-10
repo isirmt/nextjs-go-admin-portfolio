@@ -42,6 +42,7 @@ function WorkCard({
   onRecordClick?: (id: string) => void;
 }) {
   const { images } = useImagesContext();
+  const [isHovered, setIsHovered] = useState(false);
   const randomInViewDelayMs = useMemo(
     () => delayFromId(work.id, 300),
     [work.id],
@@ -82,7 +83,7 @@ function WorkCard({
         transitionDelay: `${randomSelectingDelayMs}ms`,
       }}
     >
-      <div className="pointer-events-none absolute -top-9 z-3 max-w-full rounded-xl bg-[#6354eb] px-3 py-1 text-sm whitespace-nowrap text-white drop-shadow-sm drop-shadow-[#a39ed1] select-none before:absolute before:top-0 before:left-[50%] before:-z-1 before:block before:translate-x-[-50%] before:translate-y-full before:border-[22px_10px_0px_10px] before:border-x-transparent before:border-t-[#6354eb] before:content-['']">
+      <div className={`${isHovered ? "-top-8" : "-top-9"} transition-all duration-100 pointer-events-none absolute  z-3 max-w-full rounded-xl bg-[#6354eb] px-3 py-1 text-sm whitespace-nowrap text-white drop-shadow-sm drop-shadow-[#a39ed1] select-none before:absolute before:top-0 before:left-[50%] before:-z-1 before:block before:translate-x-[-50%] before:translate-y-full before:border-[22px_10px_0px_10px] before:border-x-transparent before:border-t-[#6354eb] before:content-['']`}>
         <MarqueeText text={work.comment} />
       </div>
       <button
@@ -94,6 +95,8 @@ function WorkCard({
           selectingFunc(work.id);
           onRecordClick?.(work.id);
         }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
         className={`group relative flex cursor-pointer items-center justify-center drop-shadow-2xl transition-all duration-100 ${isSelected ? "scale-110" : ""}`}
       >
         <div
