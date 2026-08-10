@@ -8,7 +8,10 @@ const WAVE_MIN_LENGTH = 120;
 const WAVE_LENGTH_RATIO = 0.4;
 const WAVE_STEPS_PER_LENGTH = 20;
 
+export type SineClipPathEdge = "top" | "bottom" | "both";
+
 export type SineClipPathOptions = {
+  edge?: SineClipPathEdge;
   phase?: number;
   waveHeightPx?: number;
   waveLengthPx?: number;
@@ -17,7 +20,12 @@ export type SineClipPathOptions = {
 export const createSineClipPath = (
   width: number,
   height: number,
-  { phase = 0, waveHeightPx, waveLengthPx }: SineClipPathOptions = {},
+  {
+    edge = "top",
+    phase = 0,
+    waveHeightPx,
+    waveLengthPx,
+  }: SineClipPathOptions = {},
 ) => {
   const responsiveOffset = Math.min(
     WAVE_MAX_OFFSET,
@@ -34,12 +42,12 @@ export const createSineClipPath = (
       Math.max(WAVE_MIN_LENGTH, Math.floor(width * WAVE_LENGTH_RATIO)),
   );
   const step = Math.max(8, Math.floor(waveLength / WAVE_STEPS_PER_LENGTH));
-  const points: string[] = [`0px ${height}px`];
+  const wavePoints: Array<{ x: number; inset: number }> = [];
 
   const addWavePoint = (x: number) => {
     const pointPhase = (x / waveLength) * SINE_WAVE_FULL_PHASE + phase;
-    const y = Math.max(0, waveOffset + Math.sin(pointPhase) * waveHeight);
-    points.push(`${x}px ${y}px`);
+    const inset = Math.max(0, waveOffset + Math.sin(pointPhase) * waveHeight);
+    wavePoints.push({ x, inset });
   };
 
   for (let x = 0; x <= width; x += step) {
@@ -50,7 +58,20 @@ export const createSineClipPath = (
     addWavePoint(width);
   }
 
-  points.push(`${width}px ${height}px`);
+  const topPoints = wavePoints.map(({ x, inset }) => `${x}px ${inset}px`);
+  const bottomPoints = wavePoints
+    .slice()
+    .reverse()
+    .map(({ x, inset }) => `${x}px ${Math.max(0, height - inset)}px`);
+
+  let points: string[];
+  if (edge === "bottom") {
+    points = [`0px 0px`, `${width}px 0px`, ...bottomPoints];
+  } else if (edge === "both") {
+    points = [...topPoints, ...bottomPoints];
+  } else {
+    points = [`0px ${height}px`, ...topPoints, `${width}px ${height}px`];
+  }
 
   return `polygon(${points.join(",")})`;
 };

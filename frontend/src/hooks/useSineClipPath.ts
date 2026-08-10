@@ -4,16 +4,19 @@ import {
   createSineClipPath,
   DEFAULT_SINE_WAVE_LOOP_DURATION_MS,
   SINE_WAVE_FULL_PHASE,
+  type SineClipPathEdge,
 } from "@/lib/createSineClipPath";
 import { useEffect, useRef } from "react";
 
 export type UseSineClipPathOptions = {
+  edge?: SineClipPathEdge;
   loopDurationMs?: number;
   waveHeightPx?: number;
   waveLengthPx?: number;
 };
 
 export function useSineClipPath<T extends HTMLElement>({
+  edge = "top",
   loopDurationMs = DEFAULT_SINE_WAVE_LOOP_DURATION_MS,
   waveHeightPx,
   waveLengthPx,
@@ -33,6 +36,7 @@ export function useSineClipPath<T extends HTMLElement>({
 
     const applyClipPath = () => {
       element.style.clipPath = createSineClipPath(width, height, {
+        edge,
         phase,
         waveHeightPx,
         waveLengthPx,
@@ -89,7 +93,7 @@ export function useSineClipPath<T extends HTMLElement>({
         cancelAnimationFrame(animationFrame);
       }
     };
-  }, [loopDurationMs, waveHeightPx, waveLengthPx]);
+  }, [edge, loopDurationMs, waveHeightPx, waveLengthPx]);
 
   return elementRef;
 }

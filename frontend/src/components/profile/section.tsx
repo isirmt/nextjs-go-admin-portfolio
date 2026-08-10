@@ -31,7 +31,7 @@ type DetailBoxProps = {
 };
 
 const DetailBox = ({ label, array, isApplyingEtc }: DetailBoxProps) => (
-  <div className="flex flex-col gap-3">
+  <div className="flex flex-col gap-6">
     <div className={`text-2xl text-[#054a5c] ${delaGothicOne.className}`}>
       {label}
     </div>
@@ -55,12 +55,12 @@ const DetailBox = ({ label, array, isApplyingEtc }: DetailBoxProps) => (
 );
 
 export default function ProfileSection({ age }: { age: number }) {
-  const waveRef = useSineClipPath<HTMLDivElement>();
+  const waveRef = useSineClipPath<HTMLDivElement>({ edge: "both" });
 
   return (
     <section
       aria-label="profile"
-      className="relative w-full overflow-x-clip overflow-y-visible"
+      className="relative z-1 w-full overflow-x-clip overflow-y-visible"
     >
       <div className="relative flex flex-wrap items-end justify-start overflow-visible">
         <img
@@ -76,7 +76,7 @@ export default function ProfileSection({ age }: { age: number }) {
       </div>
       <div
         ref={waveRef}
-        className="relative -mt-6 grid grid-cols-1 gap-14 bg-[#c6f4ff] px-10 pt-32 pb-20 lg:grid-cols-2 lg:gap-20 lg:px-40"
+        className="relative -mt-12 -mb-20 grid grid-cols-1 gap-14 bg-[#c6f4ff] px-10 pt-44 pb-40 lg:grid-cols-2 lg:gap-20 lg:px-40"
       >
         <DetailBox label="分野" array={myAreas} />
         <DetailBox
