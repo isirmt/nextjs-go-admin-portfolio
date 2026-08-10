@@ -20,7 +20,11 @@ export default function Header() {
   return (
     <header className="pointer-events-none fixed top-0 left-0 z-100 flex h-24 w-full items-center justify-between bg-transparent px-3 md:h-32 md:px-8">
       <Link href="/" className="pointer-events-auto" onClick={handleLogoClick}>
-        <img src="/isirmt_logo.png" alt="ISIRMT Logo" className="h-20 w-auto" />
+        <img
+          src="/isirmt_logo.png"
+          alt="ISIRMT Logo"
+          className="h-20 w-auto md:h-28"
+        />
       </Link>
     </header>
   );
