@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useSelectingCubeContext } from "@/contexts/selectingCubeContext";
@@ -26,17 +25,6 @@ export default function HeroSection() {
         className={`absolute top-0 left-0 size-full transition-all duration-300 ${selectingWork ? "opacity-0" : "opacity-100"}`}
       >
         {/* <VerticalViewer /> */}
-      </div>
-      <div
-        className={`absolute top-0 left-0 size-full overflow-hidden bg-white transition-all duration-300 ${selectingWork ? "opacity-100 delay-300" : "opacity-0"}`}
-      >
-        {selectingWork && (
-          <img
-            alt={`${selectingWork.title}`}
-            className="size-full object-cover opacity-25"
-            src={`/api/images/${selectingWork.thumbnail_image_id}/raw`}
-          />
-        )}
       </div>
       <div className="pointer-events-none absolute flex size-full -translate-y-10 items-center justify-center text-[#111111] drop-shadow-[#aaa]">
         {selectingWork ? (
