@@ -120,7 +120,7 @@ export default function Home() {
               <Navigation />
               <section
                 aria-label="profile"
-                className="relative w-full overflow-x-hidden overflow-y-visible"
+                className="relative w-full overflow-x-clip overflow-y-visible"
               >
                 <div className="relative flex flex-wrap items-end justify-start overflow-visible">
                   <img

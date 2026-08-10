@@ -122,7 +122,7 @@ export default function ProfileCard({ age }: ProfileCardProps) {
         >
           <div className="pointer-events-none absolute top-0 left-0 z-0 size-full bg-[url('/noise_color_128.png')] opacity-20 mix-blend-multiply" />
           <div className="relative flex flex-col gap-10 pt-24 pr-10 pb-18 pl-13 lg:pr-44 lg:pl-36">
-            <div className="relative flex max-w-2xl flex-col items-center gap-16 md:flex-row md:gap-10">
+            <div className="relative flex max-w-2xl flex-col items-center gap-16 md:flex-row md:gap-14">
               <div className="group relative flex flex-col items-end gap-6 pr-6 drop-shadow-xl drop-shadow-[#ffd67c] md:pr-0">
                 <div className="pointer-events-none relative z-1 size-36 overflow-hidden rounded-lg transition-all select-none group-hover:opacity-0">
                   <Image
@@ -149,7 +149,7 @@ export default function ProfileCard({ age }: ProfileCardProps) {
                   />
                 </Link>
               </div>
-              <div className="flex w-fit flex-col gap-2.5 text-sm font-semibold tracking-wide text-[#61230b]">
+              <div className="flex w-fit flex-col gap-3.5 text-base font-semibold tracking-wide text-[#61230b]">
                 <div className="flex gap-2">
                   <div>兵庫県神戸市出身</div>
                   <div>
