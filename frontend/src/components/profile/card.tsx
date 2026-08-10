@@ -150,7 +150,9 @@ export default function ProfileCard({ age }: ProfileCardProps) {
                   />
                 </Link>
               </div>
-              <div className={`${kiwiMaru.className} flex w-fit flex-col gap-3.5 text-base tracking-wide text-[#61230b]`}>
+              <div
+                className={`${kiwiMaru.className} flex w-fit flex-col gap-3.5 text-base tracking-wide text-[#61230b]`}
+              >
                 <div className="flex gap-2">
                   <div>兵庫県神戸市出身</div>
                   <div>
