@@ -76,7 +76,7 @@ export default function ProfileSection({ age }: { age: number }) {
       </div>
       <div
         ref={waveRef}
-        className="relative -mt-12 -mb-20 grid grid-cols-1 gap-14 bg-[#c6f4ff] px-10 pt-44 pb-40 lg:grid-cols-2 lg:gap-20 lg:px-40"
+        className="relative -mt-14 -mb-20 grid grid-cols-1 gap-14 bg-[#c6f4ff] px-10 pt-44 pb-40 lg:grid-cols-2 lg:gap-20 lg:px-40"
       >
         <DetailBox label="分野" array={myAreas} />
         <DetailBox
