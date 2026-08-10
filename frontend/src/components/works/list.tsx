@@ -225,9 +225,8 @@ export default function WorksList() {
         >
           And More
         </div>
-        <div className="pointer-events-none absolute top-0 left-0 z-0 size-full bg-[url('/noise_color_128.png')] opacity-20 mix-blend-multiply" />
         <SectionText />
-        <div className="flex w-fit flex-wrap justify-center gap-x-20 gap-y-20">
+        <div className="flex w-fit flex-wrap justify-center gap-x-24 gap-y-24">
           {works.map((work, workIdx) => (
             <WorkCard
               key={workIdx}
