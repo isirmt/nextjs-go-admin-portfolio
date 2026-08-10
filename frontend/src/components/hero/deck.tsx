@@ -104,11 +104,31 @@ export default function HeroDeck({
     return null;
   }
 
-  const CurrentPage = currentPage.Component;
-
   return (
     <HeroDeckContext.Provider value={controls}>
-      <CurrentPage key={currentPage.id} />
+      <div className="relative size-full overflow-hidden">
+        <div
+          className="ease-over flex size-full transform-gpu transition-transform duration-850 will-change-transform"
+          style={{
+            transform: `translate3d(-${currentPageIndex * 100}%, 0, 0)`,
+          }}
+        >
+          {pages.map((page, pageIndex) => {
+            const Page = page.Component;
+            const isActive = pageIndex === currentPageIndex;
+
+            return (
+              <div
+                key={page.id}
+                className={`relative size-full shrink-0 ${isActive ? "" : "pointer-events-none"}`}
+                inert={!isActive}
+              >
+                <Page />
+              </div>
+            );
+          })}
+        </div>
+      </div>
       {children}
     </HeroDeckContext.Provider>
   );
