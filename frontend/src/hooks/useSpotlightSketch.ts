@@ -39,6 +39,8 @@ const WAVE_HEIGHT_RATIO = 0.08;
 const WAVE_MIN_LENGTH = 120;
 const WAVE_LENGTH_RATIO = 0.4;
 const WAVE_STEPS_PER_LENGTH = 20;
+const WAVE_LOOP_DURATION_MS = 16000;
+const FULL_ROTATION = Math.PI * 2;
 
 const VERTEX_SHADER_SOURCE = `#version 300 es
 in vec2 a_position;
@@ -179,7 +181,7 @@ const createVertices = (side: SpotlightSide, width: number, height: number) =>
     y: point.y * height,
   }));
 
-const createSineClipPath = (width: number, height: number) => {
+const createSineClipPath = (width: number, height: number, wavePhase = 0) => {
   const amplitude = Math.min(
     WAVE_MAX_AMPLITUDE,
     Math.max(WAVE_MIN_AMPLITUDE, Math.floor(height * WAVE_HEIGHT_RATIO)),
@@ -193,13 +195,13 @@ const createSineClipPath = (width: number, height: number) => {
   const points: string[] = [`0px ${height}px`];
 
   for (let x = 0; x <= width; x += step) {
-    const phase = (x / waveLength) * Math.PI * 2;
+    const phase = (x / waveLength) * FULL_ROTATION + wavePhase;
     const y = Math.max(0, amplitude + Math.sin(phase) * waveAmplitude);
     points.push(`${x}px ${y}px`);
   }
 
   if (width % step !== 0) {
-    const phase = (width / waveLength) * Math.PI * 2;
+    const phase = (width / waveLength) * FULL_ROTATION + wavePhase;
     const y = Math.max(0, amplitude + Math.sin(phase) * waveAmplitude);
     points.push(`${width}px ${y}px`);
   }
@@ -219,6 +221,7 @@ export function useSpotlightSketch() {
   const appliedSizeRef = useRef({ width: 0, height: 0 });
   const animationFrameRef = useRef<number | null>(null);
   const lastTimestampRef = useRef<number>(performance.now());
+  const wavePhaseRef = useRef(0);
   const webglResourcesRef = useRef<WebGLResources | null>(null);
   const snowflakesRef = useRef<Snowflake[]>([]);
 
@@ -396,6 +399,16 @@ export function useSpotlightSketch() {
       }
 
       const safeDelta = Math.max(0, deltaTime);
+      wavePhaseRef.current =
+        (wavePhaseRef.current +
+          (safeDelta / WAVE_LOOP_DURATION_MS) * FULL_ROTATION) %
+        FULL_ROTATION;
+      currentCanvas.style.clipPath = createSineClipPath(
+        currentCanvas.width,
+        currentCanvas.height,
+        wavePhaseRef.current,
+      );
+
       const interpolatedVertices = vertexTransition.step(safeDelta);
       const interpolatedColor = colorTransition.step(safeDelta);
       const isAnimating =
@@ -541,7 +554,11 @@ export function useSpotlightSketch() {
       if (canvas) {
         canvas.width = nextWidth;
         canvas.height = nextHeight;
-        canvas.style.clipPath = createSineClipPath(nextWidth, nextHeight);
+        canvas.style.clipPath = createSineClipPath(
+          nextWidth,
+          nextHeight,
+          wavePhaseRef.current,
+        );
       }
 
       const resources = webglResourcesRef.current;
