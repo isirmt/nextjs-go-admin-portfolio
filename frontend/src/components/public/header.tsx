@@ -23,7 +23,7 @@ export default function Header() {
         <img
           src="/isirmt_logo.png"
           alt="ISIRMT Logo"
-          className="h-20 w-auto md:h-28"
+          className="h-20 w-auto drop-shadow-sm md:h-28"
         />
       </Link>
     </header>
