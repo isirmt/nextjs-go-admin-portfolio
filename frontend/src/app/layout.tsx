@@ -3,7 +3,6 @@ import "./globals.css";
 import { notoSansJp } from "@/lib/fonts";
 import ScrollbarWidthSetter from "@/components/scrollbarWidthSetter";
 import { GoogleTagManager } from "@next/third-parties/google";
-import Header from "@/components/header";
 
 export const dynamic = "force-dynamic";
 
@@ -30,7 +29,6 @@ export default function RootLayout({
       <body
         className={`${notoSansJp.variable} overflow-x-hidden bg-white antialiased`}
       >
-        <Header />
         <ScrollbarWidthSetter />
         {children}
       </body>
