@@ -52,7 +52,9 @@ export default function Home() {
         <WorksProvider>
           <TechsProvider>
             <SelectingCubeContextProvider>
-              <SearchWindow />
+              <div className="hidden md:block">
+                <SearchWindow />
+              </div>
               <section
                 aria-label="top-view"
                 className="relative h-[calc(100dvh+72px)] w-full bg-[#fafafa]"
