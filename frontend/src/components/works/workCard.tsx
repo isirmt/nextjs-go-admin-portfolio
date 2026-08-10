@@ -6,7 +6,7 @@ import { useInViewAnimation } from "@/hooks/useInViewAnimation";
 import { useTechInfoGetter } from "@/hooks/useTechInfoGetter";
 import { Work } from "@/types/works/common";
 import { useMemo, useState } from "react";
-import MarqueeText from "../marqueeText";
+import MarqueeText from "../public/marqueeText";
 
 const delayFromId = (id: string, maxDelay = 500) => {
   let hash = 0;

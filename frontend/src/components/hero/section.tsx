@@ -1,11 +1,11 @@
 "use client";
 
 import { useSelectingCubeContext } from "@/contexts/selectingCubeContext";
-import RealtimeWorld from "../realtimeWorld";
+import RealtimeWorld from "../public/realtimeWorld";
 import React, { useMemo } from "react";
 import { useWorksContext } from "@/contexts/worksContext";
 import Link from "next/link";
-import MarqueeText from "../marqueeText";
+import MarqueeText from "../public/marqueeText";
 import { kiwiMaru } from "@/lib/fonts";
 
 export default function HeroSection() {

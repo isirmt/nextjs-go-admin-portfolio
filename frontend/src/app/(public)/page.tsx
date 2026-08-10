@@ -3,7 +3,7 @@ import { ImagesProvider } from "@/contexts/imagesContext";
 import { TechsProvider } from "@/contexts/techsContext";
 import { WorksProvider } from "@/contexts/worksContext";
 import { Suspense } from "react";
-import Navigation from "@/components/navigation";
+import Navigation from "@/components/public/navigation";
 import HeroSection from "@/components/hero/section";
 import { SelectingCubeContextProvider } from "@/contexts/selectingCubeContext";
 import { Metadata } from "next";

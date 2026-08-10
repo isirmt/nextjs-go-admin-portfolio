@@ -5,7 +5,7 @@ import { useSelectingCubeContext } from "@/contexts/selectingCubeContext";
 import { useScrollbarControl } from "@/hooks/useScrollbarControl";
 import { Work } from "@/types/works/common";
 import { useEffect, useRef, useState } from "react";
-import SearchIcon from "../searchIcon";
+import SearchIcon from "../public/searchIcon";
 import React from "react";
 
 const SEARCH_DELAY = 300; // ms
