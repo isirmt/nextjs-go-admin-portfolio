@@ -3,6 +3,7 @@ import "./globals.css";
 import { notoSansJp } from "@/lib/fonts";
 import ScrollbarWidthSetter from "@/components/scrollbarWidthSetter";
 import { GoogleTagManager } from "@next/third-parties/google";
+import Header from "@/components/header";
 
 export const dynamic = "force-dynamic";
 
@@ -26,12 +27,10 @@ export default function RootLayout({
       {process.env.GOOGLE_TAG_MANAGER_ID && (
         <GoogleTagManager gtmId={process.env.GOOGLE_TAG_MANAGER_ID} />
       )}
-      <head>
-        <meta name="application-name" content="Folims" />
-      </head>
       <body
         className={`${notoSansJp.variable} overflow-x-hidden bg-white antialiased`}
       >
+        <Header />
         <ScrollbarWidthSetter />
         {children}
       </body>
