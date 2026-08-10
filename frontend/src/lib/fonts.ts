@@ -47,6 +47,6 @@ export const smoochSans = Smooch_Sans({
 
 export const kiwiMaru = Kiwi_Maru({
   variable: "--font-kiwi-maru",
-  weight: ["400"],
+  weight: ["400", "500"],
   subsets: ["latin"],
 });

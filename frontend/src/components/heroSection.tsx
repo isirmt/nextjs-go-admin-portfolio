@@ -7,6 +7,7 @@ import React, { useMemo } from "react";
 import { useWorksContext } from "@/contexts/worksContext";
 import Link from "next/link";
 import MarqueeText from "./marqueeText";
+import { kiwiMaru } from "@/lib/fonts";
 
 export default function HeroSection() {
   const { works } = useWorksContext();
@@ -37,10 +38,10 @@ export default function HeroSection() {
           />
         )}
       </div>
-      <div className="pointer-events-none absolute flex size-full -translate-y-10 items-center justify-center text-[#111111] drop-shadow-md drop-shadow-[#aaa]">
+      <div className="pointer-events-none absolute flex size-full -translate-y-10 items-center justify-center text-[#111111] drop-shadow-[#aaa]">
         {selectingWork ? (
           <div className="absolute flex w-full flex-col gap-2 px-10 text-center lg:px-20">
-            <div className="font-noto relative max-w-full text-6xl font-bold whitespace-nowrap text-[#751aab] md:text-8xl">
+            <div className={`${kiwiMaru.className} relative max-w-full text-6xl font-medium whitespace-nowrap text-[#751aab] md:text-8xl`}>
               <MarqueeText
                 speedFactor={120}
                 pauseSeconds={0.5}
