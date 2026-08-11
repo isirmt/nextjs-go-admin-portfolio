@@ -8,8 +8,8 @@ export default function OpeningHeroPage() {
       <div
         className={`pointer-events-none absolute inset-0 flex items-center justify-center bg-[#ffffff] font-bold select-none ${lineSeedJp.className}`}
       >
-        <div className="absolute -top-1/2 right-0 h-[300dvh] w-[300dvh] rounded-full bg-red-100 md:right-1/3" />
-        <div className="absolute -top-1/2 left-0 h-[300dvh] w-[300dvh] rounded-full bg-blue-100 md:left-1/3" />
+        <div className="animate-btt absolute top-[300dvh] right-0 h-[300dvh] w-[300dvh] rounded-full bg-red-100 md:right-1/3" />
+        <div className="animate-btt absolute top-[300dvh] left-0 h-[300dvh] w-[300dvh] rounded-full bg-blue-100 [animation-delay:0.5s] md:left-1/3" />
         <div className="flex flex-col items-center justify-center gap-6">
           <div className="flex flex-row items-center justify-center gap-12">
             <div className="relative flex size-26 items-center justify-center">

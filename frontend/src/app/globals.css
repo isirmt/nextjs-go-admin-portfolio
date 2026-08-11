@@ -101,6 +101,23 @@
   animation: aqua-frame-swap 4000ms step-end infinite;
 }
 
+@keyframes bottom-to-top {
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(-600dvh);
+  }
+}
+
+.animate-btt {
+  animation-name: bottom-to-top;
+  animation-duration: 4000ms;
+  animation-timing-function: linear;
+  animation-fill-mode: both;
+}
+
 @keyframes iv-fade-tracking {
   0% {
     opacity: 0;
