@@ -83,6 +83,24 @@
   animation-fill-mode: forwards;
 }
 
+@keyframes aqua-frame-swap {
+  0%,
+  100% {
+    background-image: url("/aqua_frame_1.png");
+    width: 32.5rem;
+    right: -1.5rem;
+  }
+  50% {
+    background-image: url("/aqua_frame_2.png");
+    width: 30.5rem;
+    right: 0.4rem;
+  }
+}
+
+.animate-aqua-frame {
+  animation: aqua-frame-swap 4000ms step-end infinite;
+}
+
 @keyframes iv-fade-tracking {
   0% {
     opacity: 0;
