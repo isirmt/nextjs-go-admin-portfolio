@@ -41,7 +41,7 @@ function HeroPageNavigation() {
             <button
               type="button"
               onClick={() => goTo(page.id)}
-              className={`font-dot relative z-10 flex size-10 items-center justify-center rounded border-2 border-[#F43F5E] text-xl font-bold shadow transition-all ${isCurrent ? "pointer-events-none rotate-45 bg-[#F43F5E] text-white" : "cursor-pointer bg-white text-[#F43F5E]"}`}
+              className={`font-dot relative z-10 flex size-10 items-center justify-center rounded border-2 border-[#F43F5E] text-xl font-bold shadow transition-all select-none ${isCurrent ? "pointer-events-none rotate-45 bg-[#F43F5E] text-white" : "cursor-pointer bg-white text-[#F43F5E]"}`}
             >
               <span
                 className={`transition-all ${isCurrent ? "-rotate-45" : ""}`}
@@ -62,7 +62,7 @@ export default function HeroSection() {
       <h1 className="hidden" aria-hidden="true">
         色彩と体験
       </h1>
-      <HeroDeck pages={heroPages} initialPageId="portfolio" autoPagination loop>
+      <HeroDeck pages={heroPages} initialPageId="opening" autoPagination loop>
         <HeroPageNavigation />
       </HeroDeck>
     </div>
