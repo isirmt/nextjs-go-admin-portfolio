@@ -5,7 +5,7 @@ import { useSelectingCubeContext } from "@/contexts/selectingCubeContext";
 import { useScrollbarControl } from "@/hooks/useScrollbarControl";
 import { Work } from "@/types/works/common";
 import { useEffect, useRef, useState } from "react";
-import SearchIcon from "../searchIcon";
+import SearchIcon from "../public/searchIcon";
 import React from "react";
 
 const SEARCH_DELAY = 300; // ms
@@ -176,7 +176,7 @@ export default function SearchWindow() {
       className={`fixed top-0 left-0 z-100 flex size-full flex-col items-end gap-6 p-6 transition-colors ${isOpen ? "pointer-events-auto bg-black/10 backdrop-blur-sm" : "pointer-events-none bg-transparent"}`}
     >
       <div
-        className="relative z-10 h-12 w-78 max-w-full"
+        className="relative z-10 h-12 w-40 max-w-full md:w-78"
         style={{ marginRight: isOpen ? scrollbarWidth : 0 }}
       >
         <input
@@ -198,15 +198,15 @@ export default function SearchWindow() {
         {!isOpen && searchTerm.trim() === "" && (
           <div className="pointer-events-none absolute top-3.25 left-13 z-10 flex items-center gap-1">
             <div
-              className={`relative flex scale-y-110 items-center gap-3 overflow-hidden rounded-sm bg-[#ddd] px-1 py-px tracking-[.1rem] shadow-[0_.125rem_0_0_#bbb] transition-all duration-150 select-none`}
+              className={`relative hidden scale-y-110 items-center gap-3 overflow-hidden rounded-sm bg-[#ddd] px-1 py-px tracking-[.1rem] shadow-[0_.125rem_0_0_#bbb] transition-all duration-150 select-none md:flex`}
             >
               <span className="font-dot text-lg leading-none text-[#555]">
                 /
               </span>
             </div>
-            <span className="tracking-wider text-[#333]">
-              を押してスマート検索
-            </span>
+            <div className="flex tracking-wider text-[#333]">
+              <span className="hidden md:block">を押して</span>スマート検索
+            </div>
           </div>
         )}
       </div>

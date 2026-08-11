@@ -6,7 +6,7 @@ import { useTechInfoGetter } from "@/hooks/useTechInfoGetter";
 import { smoochSans } from "@/lib/fonts";
 import Link from "next/link";
 import { useEffect, useMemo, useRef } from "react";
-import MarqueeText from "../marqueeText";
+import MarqueeText from "../public/marqueeText";
 
 type SelectedDetailScreenProps = {
   selectingWorkId?: string;

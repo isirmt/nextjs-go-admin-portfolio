@@ -1,14 +1,15 @@
 "use client";
 
 import { useSelectingCubeContext } from "@/contexts/selectingCubeContext";
-import RealtimeWorld from "./realtimeWorld";
-import React, { useMemo } from "react";
+import RealtimeWorld from "../../public/realtimeWorld";
+import { useMemo } from "react";
 import { useWorksContext } from "@/contexts/worksContext";
 import Link from "next/link";
-import MarqueeText from "./marqueeText";
+import MarqueeText from "../../public/marqueeText";
 import { kiwiMaru } from "@/lib/fonts";
+import HeroPageFrame from "../pageFrame";
 
-export default function HeroSection() {
+export default function PortfolioHeroPage() {
   const { works } = useWorksContext();
   const { selectingCubeId } = useSelectingCubeContext();
 
@@ -17,10 +18,8 @@ export default function HeroSection() {
   }, [works, selectingCubeId]);
 
   return (
-    <React.Fragment>
-      <h1 className="hidden" aria-hidden="true">
-        色彩と体験
-      </h1>
+    <HeroPageFrame>
+      <div className="absolute top-0 left-0 size-full bg-[#fafafa]" />
       <div
         className={`absolute top-0 left-0 size-full transition-all duration-300 ${selectingWork ? "opacity-0" : "opacity-100"}`}
       >
@@ -50,8 +49,9 @@ export default function HeroSection() {
       </div>
       <div className="pointer-events-none absolute top-0 left-0 size-full bg-[linear-gradient(0deg,transparent_calc(100%-1px),#000_calc(100%-1px)),linear-gradient(90deg,transparent_calc(100%-1px),#000_calc(100%-1px))] bg-size-[64px_64px] opacity-10" />
       <RealtimeWorld />
+      <div className="absolute bottom-0 left-0 h-6 w-full border-t-2 border-dotted border-[#888]" />
       <Link
-        className="group absolute right-0 bottom-24 z-10 size-[300px] bg-[#f43f5e] transition-all [clip-path:polygon(100%_0%,100%_100%,0%_100%)] hover:bg-[#ff5a75]"
+        className="group absolute right-0 bottom-6 z-10 size-[300px] bg-[#f43f5e] transition-all [clip-path:polygon(100%_0%,100%_100%,0%_100%)] hover:bg-[#ff5a75]"
         href="https://itomiri.com"
         target="_blank"
         rel="noopener"
@@ -194,6 +194,6 @@ export default function HeroSection() {
           </svg>
         </div>
       </Link>
-    </React.Fragment>
+    </HeroPageFrame>
   );
 }

@@ -3,8 +3,8 @@ import { ImagesProvider } from "@/contexts/imagesContext";
 import { TechsProvider } from "@/contexts/techsContext";
 import { WorksProvider } from "@/contexts/worksContext";
 import { Suspense } from "react";
-import Navigation from "@/components/navigation";
-import HeroSection from "@/components/heroSection";
+import Navigation from "@/components/public/navigation";
+import HeroSection from "@/components/hero/section";
 import { SelectingCubeContextProvider } from "@/contexts/selectingCubeContext";
 import { Metadata } from "next";
 import SearchWindow from "@/components/works/searchWindow";
@@ -55,7 +55,7 @@ export default function Home() {
               <SearchWindow />
               <section
                 aria-label="top-view"
-                className="relative h-[calc(100dvh+72px)] w-full bg-[#fafafa]"
+                className="relative h-dvh w-full bg-[#C6F4FF]"
               >
                 <Suspense fallback={null}>
                   <HeroSection />

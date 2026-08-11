@@ -6,7 +6,7 @@ import { useInViewAnimation } from "@/hooks/useInViewAnimation";
 import { useTechInfoGetter } from "@/hooks/useTechInfoGetter";
 import { Work } from "@/types/works/common";
 import { useMemo, useState } from "react";
-import MarqueeText from "../marqueeText";
+import MarqueeText from "../public/marqueeText";
 
 const delayFromId = (id: string, maxDelay = 500) => {
   let hash = 0;
@@ -85,7 +85,7 @@ export default function WorkCard({
         }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        className={`group relative flex cursor-pointer items-center justify-center drop-shadow-2xl transition-all duration-100 ${isSelected ? "scale-110" : ""}`}
+        className={`group relative flex cursor-pointer items-center justify-center drop-shadow-[0_25px_25px_#dbe7ff85] transition-all duration-100 ${isSelected ? "scale-110" : ""}`}
       >
         <div
           className={`pointer-events-none absolute z-0 size-[95%] bg-[#94d5f3] transition-all duration-300 ${isSelected ? "-rotate-360 delay-200 ease-linear" : "ease-over rotate-17"}`}
