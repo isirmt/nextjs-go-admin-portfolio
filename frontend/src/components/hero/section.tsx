@@ -62,12 +62,7 @@ export default function HeroSection() {
       <h1 className="hidden" aria-hidden="true">
         色彩と体験
       </h1>
-      <HeroDeck
-        pages={heroPages}
-        initialPageId="opening"
-        autoPagination={false}
-        loop
-      >
+      <HeroDeck pages={heroPages} initialPageId="opening" autoPagination loop>
         <HeroPageNavigation />
       </HeroDeck>
     </div>
