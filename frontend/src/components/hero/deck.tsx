@@ -15,6 +15,7 @@ import type { HeroPageDefinition } from "../../types/hero/types";
 type HeroDeckControls = {
   currentPageId: string;
   currentPageIndex: number;
+  autoPagination: boolean;
   isTransitioning: boolean;
   pageCount: number;
   goTo: (pageId: string) => boolean;
@@ -37,6 +38,7 @@ type HeroDeckProps = {
   pages: readonly HeroPageDefinition[];
   initialPageId?: string;
   activePageId?: string;
+  autoPagination?: boolean;
   loop?: boolean;
   onPageChange?: (pageId: string) => void;
   children?: ReactNode;
@@ -123,6 +125,7 @@ export default function HeroDeck({
   pages,
   initialPageId,
   activePageId,
+  autoPagination = true,
   loop = true,
   onPageChange,
   children,
@@ -245,6 +248,7 @@ export default function HeroDeck({
   useEffect(() => {
     const durationMs = currentPage?.durationMs;
     if (
+      !autoPagination ||
       isTransitioning ||
       pages.length < 2 ||
       durationMs === undefined ||
@@ -257,6 +261,7 @@ export default function HeroDeck({
     const timeoutId = window.setTimeout(next, durationMs);
     return () => window.clearTimeout(timeoutId);
   }, [
+    autoPagination,
     currentPage?.durationMs,
     currentPageId,
     isTransitioning,
@@ -268,12 +273,14 @@ export default function HeroDeck({
     () => ({
       currentPageId,
       currentPageIndex,
+      autoPagination,
       isTransitioning,
       pageCount: pages.length,
       goTo,
       next,
     }),
     [
+      autoPagination,
       currentPageId,
       currentPageIndex,
       goTo,

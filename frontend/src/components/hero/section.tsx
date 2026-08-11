@@ -4,13 +4,15 @@ import HeroDeck, { useHeroDeck } from "./deck";
 import { heroPages } from "./pages/registry";
 
 function HeroPageNavigation() {
-  const { currentPageId, goTo, isTransitioning, pageCount } = useHeroDeck();
+  const { autoPagination, currentPageId, goTo, isTransitioning, pageCount } =
+    useHeroDeck();
 
   return (
     <ul className="absolute bottom-0 left-0 z-10 flex gap-6 p-6">
       {heroPages.map((page, index) => {
         const isCurrent = page.id === currentPageId;
-        const showDuration = isCurrent && !isTransitioning && pageCount > 1;
+        const showDuration =
+          autoPagination && isCurrent && !isTransitioning && pageCount > 1;
 
         return (
           <li key={page.id} className="relative">
@@ -60,7 +62,7 @@ export default function HeroSection() {
       <h1 className="hidden" aria-hidden="true">
         色彩と体験
       </h1>
-      <HeroDeck pages={heroPages} initialPageId="portfolio" loop>
+      <HeroDeck pages={heroPages} initialPageId="portfolio" autoPagination loop>
         <HeroPageNavigation />
       </HeroDeck>
     </div>
