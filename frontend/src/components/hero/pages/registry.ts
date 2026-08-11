@@ -6,16 +6,11 @@ export const heroPages = [
   {
     id: "portfolio",
     Component: PortfolioHeroPage,
-    durationMs: 8000,
+    durationMs: 10 * 1000,
   },
   {
     id: "sample",
     Component: SampleHeroPage,
-    durationMs: 4000,
-  },
-  {
-    id: "sample2",
-    Component: SampleHeroPage,
-    durationMs: 8000,
+    durationMs: 4 * 1000,
   },
 ] as const satisfies readonly HeroPageDefinition[];
