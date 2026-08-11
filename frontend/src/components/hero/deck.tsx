@@ -24,11 +24,29 @@ type HeroDeckControls = {
 
 const HeroDeckContext = createContext<HeroDeckControls | null>(null);
 
+type HeroSceneState = {
+  sceneId: string;
+  isCurrent: boolean;
+  activationVersion: number;
+};
+
+const HeroSceneContext = createContext<HeroSceneState | null>(null);
+
 export function useHeroDeck() {
   const context = useContext(HeroDeckContext);
 
   if (!context) {
     throw new Error("useHeroDeck must be used within HeroDeck");
+  }
+
+  return context;
+}
+
+export function useHeroScene() {
+  const context = useContext(HeroSceneContext);
+
+  if (!context) {
+    throw new Error("useHeroScene must be used within HeroDeck");
   }
 
   return context;
@@ -133,6 +151,12 @@ export default function HeroDeck({
   const [internalPageId, setInternalPageId] = useState(
     () => initialPageId ?? pages[0]?.id ?? "",
   );
+  const [sceneActivationVersions, setSceneActivationVersions] = useState<
+    Record<string, number>
+  >(() => {
+    const firstPageId = activePageId ?? initialPageId ?? pages[0]?.id;
+    return firstPageId ? { [firstPageId]: 1 } : {};
+  });
   const [isTransitioning, setIsTransitioning] = useState(false);
   const trackRef = useRef<HTMLDivElement | null>(null);
   const frameRefs = useRef(new Map<string, HTMLDivElement>());
@@ -166,6 +190,11 @@ export default function HeroDeck({
 
       const toPageIndex = pages.findIndex((page) => page.id === pageId);
       const track = trackRef.current;
+
+      setSceneActivationVersions((current) => ({
+        ...current,
+        [pageId]: (current[pageId] ?? 0) + 1,
+      }));
 
       if (activePageId === undefined) {
         setInternalPageId(pageId);
@@ -307,6 +336,10 @@ export default function HeroDeck({
           {pages.map((page, pageIndex) => {
             const Page = page.Component;
             const isActive = pageIndex === currentPageIndex;
+            const activationVersion = sceneActivationVersions[page.id] ?? 0;
+            const pageKey = page.remountOnEnter
+              ? `${page.id}:${activationVersion}`
+              : page.id;
 
             return (
               <div
@@ -334,7 +367,15 @@ export default function HeroDeck({
                     }}
                     className="relative size-full origin-center will-change-transform"
                   >
-                    <Page />
+                    <HeroSceneContext.Provider
+                      value={{
+                        sceneId: page.id,
+                        isCurrent: isActive,
+                        activationVersion,
+                      }}
+                    >
+                      <Page key={pageKey} />
+                    </HeroSceneContext.Provider>
                   </div>
                 </div>
               </div>
