@@ -4,7 +4,9 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -39,6 +41,73 @@ type HeroDeckProps = {
   children?: ReactNode;
 };
 
+const HERO_FRAME_DURATION_MS = 900;
+const HERO_TRACK_DELAY_MS = 350;
+const HERO_TRACK_DURATION_MS = 510;
+const HERO_TRACK_EASING = "cubic-bezier(0.34, 1.56, 0.64, 1)";
+
+const HERO_FRAME_KEYFRAMES: Keyframe[] = [
+  {
+    borderRadius: "0",
+    transform: "scale3d(1, 1, 1)",
+    borderColor: "transparent",
+    borderWidth: "0",
+    offset: 0,
+    easing: "linear",
+  },
+  {
+    borderRadius: "4rem",
+    transform: "scale3d(0.9, 0.9, 1)",
+    borderColor: "#525eeb",
+    borderWidth: "4",
+    offset: 0.2,
+    easing: "linear",
+  },
+  {
+    borderRadius: "4rem",
+    transform: "scale3d(0.9, 0.9, 1)",
+    borderColor: "#525eeb",
+    borderWidth: "4",
+    offset: 0.8,
+    easing: "linear",
+  },
+  {
+    borderRadius: "0",
+    transform: "scale3d(1, 1, 1)",
+    borderColor: "transparent",
+    borderWidth: "0",
+    offset: 1,
+  },
+];
+
+const HERO_CONTENT_KEYFRAMES: Keyframe[] = [
+  {
+    transform: "scale3d(1, 1, 1)",
+    offset: 0,
+    easing: "linear",
+  },
+  {
+    transform: "scale3d(1.1, 1.1, 1)",
+    offset: 0.2,
+    easing: "linear",
+  },
+  {
+    transform: "scale3d(1.1, 1.1, 1)",
+    offset: 0.8,
+    easing: "linear",
+  },
+  {
+    transform: "scale3d(1, 1, 1)",
+    offset: 1,
+  },
+];
+
+const HERO_FRAME_ANIMATION_OPTIONS: KeyframeAnimationOptions = {
+  duration: HERO_FRAME_DURATION_MS,
+  easing: "linear",
+  fill: "both",
+};
+
 export default function HeroDeck({
   pages,
   initialPageId,
@@ -50,6 +119,11 @@ export default function HeroDeck({
   const [internalPageId, setInternalPageId] = useState(
     () => initialPageId ?? pages[0]?.id ?? "",
   );
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const trackRef = useRef<HTMLDivElement | null>(null);
+  const frameRefs = useRef(new Map<string, HTMLDivElement>());
+  const contentRefs = useRef(new Map<string, HTMLDivElement>());
+  const activeAnimationsRef = useRef<Animation[]>([]);
   const requestedPageId = activePageId ?? internalPageId;
   const requestedPageIndex = pages.findIndex(
     (page) => page.id === requestedPageId,
@@ -58,22 +132,90 @@ export default function HeroDeck({
   const currentPage = pages[currentPageIndex];
   const currentPageId = currentPage?.id ?? "";
 
+  useEffect(() => {
+    return () => {
+      const animations = activeAnimationsRef.current;
+      activeAnimationsRef.current = [];
+      animations.forEach((animation) => animation.cancel());
+    };
+  }, []);
+
   const goTo = useCallback(
     (pageId: string) => {
       if (
+        isTransitioning ||
         pageId === currentPageId ||
         !pages.some((page) => page.id === pageId)
       ) {
         return false;
       }
 
+      const toPageIndex = pages.findIndex((page) => page.id === pageId);
+      const track = trackRef.current;
+
       if (activePageId === undefined) {
         setInternalPageId(pageId);
       }
       onPageChange?.(pageId);
+
+      if (!track) {
+        return true;
+      }
+
+      setIsTransitioning(true);
+
+      const animations: Animation[] = [
+        track.animate(
+          [
+            {
+              transform: `translate3d(-${currentPageIndex * 100}%, 0, 0)`,
+            },
+            {
+              transform: `translate3d(-${toPageIndex * 100}%, 0, 0)`,
+            },
+          ],
+          {
+            duration: HERO_TRACK_DURATION_MS,
+            delay: HERO_TRACK_DELAY_MS,
+            easing: HERO_TRACK_EASING,
+            fill: "both",
+          },
+        ),
+      ];
+
+      pages.forEach((page) => {
+        const frame = frameRefs.current.get(page.id);
+        const content = contentRefs.current.get(page.id);
+        if (!frame || !content) return;
+
+        animations.push(
+          frame.animate(HERO_FRAME_KEYFRAMES, HERO_FRAME_ANIMATION_OPTIONS),
+          content.animate(HERO_CONTENT_KEYFRAMES, HERO_FRAME_ANIMATION_OPTIONS),
+        );
+      });
+
+      activeAnimationsRef.current = animations;
+
+      void Promise.allSettled(
+        animations.map((animation) => animation.finished),
+      ).then(() => {
+        if (activeAnimationsRef.current !== animations) return;
+
+        activeAnimationsRef.current = [];
+        animations.forEach((animation) => animation.cancel());
+        setIsTransitioning(false);
+      });
+
       return true;
     },
-    [activePageId, currentPageId, onPageChange, pages],
+    [
+      activePageId,
+      currentPageId,
+      currentPageIndex,
+      isTransitioning,
+      onPageChange,
+      pages,
+    ],
   );
 
   const next = useCallback(() => {
@@ -106,9 +248,10 @@ export default function HeroDeck({
 
   return (
     <HeroDeckContext.Provider value={controls}>
-      <div className="relative size-full overflow-hidden">
+      <div className="relative size-full overflow-hidden bg-[#C6F4FF]">
         <div
-          className="ease-over flex size-full transform-gpu transition-transform duration-850 will-change-transform"
+          ref={trackRef}
+          className="flex size-full transform-gpu will-change-transform"
           style={{
             transform: `translate3d(-${currentPageIndex * 100}%, 0, 0)`,
           }}
@@ -123,7 +266,29 @@ export default function HeroDeck({
                 className={`relative size-full shrink-0 ${isActive ? "" : "pointer-events-none"}`}
                 inert={!isActive}
               >
-                <Page />
+                <div
+                  ref={(element) => {
+                    if (element) {
+                      frameRefs.current.set(page.id, element);
+                    } else {
+                      frameRefs.current.delete(page.id);
+                    }
+                  }}
+                  className="relative size-full origin-center overflow-hidden border-0 border-transparent will-change-transform"
+                >
+                  <div
+                    ref={(element) => {
+                      if (element) {
+                        contentRefs.current.set(page.id, element);
+                      } else {
+                        contentRefs.current.delete(page.id);
+                      }
+                    }}
+                    className="relative size-full origin-center will-change-transform"
+                  >
+                    <Page />
+                  </div>
+                </div>
               </div>
             );
           })}
