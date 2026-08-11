@@ -274,7 +274,7 @@ export default function HeroDeck({
                       frameRefs.current.delete(page.id);
                     }
                   }}
-                  className="relative size-full origin-center overflow-hidden border-0 border-transparent will-change-transform"
+                  className="relative box-content size-full origin-center overflow-hidden border-0 border-transparent will-change-transform"
                 >
                   <div
                     ref={(element) => {
