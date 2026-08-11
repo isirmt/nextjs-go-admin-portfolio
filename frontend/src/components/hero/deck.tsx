@@ -248,7 +248,7 @@ export default function HeroDeck({
 
   return (
     <HeroDeckContext.Provider value={controls}>
-      <div className="relative size-full overflow-hidden bg-[#C6F4FF]">
+      <div className="relative size-full overflow-hidden">
         <div
           ref={trackRef}
           className="flex size-full transform-gpu will-change-transform"
