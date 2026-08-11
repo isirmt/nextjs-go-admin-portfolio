@@ -15,6 +15,7 @@ import type { HeroPageDefinition } from "../../types/hero/types";
 type HeroDeckControls = {
   currentPageId: string;
   currentPageIndex: number;
+  isTransitioning: boolean;
   pageCount: number;
   goTo: (pageId: string) => boolean;
   next: () => void;
@@ -267,11 +268,19 @@ export default function HeroDeck({
     () => ({
       currentPageId,
       currentPageIndex,
+      isTransitioning,
       pageCount: pages.length,
       goTo,
       next,
     }),
-    [currentPageId, currentPageIndex, goTo, next, pages.length],
+    [
+      currentPageId,
+      currentPageIndex,
+      goTo,
+      isTransitioning,
+      next,
+      pages.length,
+    ],
   );
 
   if (!currentPage) {
