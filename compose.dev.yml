@@ -17,8 +17,8 @@ services:
 
   web:
     build:
-      context: .
-      dockerfile: ./frontend/Dockerfile.dev
+      context: ./frontend
+      dockerfile: Dockerfile.dev
     environment:
       NODE_ENV: development
       HOSTNAME: "0.0.0.0"
