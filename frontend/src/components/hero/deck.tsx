@@ -231,6 +231,28 @@ export default function HeroDeck({
     }
   }, [currentPageIndex, goTo, loop, pages]);
 
+  useEffect(() => {
+    const durationMs = currentPage?.durationMs;
+    if (
+      isTransitioning ||
+      pages.length < 2 ||
+      durationMs === undefined ||
+      !Number.isFinite(durationMs) ||
+      durationMs <= 0
+    ) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(next, durationMs);
+    return () => window.clearTimeout(timeoutId);
+  }, [
+    currentPage?.durationMs,
+    currentPageId,
+    isTransitioning,
+    next,
+    pages.length,
+  ]);
+
   const controls = useMemo<HeroDeckControls>(
     () => ({
       currentPageId,
