@@ -6,7 +6,7 @@ export const heroPages = [
   {
     id: "opening",
     Component: OpeningHeroPage,
-    durationMs: 6 * 1000,
+    durationMs: 5.5 * 1000,
     remountOnEnter: true,
   },
   {
