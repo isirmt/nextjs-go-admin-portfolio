@@ -20,10 +20,10 @@ export default function OpeningHeroPage() {
         className={`pointer-events-none absolute inset-0 flex items-center justify-center bg-[#ffffff] font-bold select-none ${lineSeedJp.className}`}
       >
         <div
-          className={`absolute z-10 aspect-square rounded-full bg-transparent backdrop-grayscale-100 transition-all duration-1000 ${isColorful ? "size-0" : "size-[calc(max(100dvh,100dvw)*1.414)]"}`}
+          className={`absolute z-10 aspect-square rounded-full bg-transparent backdrop-grayscale-100 transition-all duration-1500 ${isColorful ? "size-0" : "size-[calc(max(100dvh,100dvw)*1.414)]"}`}
         />
-        <div className="animate-btt absolute top-[300dvh] right-0 h-[300dvh] w-[300dvh] rounded-full bg-red-100 md:right-1/3" />
-        <div className="animate-btt absolute top-[300dvh] left-0 h-[300dvh] w-[300dvh] rounded-full bg-blue-100 [animation-delay:0.5s] md:left-1/3" />
+        <div className="animate-btt absolute top-[300dvh] right-0 h-[300dvh] w-[300dvh] rounded-full bg-[#faddf1] md:right-1/3" />
+        <div className="animate-btt absolute top-[300dvh] left-0 h-[300dvh] w-[300dvh] rounded-full bg-[#cbf9ff] [animation-delay:0.5s] md:left-1/3" />
         <div className="flex flex-col items-center justify-center gap-6">
           <div className="flex flex-row items-center justify-center gap-12">
             <div className="relative flex size-26 items-center justify-center">
