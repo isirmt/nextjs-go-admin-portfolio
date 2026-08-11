@@ -41,9 +41,19 @@ type HeroDeckProps = {
   children?: ReactNode;
 };
 
-const HERO_FRAME_DURATION_MS = 900;
-const HERO_TRACK_DELAY_MS = 350;
-const HERO_TRACK_DURATION_MS = 510;
+const HERO_FRAME_SHRINK_DURATION_MS = 350;
+const HERO_PHASE_GAP_MS = 200;
+const HERO_TRACK_DURATION_MS = 1000;
+const HERO_FRAME_RESTORE_DURATION_MS = 350;
+const HERO_TRACK_DELAY_MS = HERO_FRAME_SHRINK_DURATION_MS + HERO_PHASE_GAP_MS;
+const HERO_FRAME_RESTORE_START_MS =
+  HERO_TRACK_DELAY_MS + HERO_TRACK_DURATION_MS + HERO_PHASE_GAP_MS;
+const HERO_FRAME_DURATION_MS =
+  HERO_FRAME_RESTORE_START_MS + HERO_FRAME_RESTORE_DURATION_MS;
+const HERO_FRAME_SHRINK_END_OFFSET =
+  HERO_FRAME_SHRINK_DURATION_MS / HERO_FRAME_DURATION_MS;
+const HERO_FRAME_RESTORE_START_OFFSET =
+  HERO_FRAME_RESTORE_START_MS / HERO_FRAME_DURATION_MS;
 const HERO_TRACK_EASING = "cubic-bezier(0.34, 1.56, 0.64, 1)";
 
 const HERO_FRAME_KEYFRAMES: Keyframe[] = [
@@ -60,7 +70,7 @@ const HERO_FRAME_KEYFRAMES: Keyframe[] = [
     transform: "scale3d(0.9, 0.9, 1)",
     borderColor: "#525eeb",
     borderWidth: "4px",
-    offset: 0.2,
+    offset: HERO_FRAME_SHRINK_END_OFFSET,
     easing: "linear",
   },
   {
@@ -68,7 +78,7 @@ const HERO_FRAME_KEYFRAMES: Keyframe[] = [
     transform: "scale3d(0.9, 0.9, 1)",
     borderColor: "#525eeb",
     borderWidth: "4px",
-    offset: 0.8,
+    offset: HERO_FRAME_RESTORE_START_OFFSET,
     easing: "linear",
   },
   {
@@ -88,12 +98,12 @@ const HERO_CONTENT_KEYFRAMES: Keyframe[] = [
   },
   {
     transform: "scale3d(1.1, 1.1, 1)",
-    offset: 0.2,
+    offset: HERO_FRAME_SHRINK_END_OFFSET,
     easing: "linear",
   },
   {
     transform: "scale3d(1.1, 1.1, 1)",
-    offset: 0.8,
+    offset: HERO_FRAME_RESTORE_START_OFFSET,
     easing: "linear",
   },
   {
