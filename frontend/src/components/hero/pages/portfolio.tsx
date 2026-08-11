@@ -19,6 +19,7 @@ export default function PortfolioHeroPage() {
 
   return (
     <HeroPageFrame>
+      <div className="absolute top-0 left-0 size-full bg-[#fafafa]" />
       <div
         className={`absolute top-0 left-0 size-full transition-all duration-300 ${selectingWork ? "opacity-0" : "opacity-100"}`}
       >

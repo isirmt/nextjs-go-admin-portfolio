@@ -7,7 +7,7 @@ function HeroPageNavigation() {
   const { currentPageId, goTo } = useHeroDeck();
 
   return (
-    <ul className="absolute bottom-0 left-0 z-100 flex gap-4 p-6">
+    <ul className="absolute bottom-0 left-0 z-10 flex gap-4 p-6">
       {heroPages.map((page, index) => {
         const isCurrent = page.id === currentPageId;
 
