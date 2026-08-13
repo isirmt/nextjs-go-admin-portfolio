@@ -12,10 +12,12 @@ import { SectionText } from "./sectionText";
 import { CloudLarge, CloudSmall } from "./clouds";
 import SelectedDetailScreen from "./selectedDetailScreen";
 import WorkCard from "./workCard";
+import { useTechsContext } from "@/contexts/techsContext";
 
 export default function WorksList() {
   const { works } = useWorksContext();
-  const { visibleWorks } = useWorkListView(works);
+  const { techs } = useTechsContext();
+  const { visibleWorks, toggleTech, selectedTechIds } = useWorkListView(works);
   const { clickedCubeId, clickNonce } = useSelectingCubeContext();
   const [selectingWorkId, setSelectingWorkId] = useState<string>();
   const [lastSelectedWorkId, setLastSelectedWorkId] = useState<string>();
@@ -94,6 +96,22 @@ export default function WorksList() {
           And More
         </div>
         <SectionText />
+        <div className="relative mb-24 flex w-full justify-center gap-12">
+          <div>
+            <ul className="flex flex-wrap justify-start gap-1.5">
+              {techs.map((tech) => (
+                <li key={tech.id}>
+                  <button
+                    className={`pointer-events-auto scale-100 cursor-pointer rounded-full border border-[#6354EB] px-2 py-0.5 text-sm transition-[background-color,color,scale] duration-[250ms,250ms,500ms] ease-[linear,linear,cubic-bezier(0.34,1.56,0.64,1)] hover:scale-110 ${selectedTechIds.has(tech.id) ? "bg-[#6354EB] text-white" : "bg-white text-[#6354EB] hover:bg-[#e4e0ff]"}`}
+                    onClick={() => toggleTech(tech.id)}
+                  >
+                    #{tech.name}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
         <div className="flex w-fit flex-wrap justify-center gap-x-24 gap-y-24">
           {visibleWorks.map((work) => (
             <WorkCard
