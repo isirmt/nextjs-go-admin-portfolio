@@ -2,7 +2,7 @@
 
 import { useSelectingCubeContext } from "@/contexts/selectingCubeContext";
 import RealtimeWorld from "../../public/realtimeWorld";
-import { useMemo } from "react";
+import { Suspense, useMemo } from "react";
 import { useWorksContext } from "@/contexts/worksContext";
 import Link from "next/link";
 import MarqueeText from "../../public/marqueeText";
@@ -48,7 +48,9 @@ export default function PortfolioHeroPage() {
         )}
       </div>
       <div className="pointer-events-none absolute top-0 left-0 size-full bg-[linear-gradient(0deg,transparent_calc(100%-1px),#000_calc(100%-1px)),linear-gradient(90deg,transparent_calc(100%-1px),#000_calc(100%-1px))] bg-size-[64px_64px] opacity-10" />
-      <RealtimeWorld />
+      <Suspense fallback={null}>
+        <RealtimeWorld />
+      </Suspense>
       <div className="absolute bottom-0 left-0 h-6 w-full border-t-2 border-dotted border-[#888]" />
       <Link
         className="group absolute right-0 bottom-6 z-10 size-[300px] bg-[#f43f5e] transition-all [clip-path:polygon(100%_0%,100%_100%,0%_100%)] hover:bg-[#ff5a75]"
