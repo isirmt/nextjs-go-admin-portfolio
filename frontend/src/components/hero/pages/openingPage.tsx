@@ -34,8 +34,8 @@ export default function OpeningHeroPage() {
         >
           <div className="animate-up-down-smooth absolute right-0 bottom-0 size-[140%] translate-x-1/2 translate-y-1/2 rounded-full bg-[#f3c2e2] duration-1000 [animation-delay:-.7s]" />
         </Sparkle>
-        <div className="animate-btt absolute top-[300dvh] right-0 h-[300dvh] w-[300dvh] rounded-full bg-[#faddf1] md:right-1/3" />
-        <div className="animate-btt absolute top-[300dvh] left-0 h-[300dvh] w-[300dvh] rounded-full bg-[#cbf9ff] [animation-delay:0.5s] md:left-1/3" />
+        <div className="animate-btt absolute top-[300dvh] right-0 h-[300dvh] w-[300dvh] rounded-full bg-[#faddf1] ease-out md:right-1/3" />
+        <div className="animate-btt absolute top-[300dvh] left-0 h-[300dvh] w-[300dvh] rounded-full bg-[#cbf9ff] ease-out [animation-delay:0.5s] md:left-1/3" />
         <div className="flex flex-col items-center justify-center gap-6">
           <div className="flex flex-row items-center justify-center gap-12">
             <div className="relative flex size-26 items-center justify-center">
