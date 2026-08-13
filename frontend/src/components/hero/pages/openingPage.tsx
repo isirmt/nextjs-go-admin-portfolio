@@ -39,12 +39,12 @@ export default function OpeningHeroPage() {
         <div className="flex flex-col items-center justify-center gap-6">
           <div className="flex flex-row items-center justify-center gap-12">
             <div className="relative flex size-26 items-center justify-center">
-              <div className="flex size-full items-center justify-center bg-[#F43F5E] text-8xl leading-none text-white">
+              <div className="flex size-full items-center justify-center bg-[#f09ba9] text-8xl leading-none text-white">
                 色
               </div>
             </div>
             <div className="relative flex size-26 items-center justify-center">
-              <div className="flex size-full items-center justify-center bg-[#F4603F] text-8xl leading-none text-white">
+              <div className="flex size-full items-center justify-center bg-[#f4a18f] text-8xl leading-none text-white">
                 彩
               </div>
             </div>
@@ -53,7 +53,7 @@ export default function OpeningHeroPage() {
             <div className="group relative flex size-20 items-center justify-center">
               <button
                 className={`ease-over pointer-events-auto z-20 flex size-full cursor-pointer items-center justify-center text-7xl leading-none text-white transition-[scale,background-color] duration-[350ms,1000ms] hover:scale-90 active:scale-80 ${
-                  isColorful ? "bg-[#aaa]" : "bg-[#F4CE6B]"
+                  isColorful ? "bg-[#aaa]" : "bg-[#f8d16e]"
                 }`}
                 onClick={() => setIsColorful((current) => !current)}
               >
@@ -63,12 +63,12 @@ export default function OpeningHeroPage() {
           </div>
           <div className="flex flex-row items-center justify-center gap-12">
             <div className="relative flex size-26 items-center justify-center">
-              <div className="flex size-full items-center justify-center bg-[#D386F4] text-8xl leading-none text-white">
+              <div className="flex size-full items-center justify-center bg-[#d9aeeb] text-8xl leading-none text-white">
                 体
               </div>
             </div>
             <div className="relative flex size-26 items-center justify-center">
-              <div className="flex size-full items-center justify-center bg-[#90F4A1] text-8xl leading-none text-white">
+              <div className="flex size-full items-center justify-center bg-[#9bd1a4] text-8xl leading-none text-white">
                 験
               </div>
             </div>
