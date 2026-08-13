@@ -55,7 +55,7 @@ export default function Home() {
               <SearchWindow />
               <section
                 aria-label="top-view"
-                className="relative h-dvh w-full bg-[#C6F4FF]"
+                className="relative h-dvh w-full bg-[repeating-linear-gradient(0deg,#c6f4ff,#c6f4ff_4rem,#d8f6fe_4rem,#d8f6fe_8rem)]"
               >
                 <Suspense fallback={null}>
                   <HeroSection />
