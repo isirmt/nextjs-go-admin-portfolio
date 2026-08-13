@@ -105,7 +105,7 @@ const HERO_FRAME_KEYFRAMES: Keyframe[] = [
   {
     borderRadius: "0",
     transform: "scale3d(1, 1, 1)",
-    borderColor: "transparent",
+    borderColor: "#c6f4ff00",
     borderWidth: "0",
     offset: 1,
   },
