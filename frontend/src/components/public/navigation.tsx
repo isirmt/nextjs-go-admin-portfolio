@@ -26,7 +26,7 @@ export default function Navigation() {
 
   return (
     <nav className="pointer-events-none relative top-0 z-50 h-24 w-full">
-      <ul className="font-dot flex h-full w-full items-center justify-start gap-6 px-4 tracking-wide md:px-10">
+      <ul className="font-dot flex h-full w-full items-center justify-start gap-6 px-4 tracking-wide select-none md:px-10">
         {links.map(({ href, label, subLabel }) => (
           <li key={href}>
             <Link

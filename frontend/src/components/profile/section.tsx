@@ -66,7 +66,7 @@ export default function ProfileSection({ age }: { age: number }) {
         <div className="animate-aqua-frame absolute -right-6 bottom-0 hidden aspect-5000/5200 w-130 max-w-full bg-[url('/aqua_frame_1.png')] bg-contain bg-bottom bg-no-repeat xl:block" />
         <img
           loading="lazy"
-          className="pointer-events-none absolute right-8 bottom-0 hidden w-100 max-w-full xl:block"
+          className="pointer-events-none absolute right-8 bottom-0 hidden w-100 max-w-full select-none xl:block"
           alt="miri_transparent"
           src="/miri_transparent.webp"
         />

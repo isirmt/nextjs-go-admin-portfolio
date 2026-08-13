@@ -2,10 +2,11 @@
 "use client";
 
 import { useWorksContext } from "@/contexts/worksContext";
+import { useBackButtonDismiss } from "@/hooks/useBackButtonDismiss";
 import { useTechInfoGetter } from "@/hooks/useTechInfoGetter";
 import { smoochSans } from "@/lib/fonts";
 import Link from "next/link";
-import { useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import MarqueeText from "../public/marqueeText";
 
 type SelectedDetailScreenProps = {
@@ -28,6 +29,16 @@ export default function SelectedDetailScreen({
   }, [lastSelectedWorkId, selectingWorkId, works]);
 
   const { techsInfo } = useTechInfoGetter(selectedLastWork?.tech_stacks ?? []);
+
+  const dismissDetail = useCallback(
+    () => setSelectingWorkId(undefined),
+    [setSelectingWorkId],
+  );
+
+  useBackButtonDismiss({
+    isOpen: Boolean(selectingWorkId),
+    onDismiss: dismissDetail,
+  });
 
   useEffect(() => {
     if (!selectingWorkId) return;
@@ -113,7 +124,7 @@ export default function SelectedDetailScreen({
                         <span className="mx-4 select-none">関連リンク</span>
                         <div className="h-0 flex-1 border-b" />
                       </div>
-                      <div className="flex flex-col gap-2 px-4 py-4">
+                      <div className="flex flex-col gap-4 px-4 py-4">
                         {selectedLastWork?.urls.map((workUrl, urlIdx) => (
                           <div
                             className="flex flex-wrap items-end gap-2"
@@ -127,7 +138,7 @@ export default function SelectedDetailScreen({
                             >
                               {workUrl.label}
                             </Link>
-                            <div className="truncate text-xs leading-none text-[#555]">
+                            <div className="truncate text-xs leading-none text-ellipsis text-[#555]">
                               {workUrl.url}
                             </div>
                           </div>
@@ -138,7 +149,7 @@ export default function SelectedDetailScreen({
                       </div>
                     </div>
                   )}
-                <div className="whitespace-pre-wrap">
+                <div className="leading-loose whitespace-pre-wrap">
                   {selectedLastWork?.description}
                 </div>
               </div>
@@ -156,7 +167,7 @@ export default function SelectedDetailScreen({
             </div>
             <button
               className="group sticky bottom-10 z-2 flex cursor-pointer items-center gap-4"
-              onClick={() => setSelectingWorkId(undefined)}
+              onClick={dismissDetail}
             >
               <div className="h-0 grow border-b border-[#aaa] transition-all"></div>
               <div

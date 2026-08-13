@@ -106,7 +106,14 @@ export default function ProfileCard({ age }: ProfileCardProps) {
         <div className="pointer-events-none absolute -bottom-9 -left-9 z-100 aspect-square size-30 scale-y-155 -rotate-10 bg-[url('/star_y.png')] bg-contain bg-center bg-no-repeat drop-shadow-[#ffd67c] -hue-rotate-40" />
         <div className="pointer-events-none absolute -right-9 -bottom-9 z-100 aspect-square size-30 rotate-20 bg-[url('/star_y.png')] bg-contain bg-center bg-no-repeat drop-shadow-[#ffd67c]" />
         <div className="pointer-events-none absolute right-6 bottom-15 z-100 aspect-square size-17 scale-y-134 rotate-11 bg-[url('/star_y.png')] bg-contain bg-center bg-no-repeat drop-shadow drop-shadow-[#ffd67c] -hue-rotate-20" />
-        <div className="font-dot absolute -top-10 left-12 flex flex-col items-center justify-center lg:left-24">
+        <Image
+          src="/profile_text.png"
+          width={299}
+          height={1059}
+          alt="profile_text"
+          className="pointer-events-none absolute hidden aspect-299/1059 h-full w-auto opacity-60 mix-blend-soft-light select-none lg:block"
+        />
+        <div className="font-dot absolute -top-10 left-12 flex flex-col items-center justify-center select-none lg:left-24">
           <h2
             id="profile"
             className="scroll-mt-16 text-6xl leading-none tracking-wider"

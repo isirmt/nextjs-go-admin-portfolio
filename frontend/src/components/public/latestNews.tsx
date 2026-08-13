@@ -94,7 +94,7 @@ export function InformationSite({
           />
         </div>
         <div className={`text-xl ${delaGothicOne.className}`}>{siteName}</div>
-        <div className="font-bold">{siteDescription}</div>
+        <div className="w-72 font-bold sm:w-96">{siteDescription}</div>
       </Link>
       <div className={`text-center text-lg ${delaGothicOne.className}`}>
         新着情報
