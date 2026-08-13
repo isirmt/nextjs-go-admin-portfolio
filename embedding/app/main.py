@@ -7,7 +7,7 @@ from typing import Literal
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
 
-from app.embedder import embed_passages, embed_queries
+from app.embedder import embed_passages, embed_queries, get_model
 from app.reindex import main as run_reindex
 
 logger = logging.getLogger(__name__)
@@ -39,6 +39,11 @@ async def reindex_periodically() -> None:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    logger.info("loading embedding model: %s", model_id)
+    await asyncio.to_thread(get_model)
+    await asyncio.to_thread(embed_queries, ["warmup"])
+    logger.info("embedding model is ready: %s", model_id)
+
     task: asyncio.Task[None] | None = None
     if reindex_interval_seconds > 0:
         task = asyncio.create_task(reindex_periodically())
