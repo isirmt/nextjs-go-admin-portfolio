@@ -63,16 +63,18 @@ export default function ProfileSection({ age }: { age: number }) {
       className="relative z-1 w-full overflow-x-clip overflow-y-visible"
     >
       <div className="relative flex flex-wrap items-end justify-start overflow-visible bg-[linear-gradient(#ffffff,#f2faff_63%,#eef2ff)]">
-        <div className="animate-aqua-frame absolute -right-6 bottom-0 hidden aspect-5000/5200 w-130 max-w-full bg-[url('/aqua_frame_1.webp')] bg-contain bg-bottom bg-no-repeat xl:block" />
-        <img
-          loading="lazy"
-          className="pointer-events-none absolute right-8 bottom-0 hidden w-100 max-w-full select-none xl:block"
-          alt="miri_transparent"
-          src="/miri_transparent.webp"
-        />
-        <span className="font-dot pointer-events-none absolute right-8 bottom-13 hidden bg-[#f43f5e] px-2.5 text-right text-3xl leading-none text-white select-none xl:block">
-          井筒&nbsp;ミリ
-        </span>
+        <div className="animate-scale-motion-little absolute top-0 right-0 size-full origin-bottom-right">
+          <div className="animate-aqua-frame absolute -right-6 bottom-0 hidden aspect-5000/5200 w-130 max-w-full bg-[url('/aqua_frame_1.webp')] bg-contain bg-bottom bg-no-repeat xl:block" />
+          <img
+            loading="lazy"
+            className="pointer-events-none absolute right-8 bottom-0 hidden w-100 max-w-full select-none xl:block"
+            alt="miri_transparent"
+            src="/miri_transparent.webp"
+          />
+          <span className="font-dot pointer-events-none absolute right-8 bottom-13 hidden bg-[#f43f5e] px-2.5 text-right text-3xl leading-none text-white select-none xl:block">
+            井筒&nbsp;ミリ
+          </span>
+        </div>
         <ProfileCard age={age} />
       </div>
       <div

@@ -12,6 +12,8 @@
   --animate-spin-reverse: spin 1s linear infinite reverse;
   --animate-orbit: orbit 40s linear infinite;
   --animate-scale-motion: scale-motion 1.5s ease-out infinite alternate;
+  --animate-scale-motion-little: scale-motion-little 1.5s ease-out infinite
+    alternate;
 }
 
 @keyframes jump {
@@ -95,7 +97,7 @@
 }
 
 .animate-aqua-frame {
-  animation: aqua-frame-swap 4000ms step-end infinite;
+  animation: aqua-frame-swap 3000ms step-end infinite;
 }
 
 @keyframes bottom-to-top {
@@ -214,6 +216,15 @@
   }
   to {
     transform: scale(105%);
+  }
+}
+
+@keyframes scale-motion-little {
+  from {
+    transform: scale(99%);
+  }
+  to {
+    transform: scale(101%);
   }
 }
 
