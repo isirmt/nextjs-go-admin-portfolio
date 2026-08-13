@@ -2,10 +2,11 @@
 "use client";
 
 import { useWorksContext } from "@/contexts/worksContext";
+import { useBackButtonDismiss } from "@/hooks/useBackButtonDismiss";
 import { useTechInfoGetter } from "@/hooks/useTechInfoGetter";
 import { smoochSans } from "@/lib/fonts";
 import Link from "next/link";
-import { useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import MarqueeText from "../public/marqueeText";
 
 type SelectedDetailScreenProps = {
@@ -28,6 +29,16 @@ export default function SelectedDetailScreen({
   }, [lastSelectedWorkId, selectingWorkId, works]);
 
   const { techsInfo } = useTechInfoGetter(selectedLastWork?.tech_stacks ?? []);
+
+  const dismissDetail = useCallback(
+    () => setSelectingWorkId(undefined),
+    [setSelectingWorkId],
+  );
+
+  useBackButtonDismiss({
+    isOpen: Boolean(selectingWorkId),
+    onDismiss: dismissDetail,
+  });
 
   useEffect(() => {
     if (!selectingWorkId) return;
@@ -156,7 +167,7 @@ export default function SelectedDetailScreen({
             </div>
             <button
               className="group sticky bottom-10 z-2 flex cursor-pointer items-center gap-4"
-              onClick={() => setSelectingWorkId(undefined)}
+              onClick={dismissDetail}
             >
               <div className="h-0 grow border-b border-[#aaa] transition-all"></div>
               <div
