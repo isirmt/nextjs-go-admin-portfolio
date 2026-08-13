@@ -124,7 +124,7 @@ export default function SelectedDetailScreen({
                         <span className="mx-4 select-none">関連リンク</span>
                         <div className="h-0 flex-1 border-b" />
                       </div>
-                      <div className="flex flex-col gap-2 px-4 py-4">
+                      <div className="flex flex-col gap-4 px-4 py-4">
                         {selectedLastWork?.urls.map((workUrl, urlIdx) => (
                           <div
                             className="flex flex-wrap items-end gap-2"
@@ -138,7 +138,7 @@ export default function SelectedDetailScreen({
                             >
                               {workUrl.label}
                             </Link>
-                            <div className="truncate text-xs leading-none text-[#555]">
+                            <div className="truncate text-xs leading-none text-ellipsis text-[#555]">
                               {workUrl.url}
                             </div>
                           </div>
@@ -149,7 +149,7 @@ export default function SelectedDetailScreen({
                       </div>
                     </div>
                   )}
-                <div className="whitespace-pre-wrap">
+                <div className="leading-loose whitespace-pre-wrap">
                   {selectedLastWork?.description}
                 </div>
               </div>
