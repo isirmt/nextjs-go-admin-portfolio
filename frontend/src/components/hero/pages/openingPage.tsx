@@ -24,7 +24,7 @@ export default function OpeningHeroPage() {
         <div
           className={`absolute z-10 aspect-square rounded-full bg-transparent backdrop-grayscale-100 transition-all duration-1500 ease-in-out ${isColorful ? "size-0" : "size-[calc(max(100dvh,100dvw)*1.414)]"}`}
         />
-        <div className="absolute top-0 left-0 flex size-full items-center justify-center">
+        <div className="animate-appear-from-top absolute top-0 left-0 flex size-full items-center justify-center [animation-delay:4s]">
           <div className="absolute -top-[85dvh] h-[180dvh] w-[180dvw] rounded-b-full bg-[linear-gradient(45deg,#d1fafa_40vw,#d1f0ff_140vw)]" />
           <div className="animate-up-down-smooth absolute -top-[110dvh] h-[120dvh] w-[120dvw] translate-x-[30dvw] rounded-b-full bg-[linear-gradient(45deg,#baf8dd_40vw,#cdfefe_140vw)] [animation-delay:0.5s]" />
 
@@ -52,7 +52,7 @@ export default function OpeningHeroPage() {
         <div className="animate-btt absolute top-[300dvh] right-0 h-[300dvh] w-[300dvh] rounded-full bg-[linear-gradient(180deg,#faddf1,#f5c2e5)] ease-out md:right-1/3" />
         <div className="animate-btt absolute top-[300dvh] left-0 h-[300dvh] w-[300dvh] rounded-full bg-[linear-gradient(180deg,#cbf9ff,#b2f2fb)] ease-out [animation-delay:0.5s] md:left-1/3" />
         <div className="flex flex-col items-center justify-center gap-6">
-          <div className="flex flex-row items-center justify-center gap-12">
+          <div className="animate-up-down-smooth flex flex-row items-center justify-center gap-12">
             <div className="relative flex size-26 items-center justify-center">
               <div className="flex size-full items-center justify-center bg-[#f09ba9] text-8xl leading-none text-white">
                 色
@@ -67,7 +67,7 @@ export default function OpeningHeroPage() {
           <div className="flex flex-row items-center justify-center gap-12">
             <div className="group relative flex size-20 items-center justify-center">
               <button
-                className={`ease-over pointer-events-auto z-20 flex size-full cursor-pointer items-center justify-center text-7xl leading-none text-white transition-[scale,background-color] duration-[350ms,1000ms] hover:scale-90 active:scale-80 ${
+                className={`animate-up-down-smooth ease-over pointer-events-auto z-20 flex size-full cursor-pointer items-center justify-center text-7xl leading-none text-white transition-[scale,background-color] delay-[0ms,800ms] duration-[350ms,1000ms] hover:scale-90 active:scale-80 ${
                   isColorful ? "bg-[#aaa]" : "bg-[#f8d16e]"
                 }`}
                 onClick={() => setIsColorful((current) => !current)}
@@ -76,7 +76,7 @@ export default function OpeningHeroPage() {
               </button>
             </div>
           </div>
-          <div className="flex flex-row items-center justify-center gap-12">
+          <div className="animate-up-down-smooth flex flex-row items-center justify-center gap-12">
             <div className="relative flex size-26 items-center justify-center">
               <div className="flex size-full items-center justify-center bg-[#d9aeeb] text-8xl leading-none text-white">
                 体

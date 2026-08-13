@@ -206,5 +206,21 @@
   }
 }
 
+@keyframes appear-from-top {
+  from {
+    transform: translateY(-130%);
+  }
+  to {
+    transform: translateY(0%);
+  }
+}
+
+.animate-appear-from-top {
+  animation-name: appear-from-top;
+  animation-duration: 1000ms;
+  animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation-fill-mode: both;
+}
+
 body {
 }
