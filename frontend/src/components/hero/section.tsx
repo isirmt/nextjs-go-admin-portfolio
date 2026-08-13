@@ -63,7 +63,7 @@ export default function HeroSection() {
         色彩と体験
       </h1>
       <HeroDeck pages={heroPages} initialPageId="opening" autoPagination loop>
-        <div className="absolute bottom-0 left-0 hidden aspect-1774/1133 w-54 bg-[url('/cloud_ll.webp')] bg-contain bg-bottom-left bg-no-repeat md:block" />
+        <div className="animate-scale-motion absolute bottom-0 left-0 hidden aspect-1774/1133 w-54 origin-[bottom_left] bg-[url('/cloud_ll.webp')] bg-contain bg-bottom-left bg-no-repeat md:block" />
         <HeroPageNavigation />
       </HeroDeck>
     </div>
