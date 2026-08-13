@@ -10,7 +10,7 @@ export default function HeroPageFrame({
   return (
     <div
       {...props}
-      className={`absolute inset-0 size-full ${className ?? ""}`}
+      className={`absolute inset-0 size-full overflow-hidden ${className ?? ""}`}
       data-hero-page
     >
       {children}

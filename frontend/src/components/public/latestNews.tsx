@@ -57,7 +57,7 @@ export function LatestNews({ feedUrl }: Options) {
     <div className="relative w-full">
       {feedData?.title ? (
         <Link
-          className="inline-block max-w-72 truncate hover:border-b sm:max-w-96"
+          className="inline-block max-w-72 truncate border-b border-transparent hover:border-current sm:max-w-96"
           href={feedData.link}
         >
           {feedData.title}

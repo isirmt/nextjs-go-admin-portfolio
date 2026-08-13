@@ -1,10 +1,5 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -16,6 +11,9 @@
   --animate-up-down-smooth: up-down 2s ease-in-out infinite alternate;
   --animate-spin-reverse: spin 1s linear infinite reverse;
   --animate-orbit: orbit 40s linear infinite;
+  --animate-scale-motion: scale-motion 1.5s ease-out infinite alternate;
+  --animate-scale-motion-little: scale-motion-little 1.5s ease-out infinite
+    alternate;
 }
 
 @keyframes jump {
@@ -87,19 +85,19 @@
 @keyframes aqua-frame-swap {
   0%,
   100% {
-    background-image: url("/aqua_frame_1.png");
+    background-image: url("/aqua_frame_1.webp");
     width: 32.5rem;
     right: -1.5rem;
   }
   50% {
-    background-image: url("/aqua_frame_2.png");
+    background-image: url("/aqua_frame_2.webp");
     width: 30.5rem;
     right: 0.4rem;
   }
 }
 
 .animate-aqua-frame {
-  animation: aqua-frame-swap 4000ms step-end infinite;
+  animation: aqua-frame-swap 3000ms step-end infinite;
 }
 
 @keyframes bottom-to-top {
@@ -182,13 +180,6 @@
   animation: iv-out-down 0.3s ease-out forwards;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 .animate-vertical-loop {
   animation: vertical-loop var(--scroll-duration) linear infinite;
   will-change: transform;
@@ -217,6 +208,24 @@
   animation-duration: 1000ms;
   animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
   animation-fill-mode: both;
+}
+
+@keyframes scale-motion {
+  from {
+    transform: scale(95%);
+  }
+  to {
+    transform: scale(105%);
+  }
+}
+
+@keyframes scale-motion-little {
+  from {
+    transform: scale(99%);
+  }
+  to {
+    transform: scale(101%);
+  }
 }
 
 body {

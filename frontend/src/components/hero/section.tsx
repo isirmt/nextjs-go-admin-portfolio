@@ -8,7 +8,7 @@ function HeroPageNavigation() {
     useHeroDeck();
 
   return (
-    <ul className="absolute bottom-0 left-0 z-10 flex gap-6 p-6">
+    <ul className="absolute bottom-0 left-0 z-10 flex gap-6 p-6 drop-shadow-md md:drop-shadow-none">
       {heroPages.map((page, index) => {
         const isCurrent = page.id === currentPageId;
         const showDuration =
@@ -63,6 +63,7 @@ export default function HeroSection() {
         色彩と体験
       </h1>
       <HeroDeck pages={heroPages} initialPageId="opening" autoPagination loop>
+        <div className="animate-scale-motion absolute bottom-0 left-0 hidden aspect-1774/1133 w-54 origin-[bottom_left] bg-[url('/cloud_ll.webp')] bg-contain bg-bottom-left bg-no-repeat md:block" />
         <HeroPageNavigation />
       </HeroDeck>
     </div>
