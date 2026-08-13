@@ -1,10 +1,10 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useImagesContext } from "@/contexts/imagesContext";
 import { useInViewAnimation } from "@/hooks/useInViewAnimation";
 import { useTechInfoGetter } from "@/hooks/useTechInfoGetter";
 import { Work } from "@/types/works/common";
+import Image from "next/image";
 import { useMemo, useState } from "react";
 import MarqueeText from "../public/marqueeText";
 
@@ -93,12 +93,13 @@ export default function WorkCard({
         <div
           className={`relative z-2 flex aspect-square size-72 items-center justify-center overflow-hidden bg-white transition-all ${isSelected ? "rounded-3xl" : "rounded-xl"}`}
         >
-          <img
-            src={`/api/images/${work.thumbnail_image_id}/raw`}
-            className={`pointer-events-none size-72 object-cover transition-all duration-200 ease-out ${isSelected ? "skew-x-1 brightness-120 duration-100" : "group-hover:scale-110 group-hover:skew-x-1 group-hover:brightness-110"}`}
+          <Image
+            src={`/image-source/${work.thumbnail_image_id}`}
             alt={thumbnailAlt}
-            loading="lazy"
-            decoding="async"
+            fill
+            sizes="288px"
+            quality={100}
+            className={`pointer-events-none object-cover transition-all duration-200 ease-out ${isSelected ? "skew-x-1 brightness-120 duration-100" : "group-hover:scale-110 group-hover:skew-x-1 group-hover:brightness-110"}`}
           />
         </div>
         <div

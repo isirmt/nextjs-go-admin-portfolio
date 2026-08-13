@@ -6,6 +6,9 @@ const nextConfig: NextConfig = {
   output: "standalone",
   reactCompiler: true,
   reactStrictMode: false,
+  images: {
+    qualities: [75, 100],
+  },
   experimental: {
     authInterrupts: true,
   },
