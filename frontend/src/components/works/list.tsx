@@ -6,7 +6,7 @@ import { useWorksContext } from "@/contexts/worksContext";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useInViewAnimation } from "@/hooks/useInViewAnimation";
 import { useScrollbarControl } from "@/hooks/useScrollbarControl";
-import { useWorkTechFilter } from "@/hooks/useWorkTechFilter";
+import { useWorkListView } from "@/hooks/useWorkListView";
 import { smoochSans } from "@/lib/fonts";
 import { SectionText } from "./sectionText";
 import { CloudLarge, CloudSmall } from "./clouds";
@@ -15,7 +15,7 @@ import WorkCard from "./workCard";
 
 export default function WorksList() {
   const { works } = useWorksContext();
-  const { filteredWorks } = useWorkTechFilter(works);
+  const { visibleWorks } = useWorkListView(works);
   const { clickedCubeId, clickNonce } = useSelectingCubeContext();
   const [selectingWorkId, setSelectingWorkId] = useState<string>();
   const [lastSelectedWorkId, setLastSelectedWorkId] = useState<string>();
@@ -95,7 +95,7 @@ export default function WorksList() {
         </div>
         <SectionText />
         <div className="flex w-fit flex-wrap justify-center gap-x-24 gap-y-24">
-          {filteredWorks.map((work) => (
+          {visibleWorks.map((work) => (
             <WorkCard
               key={work.id}
               work={work}
