@@ -24,6 +24,7 @@ export default function OpeningHeroPage() {
         <div
           className={`absolute z-10 aspect-square rounded-full bg-transparent backdrop-grayscale-100 transition-all duration-1500 ease-in-out ${isColorful ? "size-0" : "size-[calc(max(100dvh,100dvw)*1.414)]"}`}
         />
+        <div className="absolute -top-[85dvh] h-[180dvh] w-[180dvw] rounded-b-full bg-[linear-gradient(45deg,#d1fafa_40vw,#d1f0ff_140vw)]" />
         <Sparkle
           className={`animate-up-down-smooth absolute top-[15%] left-[20%] aspect-3/4 w-45 bg-[#f8c774]`}
         >
