@@ -2,6 +2,7 @@
 import { lineSeedJp } from "@/lib/fonts";
 import HeroPageFrame from "../pageFrame";
 import { useEffect, useState } from "react";
+import Sparkle from "@/components/shapes/sparkle";
 
 export default function OpeningHeroPage() {
   const [isColorful, setIsColorful] = useState(false);
@@ -19,9 +20,20 @@ export default function OpeningHeroPage() {
       <div
         className={`pointer-events-none absolute inset-0 flex items-center justify-center bg-[#ffffff] font-bold select-none ${lineSeedJp.className}`}
       >
+        {/* Gray scale */}
         <div
-          className={`absolute z-10 aspect-square rounded-full bg-transparent backdrop-grayscale-100 transition-all duration-1500 ${isColorful ? "size-0" : "size-[calc(max(100dvh,100dvw)*1.414)]"}`}
+          className={`absolute z-10 aspect-square rounded-full bg-transparent backdrop-grayscale-100 transition-all duration-1500 ease-in-out ${isColorful ? "size-0" : "size-[calc(max(100dvh,100dvw)*1.414)]"}`}
         />
+        <Sparkle
+          className={`animate-up-down-smooth absolute top-[15%] left-[20%] aspect-3/4 w-45 bg-[#f8c774]`}
+        >
+          <div className="animate-up-down-smooth absolute bottom-0 left-0 size-[140%] -translate-x-1/2 translate-y-1/2 rounded-full bg-[#f6d992] duration-1000" />
+        </Sparkle>
+        <Sparkle
+          className={`animate-up-down-smooth absolute right-[20%] bottom-[-5%] aspect-1/2 w-38 bg-[#f494ae] [animation-delay:-.7s]`}
+        >
+          <div className="animate-up-down-smooth absolute right-0 bottom-0 size-[140%] translate-x-1/2 translate-y-1/2 rounded-full bg-[#f3c2e2] duration-1000 [animation-delay:-.7s]" />
+        </Sparkle>
         <div className="animate-btt absolute top-[300dvh] right-0 h-[300dvh] w-[300dvh] rounded-full bg-[#faddf1] md:right-1/3" />
         <div className="animate-btt absolute top-[300dvh] left-0 h-[300dvh] w-[300dvh] rounded-full bg-[#cbf9ff] [animation-delay:0.5s] md:left-1/3" />
         <div className="flex flex-col items-center justify-center gap-6">
@@ -40,7 +52,7 @@ export default function OpeningHeroPage() {
           <div className="flex flex-row items-center justify-center gap-12">
             <div className="group relative flex size-20 items-center justify-center">
               <button
-                className={`ease-over pointer-events-auto z-20 flex size-full cursor-pointer items-center justify-center text-7xl leading-none text-white transition-[scale,background-color] duration-[150ms,1000ms] hover:scale-90 active:scale-80 ${
+                className={`ease-over pointer-events-auto z-20 flex size-full cursor-pointer items-center justify-center text-7xl leading-none text-white transition-[scale,background-color] duration-[350ms,1000ms] hover:scale-90 active:scale-80 ${
                   isColorful ? "bg-[#aaa]" : "bg-[#F4CE6B]"
                 }`}
                 onClick={() => setIsColorful((current) => !current)}
