@@ -87,12 +87,12 @@
 @keyframes aqua-frame-swap {
   0%,
   100% {
-    background-image: url("/aqua_frame_1.png");
+    background-image: url("/aqua_frame_1.webp");
     width: 32.5rem;
     right: -1.5rem;
   }
   50% {
-    background-image: url("/aqua_frame_2.png");
+    background-image: url("/aqua_frame_2.webp");
     width: 30.5rem;
     right: 0.4rem;
   }

@@ -63,7 +63,7 @@ export default function ProfileSection({ age }: { age: number }) {
       className="relative z-1 w-full overflow-x-clip overflow-y-visible"
     >
       <div className="relative flex flex-wrap items-end justify-start overflow-visible bg-[linear-gradient(#ffffff,#f2faff_63%,#eef2ff)]">
-        <div className="animate-aqua-frame absolute -right-6 bottom-0 hidden aspect-5000/5200 w-130 max-w-full bg-[url('/aqua_frame_1.png')] bg-contain bg-bottom bg-no-repeat xl:block" />
+        <div className="animate-aqua-frame absolute -right-6 bottom-0 hidden aspect-5000/5200 w-130 max-w-full bg-[url('/aqua_frame_1.webp')] bg-contain bg-bottom bg-no-repeat xl:block" />
         <img
           loading="lazy"
           className="pointer-events-none absolute right-8 bottom-0 hidden w-100 max-w-full select-none xl:block"
