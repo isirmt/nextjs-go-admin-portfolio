@@ -113,7 +113,7 @@ export default function ProfileCard({ age }: ProfileCardProps) {
           alt="profile_text"
           className="pointer-events-none absolute hidden aspect-299/1059 h-full w-auto opacity-60 mix-blend-soft-light select-none lg:block"
         />
-        <div className="font-dot absolute -top-10 left-12 flex flex-col items-center justify-center lg:left-24">
+        <div className="font-dot absolute -top-10 left-12 flex flex-col items-center justify-center select-none lg:left-24">
           <h2
             id="profile"
             className="scroll-mt-16 text-6xl leading-none tracking-wider"

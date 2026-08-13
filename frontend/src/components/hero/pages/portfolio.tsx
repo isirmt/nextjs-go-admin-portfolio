@@ -25,7 +25,7 @@ export default function PortfolioHeroPage() {
       >
         {/* <VerticalViewer /> */}
       </div>
-      <div className="pointer-events-none absolute flex size-full -translate-y-10 items-center justify-center text-[#111111] drop-shadow-[#aaa]">
+      <div className="pointer-events-none absolute flex size-full -translate-y-10 items-center justify-center text-[#111111] drop-shadow-[#aaa] select-none">
         {selectingWork ? (
           <div className="absolute flex w-full flex-col gap-2 px-10 text-center lg:px-20">
             <div

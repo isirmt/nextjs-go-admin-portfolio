@@ -196,7 +196,7 @@ export default function SearchWindow() {
           />
         </div>
         {!isOpen && searchTerm.trim() === "" && (
-          <div className="pointer-events-none absolute top-3.25 left-13 z-10 flex items-center gap-1">
+          <div className="pointer-events-none absolute top-3.25 left-13 z-10 flex items-center gap-1 select-none">
             <div
               className={`relative hidden scale-y-110 items-center gap-3 overflow-hidden rounded-sm bg-[#ddd] px-1 py-px tracking-[.1rem] shadow-[0_.125rem_0_0_#bbb] transition-all duration-150 select-none md:flex`}
             >
