@@ -1,7 +1,11 @@
 # Next.js + Go Admin Portfolio
 
-![Next.js + Go Admin Portfolio](/frontend/src/app/opengraph-image.png)
+[![Build](https://github.com/isirmt/nextjs-go-admin-portfolio/actions/workflows/check-build.yml/badge.svg?branch=master)](https://github.com/isirmt/nextjs-go-admin-portfolio/actions/workflows/check-build.yml)
+[![Lint](https://github.com/isirmt/nextjs-go-admin-portfolio/actions/workflows/check-lint.yml/badge.svg?branch=master)](https://github.com/isirmt/nextjs-go-admin-portfolio/actions/workflows/check-lint.yml)
+[![GHCR](https://github.com/isirmt/nextjs-go-admin-portfolio/actions/workflows/ghcr.yml/badge.svg?branch=master)](https://github.com/isirmt/nextjs-go-admin-portfolio/actions/workflows/ghcr.yml)
+[![Deploy VM](https://github.com/isirmt/nextjs-go-admin-portfolio/actions/workflows/deploy-vm.yml/badge.svg?branch=master)](https://github.com/isirmt/nextjs-go-admin-portfolio/actions/workflows/deploy-vm.yml)
 
+![Next.js + Go Admin Portfolio](/frontend/src/app/opengraph-image.png)
 
 [View My Deployed Portfolio](https://isirmt.com)
 
