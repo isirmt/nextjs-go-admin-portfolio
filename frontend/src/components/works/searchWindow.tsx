@@ -184,7 +184,7 @@ export default function SearchWindow() {
           onFocus={() => setIsOpen(true)}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder={isOpen ? "キーワードを入力" : ""}
-          className={`font-noto pointer-events-auto block h-12 w-full rounded-full border border-[#ccc] py-1 pr-4 pl-12.5 text-[#333] shadow-md shadow-[#ccc] backdrop-blur-2xl outline-none hover:border-[#6354EB] focus:border-[#6354EB] active:border-[#6354EB] ${isOpen ? "bg-white" : "bg-white/60"}`}
+          className={`font-noto pointer-events-auto block h-12 w-full rounded-full border border-[#ccc] bg-white py-1 pr-4 pl-12.5 text-[#333] shadow-md shadow-[#ccc] outline-none hover:border-[#6354EB] focus:border-[#6354EB] active:border-[#6354EB]`}
         />
         <div className="absolute top-2.5 left-3.5 z-10">
           <SearchIcon
@@ -212,7 +212,7 @@ export default function SearchWindow() {
       </div>
       {isOpen && (
         <div
-          className={`pointer-events-auto relative z-0 max-h-[calc(100vh-8rem)] w-120 max-w-full overflow-y-auto rounded border border-[#ccc] bg-white/85 p-4 backdrop-blur-2xl`}
+          className={`pointer-events-auto relative z-0 max-h-[calc(100vh-8rem)] w-120 max-w-full overflow-y-auto rounded border border-[#ccc] bg-[#fafafa] p-4`}
         >
           {searchTerm.trim() === "" ? (
             <React.Fragment>
