@@ -54,7 +54,7 @@ export default function Home() {
               <SearchWindow />
               <section
                 aria-label="top-view"
-                className="relative h-dvh w-full bg-[repeating-linear-gradient(0deg,#c6f4ff,#c6f4ff_4rem,#d8f6fe_4rem,#d8f6fe_8rem)]"
+                className="relative h-dvh w-full overflow-hidden bg-[repeating-linear-gradient(0deg,#c6f4ff,#c6f4ff_4rem,#d8f6fe_4rem,#d8f6fe_8rem)]"
               >
                 <div className="animate-spin-reverse absolute right-4 bottom-4 size-34 bg-[url('/windmill.svg')] opacity-50 [animation-duration:10s]" />
                 <HeroSection />
