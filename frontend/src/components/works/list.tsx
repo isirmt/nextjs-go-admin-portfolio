@@ -93,9 +93,9 @@ export default function WorksList() {
         </div>
         <SectionText />
         <div className="flex w-fit flex-wrap justify-center gap-x-24 gap-y-24">
-          {works.map((work, workIdx) => (
+          {works.map((work) => (
             <WorkCard
-              key={workIdx}
+              key={work.id}
               work={work}
               selectingId={selectingWorkId}
               selectingFunc={handleSelectWork}
