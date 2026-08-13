@@ -17,7 +17,8 @@ import { useTechsContext } from "@/contexts/techsContext";
 export default function WorksList() {
   const { works } = useWorksContext();
   const { techs } = useTechsContext();
-  const { visibleWorks, toggleTech, selectedTechIds } = useWorkListView(works);
+  const { visibleWorks, toggleTech, selectedTechIds, clearTechs } =
+    useWorkListView(works);
   const { clickedCubeId, clickNonce } = useSelectingCubeContext();
   const [selectingWorkId, setSelectingWorkId] = useState<string>();
   const [lastSelectedWorkId, setLastSelectedWorkId] = useState<string>();
@@ -97,7 +98,13 @@ export default function WorksList() {
         </div>
         <SectionText />
         <div className="relative mb-24 flex w-full justify-center gap-12">
-          <div>
+          <div className="flex flex-col items-start gap-1.5 select-none">
+            <button
+              className={`w-fit scale-100 cursor-pointer rounded-full border border-[#eb6854] bg-white px-2 py-0.5 text-sm text-[#eb6854] transition-[background-color,opacity,scale] duration-[250ms,100ms,500ms] ease-[linear,linear,cubic-bezier(0.34,1.56,0.64,1)] hover:scale-110 hover:bg-[#ffe4e0] ${selectedTechIds.size > 0 ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`}
+              onClick={clearTechs}
+            >
+              CLEAR
+            </button>
             <ul className="flex flex-wrap justify-start gap-1.5">
               {techs.map((tech) => (
                 <li key={tech.id}>
