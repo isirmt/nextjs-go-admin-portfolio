@@ -6,6 +6,12 @@ import { useWorkTechFilter } from "./useWorkTechFilter";
 
 export type WorkSort = "newest" | "oldest" | "popular";
 
+export const WORK_SORT_OPTIONS: { value: WorkSort; label: string }[] = [
+  { value: "newest", label: "新しい順" },
+  { value: "popular", label: "人気順" },
+  { value: "oldest", label: "古い順" },
+];
+
 const RANKING_API_URL = "/api/works/ranking";
 
 const createdAtTime = (work: Work) => Date.parse(work.created_at) || 0;
