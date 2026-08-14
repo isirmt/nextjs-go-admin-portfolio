@@ -91,7 +91,7 @@ export default function WorksList() {
   return (
     <React.Fragment>
       <div
-        className={`relative flex flex-col items-center justify-center overflow-x-hidden bg-[#fcfcfc] px-20 pt-32 pb-60`}
+        className={`relative flex flex-col items-center justify-center overflow-x-hidden bg-[#fcfcfc] px-8 pt-32 pb-60 sm:px-20`}
       >
         <CloudLarge className="animate-up-down absolute bottom-[5%] left-[10%] size-36 [animation-delay:.13s] [animation-duration:1s]" />
         <CloudLarge className="animate-up-down absolute right-[30%] bottom-[35%] size-36 [animation-delay:.23s] [animation-duration:2s]" />
@@ -106,7 +106,7 @@ export default function WorksList() {
           And More
         </div>
         <SectionText />
-        <div className="relative mb-28 flex w-full flex-col items-end justify-center gap-12 lg:flex-row">
+        <div className="relative mb-28 flex w-full flex-col items-center justify-center gap-12 sm:items-end lg:flex-row">
           <div className="flex flex-col items-start gap-1.5 select-none">
             <button
               className={`w-fit scale-100 cursor-pointer rounded-full border border-[#eb6854] bg-white px-2 py-0.5 text-sm text-[#eb6854] transition-[background-color,opacity,scale] duration-[250ms,100ms,500ms] ease-[linear,linear,cubic-bezier(0.34,1.56,0.64,1)] hover:scale-110 hover:bg-[#ffe4e0] ${selectedTechIds.size > 0 ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`}
