@@ -12,7 +12,7 @@ export function SectionText() {
     <h2
       id="works"
       ref={lineAnimationRef}
-      className="relative mt-10 mb-30 flex scroll-mt-10 flex-col items-center gap-4 drop-shadow-2xl drop-shadow-[#a9e4e4]"
+      className="relative mt-10 mb-6 flex scroll-mt-10 flex-col items-center gap-4 drop-shadow-2xl drop-shadow-[#a9e4e4] md:mb-20"
     >
       <div className="hidden" aria-hidden="true">
         WORKS
