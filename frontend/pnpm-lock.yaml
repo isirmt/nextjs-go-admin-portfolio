@@ -17,6 +17,9 @@ importers:
 
   .:
     dependencies:
+      '@isirmt/react-cues':
+        specifier: 0.1.0
+        version: 0.1.0(react@19.2.4)
       '@next/third-parties':
         specifier: 16.2.1
         version: 16.2.1(next@16.2.1(@babel/core@7.28.5)(@opentelemetry/api@1.9.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)
@@ -647,6 +650,11 @@ packages:
     engines: {node: ^18.17.0 || ^20.3.0 || >=21.0.0}
     cpu: [x64]
     os: [win32]
+
+  '@isirmt/react-cues@0.1.0':
+    resolution: {integrity: sha512-ZP3X12BFrNmfguevWtxPuTlIbggy4NZaeydEaKGz1YKGvz7ub2CAm0O0Eo79ai8m6T3uFo4QNa92RpRcLZsgsg==}
+    peerDependencies:
+      react: '>=18.0.0 <20.0.0'
 
   '@joshwooding/vite-plugin-react-docgen-typescript@0.7.0':
     resolution: {integrity: sha512-qvsTEwEFefhdirGOPnu9Wp6ChfIwy2dBCRuETU3uE+4cC+PFoxMSiiEhxk4lOluA34eARHA0OxqsEUYDqRMgeQ==}
@@ -5032,6 +5040,10 @@ snapshots:
 
   '@img/sharp-win32-x64@0.34.5':
     optional: true
+
+  '@isirmt/react-cues@0.1.0(react@19.2.4)':
+    dependencies:
+      react: 19.2.4
 
   '@joshwooding/vite-plugin-react-docgen-typescript@0.7.0(typescript@5.9.3)(vite@8.2.1(@types/node@24.13.3)(esbuild@0.28.2)(jiti@2.6.1)(terser@5.49.2))':
     dependencies:
