@@ -3,6 +3,7 @@ import {
   animate,
   at,
   defineTimeline,
+  set,
   useWaapiTimeline,
 } from "@isirmt/react-cues";
 import { lineSeedJp } from "@/lib/fonts";
@@ -22,9 +23,16 @@ const APPEAR_KEYFRAMES: Keyframe[] = [
 
 const APPEAR_EASING = "cubic-bezier(0.34, 1.56, 0.64, 1)";
 
-const openingTimelineDefinition = defineTimeline({
-  initialState: {},
+type OpeningTimelineState = {
+  isColorful: boolean;
+};
+
+const openingTimelineDefinition = defineTimeline<OpeningTimelineState>({
+  initialState: {
+    isColorful: false,
+  },
   cues: [
+    at(2300, set("isColorful", true)),
     at(
       0,
       animate("pink-wave", WAVE_KEYFRAMES, {
@@ -64,22 +72,19 @@ const openingTimelineDefinition = defineTimeline({
 });
 
 export default function OpeningHeroPage() {
-  const [isColorful, setIsColorful] = useState(false);
-  const { bind, timeline } = useWaapiTimeline(openingTimelineDefinition);
+  const [colorfulOverride, setColorfulOverride] = useState<boolean | null>(
+    null,
+  );
+  const { bind, snapshot, timeline } = useWaapiTimeline(
+    openingTimelineDefinition,
+  );
+  const isColorful = colorfulOverride ?? snapshot.state.isColorful;
 
   useEffect(() => {
     timeline.play();
 
     return () => timeline.pause();
   }, [timeline]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsColorful(true);
-    }, 2300);
-
-    return () => clearTimeout(timer);
-  }, []);
 
   return (
     <HeroPageFrame>
@@ -155,7 +160,11 @@ export default function OpeningHeroPage() {
                 className={`animate-up-down-smooth ease-over pointer-events-auto z-20 flex size-full cursor-pointer items-center justify-center text-7xl leading-none text-white transition-[scale,background-color] delay-[0ms,800ms] duration-[350ms,1000ms] hover:scale-90 active:scale-80 ${
                   isColorful ? "bg-[#aaa]" : "bg-[#f8d16e]"
                 }`}
-                onClick={() => setIsColorful((current) => !current)}
+                onClick={() =>
+                  setColorfulOverride(
+                    (current) => !(current ?? snapshot.state.isColorful),
+                  )
+                }
               >
                 と
               </button>
