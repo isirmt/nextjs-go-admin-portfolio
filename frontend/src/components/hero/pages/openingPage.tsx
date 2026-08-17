@@ -1,11 +1,77 @@
 "use client";
+import {
+  animate,
+  at,
+  defineTimeline,
+  useWaapiTimeline,
+} from "@isirmt/react-cues";
 import { lineSeedJp } from "@/lib/fonts";
 import HeroPageFrame from "../pageFrame";
 import { useEffect, useState } from "react";
 import Sparkle from "@/components/shapes/sparkle";
 
+const WAVE_KEYFRAMES: Keyframe[] = [
+  { transform: "translateY(0)" },
+  { transform: "translateY(-600dvh)" },
+];
+
+const APPEAR_KEYFRAMES: Keyframe[] = [
+  { transform: "translateY(-130%)" },
+  { transform: "translateY(0)" },
+];
+
+const APPEAR_EASING = "cubic-bezier(0.34, 1.56, 0.64, 1)";
+
+const openingTimelineDefinition = defineTimeline({
+  initialState: {},
+  cues: [
+    at(
+      0,
+      animate("pink-wave", WAVE_KEYFRAMES, {
+        duration: 4000,
+        easing: "linear",
+      }),
+    ),
+    at(
+      500,
+      animate("blue-wave", WAVE_KEYFRAMES, {
+        duration: 4000,
+        easing: "linear",
+      }),
+    ),
+    at(
+      4000,
+      animate("background", APPEAR_KEYFRAMES, {
+        duration: 1000,
+        easing: APPEAR_EASING,
+      }),
+    ),
+    at(
+      4400,
+      animate("circles", APPEAR_KEYFRAMES, {
+        duration: 1000,
+        easing: APPEAR_EASING,
+      }),
+    ),
+    at(
+      4800,
+      animate("sparkles", APPEAR_KEYFRAMES, {
+        duration: 1000,
+        easing: APPEAR_EASING,
+      }),
+    ),
+  ],
+});
+
 export default function OpeningHeroPage() {
   const [isColorful, setIsColorful] = useState(false);
+  const { bind, timeline } = useWaapiTimeline(openingTimelineDefinition);
+
+  useEffect(() => {
+    timeline.play();
+
+    return () => timeline.pause();
+  }, [timeline]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -24,11 +90,17 @@ export default function OpeningHeroPage() {
         <div
           className={`absolute z-10 aspect-square rounded-full bg-transparent backdrop-grayscale-100 transition-all duration-1500 ease-in-out ${isColorful ? "size-0" : "size-[calc(max(100dvh,100dvw)*1.414)]"}`}
         />
-        <div className="animate-appear-from-top absolute top-0 left-0 flex size-full items-center justify-center [animation-delay:4s]">
+        <div
+          ref={bind("background")}
+          className="absolute top-0 left-0 flex size-full transform-[translateY(-130%)] items-center justify-center"
+        >
           <div className="absolute -top-[85dvh] h-[180dvh] w-[180dvw] rounded-b-full bg-[linear-gradient(45deg,#d1fafa_40vw,#d1f0ff_140vw)]" />
           <div className="animate-up-down-smooth absolute -top-[110dvh] h-[120dvh] w-[120dvw] translate-x-[30dvw] rounded-b-full bg-[linear-gradient(45deg,#baf8dd_40vw,#cdfefe_140vw)] [animation-delay:0.5s]" />
 
-          <div className="animate-appear-from-top absolute top-0 left-0 flex size-full items-center justify-center [animation-delay:4.4s]">
+          <div
+            ref={bind("circles")}
+            className="absolute top-0 left-0 flex size-full transform-[translateY(-130%)] items-center justify-center"
+          >
             <div
               className={`animate-up-down-smooth absolute -top-[3%] -left-[3%] aspect-square w-30 overflow-hidden rounded-full bg-[#d29cef] [animation-delay:-.5s]`}
             >
@@ -40,7 +112,10 @@ export default function OpeningHeroPage() {
               <div className="animate-up-down-smooth absolute bottom-0 left-0 size-[140%] -translate-x-1/2 translate-y-1/2 rounded-full bg-[#b0f3ee] duration-1000 [animation-delay:-.9s]" />
             </div>
           </div>
-          <div className="animate-appear-from-top absolute top-0 left-0 flex size-full items-center justify-center [animation-delay:4.8s]">
+          <div
+            ref={bind("sparkles")}
+            className="absolute top-0 left-0 flex size-full transform-[translateY(-130%)] items-center justify-center"
+          >
             <Sparkle
               className={`animate-up-down-smooth absolute top-[15%] -left-[5%] aspect-3/4 w-40 bg-[#f8c774] sm:left-[5%] md:left-[10%] md:w-65`}
             >
@@ -53,8 +128,14 @@ export default function OpeningHeroPage() {
             </Sparkle>
           </div>
         </div>
-        <div className="animate-btt absolute top-[300dvh] right-0 h-[300dvh] w-[300dvh] rounded-full bg-[linear-gradient(180deg,#faddf1,#f5c2e5)] ease-out md:right-1/3" />
-        <div className="animate-btt absolute top-[300dvh] left-0 h-[300dvh] w-[300dvh] rounded-full bg-[linear-gradient(180deg,#cbf9ff,#b2f2fb)] ease-out [animation-delay:0.5s] md:left-1/3" />
+        <div
+          ref={bind("pink-wave")}
+          className="absolute top-[300dvh] right-0 h-[300dvh] w-[300dvh] rounded-full bg-[linear-gradient(180deg,#faddf1,#f5c2e5)] ease-out md:right-1/3"
+        />
+        <div
+          ref={bind("blue-wave")}
+          className="absolute top-[300dvh] left-0 h-[300dvh] w-[300dvh] rounded-full bg-[linear-gradient(180deg,#cbf9ff,#b2f2fb)] ease-out md:left-1/3"
+        />
         <div className="flex flex-col items-center justify-center gap-6">
           <div className="animate-up-down-smooth flex flex-row items-center justify-center gap-12">
             <div className="relative flex size-26 items-center justify-center">
