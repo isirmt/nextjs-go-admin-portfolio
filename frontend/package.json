@@ -13,6 +13,7 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
+    "@isirmt/react-cues": "0.1.0",
     "@next/third-parties": "16.2.1",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.4.2",
@@ -25,32 +26,32 @@
     "three": "^0.182.0"
   },
   "devDependencies": {
+    "@chromatic-com/storybook": "latest",
+    "@storybook/addon-a11y": "^10.5.7",
+    "@storybook/addon-docs": "^10.5.7",
+    "@storybook/addon-mcp": "latest",
+    "@storybook/addon-vitest": "^10.5.7",
+    "@storybook/nextjs-vite": "^10.5.7",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^24",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "@types/three": "^0.182.0",
+    "@vitest/browser-playwright": "latest",
+    "@vitest/coverage-v8": "latest",
     "babel-plugin-react-compiler": "1.0.0",
     "baseline-browser-mapping": "^2.10.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.1",
+    "eslint-plugin-storybook": "^10.5.7",
+    "playwright": "latest",
     "prettier": "^3.4.2",
     "prettier-plugin-tailwindcss": "^0.7.2",
+    "storybook": "^10.5.7",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "storybook": "^10.5.7",
-    "@storybook/nextjs-vite": "^10.5.7",
-    "@chromatic-com/storybook": "latest",
-    "@storybook/addon-vitest": "^10.5.7",
-    "@storybook/addon-a11y": "^10.5.7",
-    "@storybook/addon-docs": "^10.5.7",
-    "@storybook/addon-mcp": "latest",
     "vite": "latest",
-    "eslint-plugin-storybook": "^10.5.7",
-    "vitest": "latest",
-    "playwright": "latest",
-    "@vitest/browser-playwright": "latest",
-    "@vitest/coverage-v8": "latest"
+    "vitest": "latest"
   },
   "pnpm": {
     "overrides": {
