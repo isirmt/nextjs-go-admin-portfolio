@@ -386,12 +386,10 @@ function WorkClickPhysics({ onSpawnEnded }: { onSpawnEnded?: () => void }) {
 export default function RealtimeWorld() {
   const searchParams = useSearchParams();
   const isLock = searchParams.get("lock") === "true";
-
-  const [isStoppingScroll, setIsStoppingScroll] = useState<boolean>(isLock);
   const [isSpawnEnded, setIsSpawnEnded] = useState<boolean>(false);
 
   useEffect(() => {
-    if (!isStoppingScroll) {
+    if (!isLock) {
       return;
     }
     const { style } = document.body;
@@ -409,7 +407,7 @@ export default function RealtimeWorld() {
       style.touchAction = previousTouchAction;
       style.paddingRight = previousPaddingRight;
     };
-  }, [isStoppingScroll]);
+  }, [isLock]);
 
   return (
     <React.Fragment>
@@ -434,15 +432,6 @@ export default function RealtimeWorld() {
           />
           <span>LIVE</span>
         </div>
-        <button
-          onClick={() => setIsStoppingScroll((prev) => !prev)}
-          className="font-dot pointer-events-auto relative flex cursor-pointer items-center gap-2 rounded-full border border-[#ccc] bg-white/60 px-4 py-1 text-xl leading-none text-[#333] shadow-md shadow-[#ccc] backdrop-blur-2xl select-none hover:border-[#777]"
-        >
-          <span
-            className={`size-3 rounded-full ${isStoppingScroll ? "bg-[#f06363]" : "bg-[#8ff0ab]"}`}
-          />
-          <span>TOGGLE SCROLL</span>
-        </button>
       </div>
     </React.Fragment>
   );
