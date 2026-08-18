@@ -180,9 +180,7 @@ export default function OpeningHeroPage() {
           <div className="flex flex-row items-center justify-center gap-12">
             <div className="group relative flex size-20 items-center justify-center">
               <button
-                className={`animate-up-down-smooth ease-over pointer-events-auto z-20 flex size-full cursor-pointer items-center justify-center text-7xl leading-none text-white transition-[scale,background-color] delay-[0ms,800ms] duration-[350ms,1000ms] hover:scale-90 active:scale-80 ${
-                  isColorful ? "bg-[#aaa]" : "bg-[#f8d16e]"
-                }`}
+                className={`animate-up-down-smooth ease-over pointer-events-auto z-20 flex size-full cursor-pointer items-center justify-center bg-[#f8d16e] text-7xl leading-none text-white transition-[scale,background-color] delay-[0ms,800ms] duration-[350ms,1000ms] hover:scale-90 active:scale-80`}
                 onClick={() =>
                   setColorfulOverride(
                     (current) => !(current ?? snapshot.state.isColorful),
