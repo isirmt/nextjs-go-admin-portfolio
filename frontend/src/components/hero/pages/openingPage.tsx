@@ -8,8 +8,9 @@ import {
 } from "@isirmt/react-cues";
 import { lineSeedJp } from "@/lib/fonts";
 import HeroPageFrame from "../pageFrame";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Sparkle from "@/components/shapes/sparkle";
+import { Slider } from "@/components/public/slider";
 
 const WAVE_KEYFRAMES: Keyframe[] = [
   { transform: "translateY(0)" },
@@ -86,11 +87,33 @@ export default function OpeningHeroPage() {
     return () => timeline.pause();
   }, [timeline]);
 
+  const handleSeekBarPointerDown = useCallback(() => {
+    timeline.pause();
+  }, [timeline]);
+
+  const handleSeekBarPointerUp = useCallback(() => {
+    timeline.play();
+  }, [timeline]);
+
   return (
     <HeroPageFrame>
       <div
         className={`pointer-events-none absolute inset-0 flex items-center justify-center bg-[#ffffff] font-bold select-none ${lineSeedJp.className}`}
       >
+        <Slider
+          min={0}
+          max={snapshot.duration}
+          step={10}
+          value={snapshot.currentTime}
+          onChange={(event) => {
+            timeline.seek(event.currentTarget.valueAsNumber);
+          }}
+          primaryColor="#9AEBE6"
+          secondaryColor="#EEE"
+          onPointerDown={handleSeekBarPointerDown}
+          onPointerUp={handleSeekBarPointerUp}
+          className="pointer-events-auto absolute bottom-6 left-[calc(54*0.25rem+1.5rem)] z-50 h-4.5 w-[calc(100%-54*0.25rem-3rem)]"
+        />
         {/* Gray scale */}
         <div
           className={`absolute z-10 aspect-square rounded-full bg-transparent backdrop-grayscale-100 transition-all duration-1500 ease-in-out ${isColorful ? "size-0" : "size-[calc(max(100dvh,100dvw)*1.414)]"}`}
