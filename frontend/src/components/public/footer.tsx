@@ -5,6 +5,7 @@ import { InformationSite } from "./latestNews";
 import { useSpotlightSketch } from "@/hooks/useSpotlightSketch";
 import { useSineClipPath } from "@/hooks/useSineClipPath";
 import Link from "next/link";
+import { useCustomMediaQuery } from "@/hooks/useCustomMediaQuery";
 
 export default function Footer() {
   const {
@@ -14,6 +15,7 @@ export default function Footer() {
     getSpotlightSide,
   } = useSpotlightSketch();
   const waveRef = useSineClipPath<HTMLDivElement>();
+  const { mq } = useCustomMediaQuery();
 
   return (
     <footer className="relative -mt-20 overflow-hidden bg-transparent select-none">
@@ -35,10 +37,10 @@ export default function Footer() {
           </div>
           <div className="my-10 flex min-w-0 flex-col gap-14 text-white lg:flex-row lg:gap-0">
             <div
-              className="transition hover:drop-shadow-2xl lg:pr-10"
-              onMouseEnter={() => handleSpotlightEnter("left")}
+              className="transition md:hover:drop-shadow-2xl lg:pr-10"
+              onMouseEnter={() => mq("md") && handleSpotlightEnter("left")}
               onMouseLeave={handleSpotlightLeave}
-              onFocus={() => handleSpotlightEnter("left")}
+              onFocus={() => mq("md") && handleSpotlightEnter("left")}
               onBlur={handleSpotlightLeave}
             >
               <InformationSite
@@ -50,10 +52,10 @@ export default function Footer() {
               />
             </div>
             <div
-              className="transition hover:drop-shadow-2xl lg:pl-10"
-              onMouseEnter={() => handleSpotlightEnter("right")}
+              className="transition md:hover:drop-shadow-2xl lg:pl-10"
+              onMouseEnter={() => mq("md") && handleSpotlightEnter("right")}
               onMouseLeave={handleSpotlightLeave}
-              onFocus={() => handleSpotlightEnter("right")}
+              onFocus={() => mq("md") && handleSpotlightEnter("right")}
               onBlur={handleSpotlightLeave}
             >
               <InformationSite

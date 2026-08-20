@@ -116,7 +116,7 @@ export default function ProfileCard({ age }: ProfileCardProps) {
         <div className="font-dot absolute -top-10 left-12 flex flex-col items-center justify-center select-none lg:left-24">
           <h2
             id="profile"
-            className="scroll-mt-16 text-6xl leading-none tracking-wider"
+            className="scroll-mt-30 text-6xl leading-none tracking-wider md:scroll-mt-34"
           >
             入本聖也
           </h2>
@@ -160,7 +160,8 @@ export default function ProfileCard({ age }: ProfileCardProps) {
               <div
                 className={`${kiwiMaru.className} flex w-fit flex-col gap-3.5 text-base tracking-wide text-[#61230b]`}
               >
-                <div className="flex gap-2">
+                <div>a.k.a. irimoti / isirmt / itomiri</div>
+                <div className="flex flex-wrap gap-2">
                   <div>兵庫県神戸市出身</div>
                   <div>
                     2004年 3月 8日生の&nbsp;

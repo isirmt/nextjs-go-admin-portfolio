@@ -7,6 +7,7 @@ import { Work } from "@/types/works/common";
 import { useEffect, useRef, useState } from "react";
 import SearchIcon from "../public/searchIcon";
 import React from "react";
+import { useCustomMediaQuery } from "@/hooks/useCustomMediaQuery";
 
 const SEARCH_DELAY = 300; // ms
 const SEARCH_API_URL = "/api/works/search";
@@ -61,6 +62,7 @@ export default function SearchWindow() {
   const containerRef = useRef<HTMLDivElement>(null);
   const searchRequestIdRef = useRef(0);
   const [rankingWorks, setRankingWorks] = useState<Work[]>([]);
+  const { mq } = useCustomMediaQuery();
 
   const { scrollbarWidth } = useScrollbarControl(isOpen);
 
@@ -176,7 +178,7 @@ export default function SearchWindow() {
       className={`fixed top-0 left-0 z-100 flex size-full flex-col items-end gap-6 p-6 transition-colors ${isOpen ? "pointer-events-auto bg-black/10 backdrop-blur-sm" : "pointer-events-none bg-transparent"}`}
     >
       <div
-        className="relative z-10 h-12 w-40 max-w-full md:w-78"
+        className={`relative z-10 h-12 max-w-full ${isOpen ? "w-78" : "w-12 md:w-78"}`}
         style={{ marginRight: isOpen ? scrollbarWidth : 0 }}
       >
         <input
@@ -184,11 +186,21 @@ export default function SearchWindow() {
           onFocus={() => setIsOpen(true)}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder={isOpen ? "キーワードを入力" : ""}
-          className={`font-noto pointer-events-auto block h-12 w-full rounded-full border border-[#ccc] bg-white py-1 pr-4 pl-12.5 text-[#333] shadow-md shadow-[#ccc] outline-none hover:border-[#6354EB] focus:border-[#6354EB] active:border-[#6354EB]`}
+          className={`font-noto pointer-events-auto block h-12 w-full rounded-full border border-[#6354EB] bg-white shadow-sm shadow-[#ccc] outline-none hover:border-[#6354EB] focus:border-[#6354EB] active:border-[#6354EB] md:border-[#ccc] md:shadow-md ${isOpen ? "py-1 pr-4 pl-12.5 text-[#333]" : "cursor-pointer p-0 text-transparent select-none md:cursor-auto md:py-1 md:pr-4 md:pl-12.5 md:text-[#333] md:select-auto"}`}
         />
-        <div className="absolute top-2.5 left-3.5 z-10">
+        <div
+          className={`absolute top-2.5 z-10 ${isOpen ? "left-3.5" : "left-2 md:left-3.5"}`}
+        >
           <SearchIcon
-            color={isOpen ? (isSearching ? "#aaa" : "#6354EB") : "#666"}
+            color={
+              isOpen
+                ? isSearching
+                  ? "#aaa"
+                  : "#6354EB"
+                : mq("md")
+                  ? "#666"
+                  : "#6354EB"
+            }
             size={32}
             style={{
               transition: "all 0.3s",
@@ -196,16 +208,16 @@ export default function SearchWindow() {
           />
         </div>
         {!isOpen && searchTerm.trim() === "" && (
-          <div className="pointer-events-none absolute top-3.25 left-13 z-10 flex items-center gap-1 select-none">
+          <div className="pointer-events-none absolute top-3.25 left-13 z-10 hidden items-center gap-1 select-none md:flex">
             <div
-              className={`relative hidden scale-y-110 items-center gap-3 overflow-hidden rounded-sm bg-[#ddd] px-1 py-px tracking-[.1rem] shadow-[0_.125rem_0_0_#bbb] transition-all duration-150 select-none md:flex`}
+              className={`relative flex scale-y-110 items-center gap-3 overflow-hidden rounded-sm bg-[#ddd] px-1 py-px tracking-[.1rem] shadow-[0_.125rem_0_0_#bbb] transition-all duration-150 select-none`}
             >
               <span className="font-dot text-lg leading-none text-[#555]">
                 /
               </span>
             </div>
             <div className="flex tracking-wider text-[#333]">
-              <span className="hidden md:block">を押して</span>スマート検索
+              を押してスマート検索
             </div>
           </div>
         )}

@@ -8,10 +8,12 @@ import Link from "next/link";
 import MarqueeText from "../../public/marqueeText";
 import { kiwiMaru } from "@/lib/fonts";
 import HeroPageFrame from "../pageFrame";
+import { useCustomMediaQuery } from "@/hooks/useCustomMediaQuery";
 
 export default function PortfolioHeroPage() {
   const { works } = useWorksContext();
   const { selectingCubeId } = useSelectingCubeContext();
+  const { mq } = useCustomMediaQuery();
 
   const selectingWork = useMemo(() => {
     return works.find((work) => work.id === selectingCubeId);
@@ -53,7 +55,11 @@ export default function PortfolioHeroPage() {
       </Suspense>
       <div className="absolute bottom-0 left-0 h-6 w-full border-t-2 border-dotted border-[#888]" />
       <Link
-        className="group absolute right-0 bottom-6 z-10 size-[300px] bg-[#f43f5e] transition-all [clip-path:polygon(100%_0%,100%_100%,0%_100%)] hover:bg-[#ff5a75]"
+        className="group absolute right-0 bottom-6 z-10 bg-[#f43f5e] transition-all [clip-path:polygon(100%_0%,100%_100%,0%_100%)] hover:bg-[#ff5a75]"
+        style={{
+          width: mq("md") ? "300px" : "200px",
+          height: mq("md") ? "300px" : "200px",
+        }}
         href="https://itomiri.com"
         target="_blank"
         rel="noopener"

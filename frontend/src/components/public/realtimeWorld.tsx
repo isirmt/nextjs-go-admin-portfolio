@@ -2,6 +2,7 @@
 
 import { useSelectingCubeContext } from "@/contexts/selectingCubeContext";
 import { useWorksContext } from "@/contexts/worksContext";
+import { useCustomMediaQuery } from "@/hooks/useCustomMediaQuery";
 import { lightenHex } from "@/lib/sketch/colorChanger";
 import { useTexture } from "@react-three/drei";
 import { Canvas, useThree } from "@react-three/fiber";
@@ -165,6 +166,7 @@ function WorkClickPhysics({ onSpawnEnded }: { onSpawnEnded?: () => void }) {
   const { works } = useWorksContext();
   const { viewport, size } = useThree();
   const [boxes, setBoxes] = useState<FallingBox[]>([]);
+  const { mq } = useCustomMediaQuery();
   const lastSeqRef = useRef(0);
   const retryRef = useRef(0);
   const reconnectTimerRef = useRef<number | null>(null);
@@ -183,7 +185,7 @@ function WorkClickPhysics({ onSpawnEnded }: { onSpawnEnded?: () => void }) {
   const floorOffset = pixelToWorld * 24;
   const floorY = -viewport.height / 2 + floorOffset;
   const rightWallX = viewport.width / 2;
-  const triangleSize = pixelToWorld * 300;
+  const triangleSize = pixelToWorld * (mq("md") ? 300 : 200);
   const triangleVertices = useMemo(() => {
     const halfDepth = wallDepth / 2;
     return new Float32Array([
