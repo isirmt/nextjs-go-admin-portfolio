@@ -28,6 +28,7 @@ export default function WorksList() {
   const { clickedCubeId, clickNonce } = useSelectingCubeContext();
   const [selectingWorkId, setSelectingWorkId] = useState<string>();
   const [lastSelectedWorkId, setLastSelectedWorkId] = useState<string>();
+  const [isOpeningFilter, setIsOpeningFilter] = useState(false);
   const clickLimiterRef = useRef<Map<string, number>>(new Map());
   const lastHandledCubeClickRef = useRef(0);
   const { ref: andMoreTextRef, isActive: isAndMoreTextActive } =
@@ -106,63 +107,77 @@ export default function WorksList() {
           And More
         </div>
         <SectionText />
-        <div className="relative mb-28 flex w-full flex-col items-center justify-center gap-12 sm:items-end lg:flex-row">
-          <div className="flex flex-col items-start gap-1.5 select-none">
-            <button
-              className={`w-fit scale-100 cursor-pointer rounded-full border border-[#eb6854] bg-white px-2 py-0.5 text-sm text-[#eb6854] transition-[background-color,opacity,scale] duration-[250ms,100ms,500ms] ease-[linear,linear,cubic-bezier(0.34,1.56,0.64,1)] hover:scale-110 hover:bg-[#ffe4e0] ${selectedTechIds.size > 0 ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`}
-              onClick={clearTechs}
-            >
-              CLEAR
-            </button>
-            <ul className="flex flex-wrap justify-start gap-1.5">
-              {techs.map((tech) => (
-                <li key={tech.id}>
-                  <button
-                    className={`pointer-events-auto scale-100 cursor-pointer rounded-full border border-[#6354EB] px-2 py-0.5 text-sm transition-[background-color,color,scale] duration-[250ms,250ms,500ms] ease-[linear,linear,cubic-bezier(0.34,1.56,0.64,1)] hover:scale-110 ${selectedTechIds.has(tech.id) ? "bg-[#6354EB] text-white" : "bg-white text-[#6354EB] hover:bg-[#e4e0ff]"}`}
-                    onClick={() => toggleTech(tech.id)}
-                  >
-                    #{tech.name}
-                  </button>
-                </li>
-              ))}
-            </ul>
+        <div className="relative mt-8 mb-28 flex w-full flex-col items-center justify-center sm:items-end">
+          <div className="relative flex w-full flex-col-reverse items-center justify-center gap-8 md:flex-row md:gap-12">
+            <div className="flex flex-col items-start gap-1.5 select-none">
+              <button
+                className={`pointer-events-auto scale-100 cursor-pointer rounded-full border border-[#6354EB] px-3 py-1 text-base font-bold transition-[background-color,color,scale] duration-[250ms,250ms,500ms] ease-[linear,linear,cubic-bezier(0.34,1.56,0.64,1)] hover:scale-110 ${isOpeningFilter ? "bg-[#6354EB] text-white" : "bg-white text-[#6354EB] hover:bg-[#e4e0ff]"}`}
+                onClick={() => setIsOpeningFilter(!isOpeningFilter)}
+              >
+                AND Filter
+              </button>
+            </div>
+            <div>
+              <fieldset className="relative grid w-64 grid-cols-3 rounded-full border border-[#6354EB] bg-white p-0.5">
+                <span
+                  className="pointer-events-none absolute top-1 bottom-1 left-1 w-[calc((100%-0.5rem)/3)] rounded-full bg-[#6354EB] transition-transform duration-150 ease-out"
+                  style={{
+                    transform: `translateX(${selectedSortIndex * 100}%)`,
+                  }}
+                />
+
+                {WORK_SORT_OPTIONS.map((option) => {
+                  const isSelected = sort === option.value;
+
+                  return (
+                    <label
+                      key={option.value}
+                      className={`group relative z-10 flex cursor-pointer items-center justify-center rounded-full px-3 py-1 text-sm transition-colors select-none ${
+                        isSelected ? "text-white" : "text-[#6354EB]"
+                      }`}
+                    >
+                      <span
+                        className={`absolute h-[calc(100%-0.25rem)] w-9/10 rounded-full bg-transparent transition-all group-hover:bg-[#e4e0ff] ${isSelected ? "hidden" : "block"}`}
+                      />
+                      <input
+                        className="sr-only"
+                        type="radio"
+                        name="work-sort"
+                        value={option.value}
+                        checked={isSelected}
+                        onChange={() => setSort(option.value)}
+                      />
+
+                      <span className="relative z-10">{option.label}</span>
+                    </label>
+                  );
+                })}
+              </fieldset>
+            </div>
           </div>
-          <div>
-            <fieldset className="relative grid w-64 grid-cols-3 rounded-full border border-[#6354EB] bg-white p-0.5">
-              <span
-                className="pointer-events-none absolute top-1 bottom-1 left-1 w-[calc((100%-0.5rem)/3)] rounded-full bg-[#6354EB] transition-transform duration-150 ease-out"
-                style={{
-                  transform: `translateX(${selectedSortIndex * 100}%)`,
-                }}
-              />
-
-              {WORK_SORT_OPTIONS.map((option) => {
-                const isSelected = sort === option.value;
-
-                return (
-                  <label
-                    key={option.value}
-                    className={`group relative z-10 flex cursor-pointer items-center justify-center rounded-full px-3 py-1 text-sm transition-colors select-none ${
-                      isSelected ? "text-white" : "text-[#6354EB]"
-                    }`}
-                  >
-                    <span
-                      className={`absolute h-[calc(100%-0.25rem)] w-9/10 rounded-full bg-transparent transition-all group-hover:bg-[#e4e0ff] ${isSelected ? "hidden" : "block"}`}
-                    />
-                    <input
-                      className="sr-only"
-                      type="radio"
-                      name="work-sort"
-                      value={option.value}
-                      checked={isSelected}
-                      onChange={() => setSort(option.value)}
-                    />
-
-                    <span className="relative z-10">{option.label}</span>
-                  </label>
-                );
-              })}
-            </fieldset>
+          <div className="relative w-full">
+            {isOpeningFilter && (
+              <React.Fragment>
+                <button
+                  className={`w-fit scale-100 cursor-pointer rounded-full border border-[#eb6854] bg-white px-2 py-0.5 text-sm text-[#eb6854] transition-[background-color,opacity,scale] duration-[250ms,100ms,500ms] ease-[linear,linear,cubic-bezier(0.34,1.56,0.64,1)] hover:scale-110 hover:bg-[#ffe4e0] ${selectedTechIds.size > 0 ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`}
+                  onClick={clearTechs}
+                >
+                  CLEAR
+                </button>
+                <ul className="flex flex-wrap justify-start gap-1.5">
+                  {techs.map((tech) => (
+                    <li key={tech.id}>
+                      <button
+                        className={`pointer-events-auto scale-100 cursor-pointer rounded-full border border-[#6354EB] px-2 py-0.5 text-sm transition-[background-color,color,scale] duration-[250ms,250ms,500ms] ease-[linear,linear,cubic-bezier(0.34,1.56,0.64,1)] hover:scale-110 ${selectedTechIds.has(tech.id) ? "bg-[#6354EB] text-white" : "bg-white text-[#6354EB] hover:bg-[#e4e0ff]"}`}
+                        onClick={() => toggleTech(tech.id)}
+                      >
+                        #{tech.name}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </React.Fragment>
+            )}
           </div>
         </div>
         <div className="flex w-fit flex-wrap justify-center gap-x-24 gap-y-24">
