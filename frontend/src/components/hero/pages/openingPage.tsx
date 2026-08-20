@@ -112,7 +112,7 @@ export default function OpeningHeroPage() {
           secondaryColor="#EEE"
           onPointerDown={handleSeekBarPointerDown}
           onPointerUp={handleSeekBarPointerUp}
-          className="pointer-events-auto absolute bottom-5 left-[calc(54*0.25rem+1.5rem)] z-50 h-4 w-[calc(100%-54*0.25rem-3rem)]"
+          className="pointer-events-auto absolute bottom-5 left-[calc(60*0.25rem+1.5rem)] z-50 h-4 w-[calc(100%-60*0.25rem-3rem)]"
         />
         {/* Gray scale */}
         <div

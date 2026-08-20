@@ -16,6 +16,7 @@ type HeroDeckControls = {
   currentPageId: string;
   currentPageIndex: number;
   autoPagination: boolean;
+  setAutoPagination: (enabled: boolean) => void;
   isTransitioning: boolean;
   pageCount: number;
   goTo: (pageId: string) => boolean;
@@ -143,7 +144,7 @@ export default function HeroDeck({
   pages,
   initialPageId,
   activePageId,
-  autoPagination = true,
+  autoPagination: initialAutoPagination = true,
   loop = true,
   onPageChange,
   children,
@@ -158,10 +159,15 @@ export default function HeroDeck({
     return firstPageId ? { [firstPageId]: 1 } : {};
   });
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [autoPagination, setAutoPagination] = useState(initialAutoPagination);
   const trackRef = useRef<HTMLDivElement | null>(null);
   const frameRefs = useRef(new Map<string, HTMLDivElement>());
   const contentRefs = useRef(new Map<string, HTMLDivElement>());
   const activeAnimationsRef = useRef<Animation[]>([]);
+  const paginationPageIdRef = useRef("");
+  const paginationDurationMsRef = useRef<number | undefined>(undefined);
+  const paginationRemainingMsRef = useRef<number | undefined>(undefined);
+  const paginationStartedAtRef = useRef<number | undefined>(undefined);
   const requestedPageId = activePageId ?? internalPageId;
   const requestedPageIndex = pages.findIndex(
     (page) => page.id === requestedPageId,
@@ -169,6 +175,10 @@ export default function HeroDeck({
   const currentPageIndex = requestedPageIndex >= 0 ? requestedPageIndex : 0;
   const currentPage = pages[currentPageIndex];
   const currentPageId = currentPage?.id ?? "";
+
+  useEffect(() => {
+    setAutoPagination(initialAutoPagination);
+  }, [initialAutoPagination]);
 
   useEffect(() => {
     return () => {
@@ -276,19 +286,51 @@ export default function HeroDeck({
 
   useEffect(() => {
     const durationMs = currentPage?.durationMs;
+    const hasValidDuration =
+      durationMs !== undefined && Number.isFinite(durationMs) && durationMs > 0;
+
+    if (
+      paginationPageIdRef.current !== currentPageId ||
+      paginationDurationMsRef.current !== durationMs
+    ) {
+      paginationPageIdRef.current = currentPageId;
+      paginationDurationMsRef.current = durationMs;
+      paginationRemainingMsRef.current = hasValidDuration
+        ? durationMs
+        : undefined;
+      paginationStartedAtRef.current = undefined;
+    }
+
     if (
       !autoPagination ||
       isTransitioning ||
       pages.length < 2 ||
-      durationMs === undefined ||
-      !Number.isFinite(durationMs) ||
-      durationMs <= 0
+      !hasValidDuration
     ) {
       return;
     }
 
-    const timeoutId = window.setTimeout(next, durationMs);
-    return () => window.clearTimeout(timeoutId);
+    const remainingMs = paginationRemainingMsRef.current ?? durationMs;
+    const startedAt = performance.now();
+    paginationStartedAtRef.current = startedAt;
+
+    const timeoutId = window.setTimeout(() => {
+      paginationStartedAtRef.current = undefined;
+      paginationRemainingMsRef.current = durationMs;
+      next();
+    }, remainingMs);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+
+      if (paginationStartedAtRef.current !== startedAt) return;
+
+      paginationStartedAtRef.current = undefined;
+      paginationRemainingMsRef.current = Math.max(
+        0,
+        remainingMs - (performance.now() - startedAt),
+      );
+    };
   }, [
     autoPagination,
     currentPage?.durationMs,
@@ -303,6 +345,7 @@ export default function HeroDeck({
       currentPageId,
       currentPageIndex,
       autoPagination,
+      setAutoPagination,
       isTransitioning,
       pageCount: pages.length,
       goTo,
@@ -316,6 +359,7 @@ export default function HeroDeck({
       isTransitioning,
       next,
       pages.length,
+      setAutoPagination,
     ],
   );
 

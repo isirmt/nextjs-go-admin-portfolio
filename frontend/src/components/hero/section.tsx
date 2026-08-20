@@ -1,7 +1,24 @@
 "use client";
 
 import HeroDeck, { useHeroDeck } from "./deck";
+import MediaPauserIcon from "../public/mediaPauserIcon";
 import { heroPages } from "./pages/registry";
+
+function HeroPageControlButton() {
+  const { autoPagination, setAutoPagination } = useHeroDeck();
+
+  return (
+    <button
+      className={`ease-over absolute bottom-16 left-0 z-50 m-6 flex size-10 cursor-pointer items-center justify-center rounded-full border-2 border-[#F43F5E] bg-white text-[#F43F5E] shadow transition-all duration-400 hover:scale-110 active:scale-95`}
+      onClick={() => setAutoPagination(!autoPagination)}
+    >
+      <MediaPauserIcon
+        isPlaying={autoPagination}
+        className="size-7 fill-current"
+      />
+    </button>
+  );
+}
 
 function HeroPageNavigation() {
   const { autoPagination, currentPageId, goTo, isTransitioning, pageCount } =
@@ -11,8 +28,7 @@ function HeroPageNavigation() {
     <ul className="absolute bottom-0 left-0 z-10 flex gap-6 p-6 drop-shadow-md md:drop-shadow-none">
       {heroPages.map((page, index) => {
         const isCurrent = page.id === currentPageId;
-        const showDuration =
-          autoPagination && isCurrent && !isTransitioning && pageCount > 1;
+        const showDuration = isCurrent && !isTransitioning && pageCount > 1;
 
         return (
           <li key={page.id} className="relative">
@@ -34,14 +50,17 @@ function HeroPageNavigation() {
                   rx="6"
                   strokeDasharray="182"
                   strokeDashoffset="182"
-                  style={{ animationDuration: `${page.durationMs}ms` }}
+                  style={{
+                    animationDuration: `${page.durationMs}ms`,
+                    animationPlayState: autoPagination ? "running" : "paused",
+                  }}
                 />
               </svg>
             ) : null}
             <button
               type="button"
               onClick={() => goTo(page.id)}
-              className={`font-dot relative z-10 flex size-10 items-center justify-center rounded border-2 border-[#F43F5E] text-xl font-bold shadow transition-all select-none ${isCurrent ? "pointer-events-none rotate-45 bg-[#F43F5E] text-white" : "cursor-pointer bg-white text-[#F43F5E]"}`}
+              className={`font-dot relative z-10 flex size-10 items-center justify-center rounded border-2 border-[#F43F5E] text-xl font-bold shadow transition-all select-none ${isCurrent ? "pointer-events-none rotate-45 bg-[#F43F5E] text-white" : "ease-over cursor-pointer bg-white text-[#F43F5E] duration-400 hover:scale-110 active:scale-95"}`}
             >
               <span
                 className={`transition-all ${isCurrent ? "-rotate-45" : ""}`}
@@ -63,7 +82,8 @@ export default function HeroSection() {
         色彩と体験
       </h1>
       <HeroDeck pages={heroPages} initialPageId="opening" autoPagination loop>
-        <div className="animate-scale-motion absolute bottom-0 left-0 hidden aspect-1774/1133 w-54 origin-[bottom_left] bg-[url('/cloud_ll.webp')] bg-contain bg-bottom-left bg-no-repeat md:block" />
+        <div className="animate-scale-motion absolute bottom-0 left-0 hidden aspect-1774/1133 w-60 origin-[bottom_left] bg-[url('/cloud_ll.webp')] bg-contain bg-bottom-left bg-no-repeat md:block" />
+        <HeroPageControlButton />
         <HeroPageNavigation />
       </HeroDeck>
     </div>

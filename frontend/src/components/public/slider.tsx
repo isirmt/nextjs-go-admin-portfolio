@@ -46,7 +46,7 @@ export function Slider({
           ${secondaryColor} 100%
         )`,
       }}
-      className={`${className} cursor-pointer appearance-none rounded-full [&::-moz-range-thumb]:opacity-0 [&::-moz-range-track]:h-full [&::-moz-range-track]:rounded-full [&::-webkit-slider-runnable-track]:h-full [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-thumb]:opacity-0`}
+      className={`${className} cursor-pointer appearance-none [&::-moz-range-thumb]:opacity-0 [&::-moz-range-track]:h-full [&::-moz-range-track]:rounded-full [&::-webkit-slider-runnable-track]:h-full [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-thumb]:opacity-0`}
     />
   );
 }
