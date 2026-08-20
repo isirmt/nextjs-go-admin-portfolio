@@ -4,13 +4,15 @@ import {
   at,
   defineTimeline,
   set,
+  TimelineStatus,
   useWaapiTimeline,
 } from "@isirmt/react-cues";
 import { lineSeedJp } from "@/lib/fonts";
 import HeroPageFrame from "../pageFrame";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Sparkle from "@/components/shapes/sparkle";
 import { Slider } from "@/components/public/slider";
+import MediaPauserIcon from "@/components/public/mediaPauserIcon";
 
 const WAVE_KEYFRAMES: Keyframe[] = [
   { transform: "translateY(0)" },
@@ -79,6 +81,7 @@ export default function OpeningHeroPage() {
   const { bind, snapshot, timeline } = useWaapiTimeline(
     openingTimelineDefinition,
   );
+  const playbackStateRef = useRef<TimelineStatus | null>(null);
   const isColorful = colorfulOverride ?? snapshot.state.isColorful;
 
   useEffect(() => {
@@ -88,11 +91,16 @@ export default function OpeningHeroPage() {
   }, [timeline]);
 
   const handleSeekBarPointerDown = useCallback(() => {
+    playbackStateRef.current = snapshot.status;
     timeline.pause();
-  }, [timeline]);
+  }, [snapshot.status, timeline]);
 
   const handleSeekBarPointerUp = useCallback(() => {
-    timeline.play();
+    if (playbackStateRef.current === "playing") {
+      timeline.play();
+    } else if (playbackStateRef.current === "paused") {
+      timeline.pause();
+    }
   }, [timeline]);
 
   return (
@@ -100,6 +108,21 @@ export default function OpeningHeroPage() {
       <div
         className={`pointer-events-none absolute inset-0 flex items-center justify-center bg-[#ffffff] font-bold select-none ${lineSeedJp.className}`}
       >
+        <button
+          className={`ease-over pointer-events-auto absolute bottom-3 left-[calc(34*0.25rem+1.5rem)] z-50 size-8 cursor-pointer text-[#F43F5E] transition-all duration-400 hover:scale-110 active:scale-95 md:left-[calc(63*0.25rem+1.5rem)]`}
+          onClick={() => {
+            if (snapshot.status === "playing") {
+              timeline.pause();
+            } else {
+              timeline.play();
+            }
+          }}
+        >
+          <MediaPauserIcon
+            isPlaying={snapshot.status === "playing"}
+            className="size-7 fill-current"
+          />
+        </button>
         <Slider
           min={0}
           max={snapshot.duration}
@@ -112,7 +135,7 @@ export default function OpeningHeroPage() {
           secondaryColor="#EEE"
           onPointerDown={handleSeekBarPointerDown}
           onPointerUp={handleSeekBarPointerUp}
-          className="pointer-events-auto absolute bottom-5 left-[calc(60*0.25rem+1.5rem)] z-50 h-4 w-[calc(100%-60*0.25rem-3rem)]"
+          className="pointer-events-auto absolute bottom-5 left-[calc(45*0.25rem+1.5rem)] z-50 h-3.5 w-[calc(100%-45*0.25rem-3rem)] rounded-full [corner-shape:bevel] md:left-[calc(75*0.25rem+1.5rem)] md:w-[calc(100%-75*0.25rem-3rem)]"
         />
         {/* Gray scale */}
         <div
