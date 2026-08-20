@@ -7,6 +7,7 @@ import { Work } from "@/types/works/common";
 import { useEffect, useRef, useState } from "react";
 import SearchIcon from "../public/searchIcon";
 import React from "react";
+import { useCustomMediaQuery } from "@/hooks/useCustomMediaQuery";
 
 const SEARCH_DELAY = 300; // ms
 const SEARCH_API_URL = "/api/works/search";
@@ -61,6 +62,7 @@ export default function SearchWindow() {
   const containerRef = useRef<HTMLDivElement>(null);
   const searchRequestIdRef = useRef(0);
   const [rankingWorks, setRankingWorks] = useState<Work[]>([]);
+  const { mq } = useCustomMediaQuery();
 
   const { scrollbarWidth } = useScrollbarControl(isOpen);
 
@@ -184,13 +186,21 @@ export default function SearchWindow() {
           onFocus={() => setIsOpen(true)}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder={isOpen ? "キーワードを入力" : ""}
-          className={`font-noto pointer-events-auto block h-12 w-full rounded-full border border-[#ccc] bg-white shadow-md shadow-[#ccc] outline-none hover:border-[#6354EB] focus:border-[#6354EB] active:border-[#6354EB] ${isOpen ? "py-1 pr-4 pl-12.5 text-[#333]" : "cursor-pointer p-0 text-transparent select-none md:cursor-auto md:py-1 md:pr-4 md:pl-12.5 md:text-[#333] md:select-auto"}`}
+          className={`font-noto pointer-events-auto block h-12 w-full rounded-full border border-[#6354EB] bg-white shadow-sm shadow-[#ccc] outline-none hover:border-[#6354EB] focus:border-[#6354EB] active:border-[#6354EB] md:border-[#ccc] md:shadow-md ${isOpen ? "py-1 pr-4 pl-12.5 text-[#333]" : "cursor-pointer p-0 text-transparent select-none md:cursor-auto md:py-1 md:pr-4 md:pl-12.5 md:text-[#333] md:select-auto"}`}
         />
         <div
           className={`absolute top-2.5 z-10 ${isOpen ? "left-3.5" : "left-2 md:left-3.5"}`}
         >
           <SearchIcon
-            color={isOpen ? (isSearching ? "#aaa" : "#6354EB") : "#666"}
+            color={
+              isOpen
+                ? isSearching
+                  ? "#aaa"
+                  : "#6354EB"
+                : mq("md")
+                  ? "#666"
+                  : "#6354EB"
+            }
             size={32}
             style={{
               transition: "all 0.3s",
