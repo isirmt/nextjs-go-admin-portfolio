@@ -13,7 +13,7 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
-    "@isirmt/react-cues": "0.1.0",
+    "@isirmt/react-cues": "0.2.1",
     "@next/third-parties": "16.2.1",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.4.2",

@@ -10,7 +10,8 @@
 [View My Deployed Portfolio](https://isirmt.com)
 
 - Next.js (Tailwind CSS, Three.js)
-- Go (Echo, Gorm, WebSocket)
+- Echo (Gorm, WebSocket)
+- FastAPI
 - PostgreSQL
 
 ## requirements
