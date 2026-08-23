@@ -40,6 +40,10 @@ jobs:
       - name: Run build
         working-directory: frontend
         run: pnpm build
+      
+      - name: Run Storybook build
+        working-directory: frontend
+        run: pnpm build-storybook
 
   test-backend:
     runs-on: ubuntu-latest
