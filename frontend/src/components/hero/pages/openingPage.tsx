@@ -155,7 +155,7 @@ export default function OpeningHeroPage() {
           onChange={(event) => {
             timeline.seek(event.currentTarget.valueAsNumber);
           }}
-          primaryColor="#F43F5E"
+          primaryColor="#FFB2B3"
           secondaryColor="#EEE"
           onPointerDown={handleSeekBarPointerDown}
           onPointerUp={handleSeekBarPointerUp}
