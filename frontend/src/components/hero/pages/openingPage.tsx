@@ -1,8 +1,10 @@
 "use client";
 import {
   animate,
+  AnimationFrameClock,
   at,
   defineTimeline,
+  PlaybackRateClock,
   set,
   TimelineStatus,
   useWaapiTimeline,
@@ -14,6 +16,8 @@ import Sparkle from "@/components/shapes/sparkle";
 import { Slider } from "@/components/public/slider";
 import MediaPauserIcon from "@/components/public/mediaPauserIcon";
 import MediaLoopIcon from "@/components/public/mediaLoopIcon";
+
+const playbackRateList = [0.5, 1, 1.5, 2];
 
 const WAVE_KEYFRAMES: Keyframe[] = [
   { transform: "translateY(0)" },
@@ -80,8 +84,20 @@ export default function OpeningHeroPage() {
     null,
   );
   const [isLoop, setIsLoop] = useState(false);
+  const [playbackRateIndex, setPlaybackRateIndex] = useState(1);
+  const [clock] = useState(
+    () =>
+      new PlaybackRateClock(
+        new AnimationFrameClock(),
+        playbackRateList[playbackRateIndex],
+      ),
+  );
   const { bind, snapshot, timeline } = useWaapiTimeline(
     openingTimelineDefinition,
+    {
+      clock,
+      loop: isLoop,
+    },
   );
   const playbackStateRef = useRef<TimelineStatus | null>(null);
   const isColorful = colorfulOverride ?? snapshot.state.isColorful;
@@ -117,7 +133,7 @@ export default function OpeningHeroPage() {
         className={`pointer-events-none absolute inset-0 flex items-center justify-center bg-[#ffffff] font-bold select-none ${lineSeedJp.className}`}
       >
         <button
-          className={`ease-over pointer-events-auto absolute bottom-3 left-[calc(34*0.25rem+1.5rem)] z-50 size-8 cursor-pointer text-[#F43F5E] transition-all duration-400 hover:scale-110 active:scale-95 md:left-[calc(63*0.25rem+1.5rem)]`}
+          className={`ease-over pointer-events-auto absolute bottom-3 left-[calc(34*0.25rem+1.5rem)] z-50 size-8 cursor-pointer text-[#F43F5E] transition-all duration-400 select-none hover:scale-110 active:scale-95 md:left-[calc(63*0.25rem+1.5rem)]`}
           onClick={() => {
             if (snapshot.status === "playing") {
               timeline.pause();
@@ -139,14 +155,24 @@ export default function OpeningHeroPage() {
           onChange={(event) => {
             timeline.seek(event.currentTarget.valueAsNumber);
           }}
-          primaryColor="#9AEBE6"
+          primaryColor="#F43F5E"
           secondaryColor="#EEE"
           onPointerDown={handleSeekBarPointerDown}
           onPointerUp={handleSeekBarPointerUp}
-          className="pointer-events-auto absolute bottom-5 left-[calc(45*0.25rem+1.5rem)] z-50 h-3.5 w-[calc(100%-45*0.25rem-7rem)] rounded-full [corner-shape:bevel] md:left-[calc(75*0.25rem+1.5rem)] md:w-[calc(100%-75*0.25rem-10rem)]"
+          className="pointer-events-auto absolute bottom-5 left-[calc(45*0.25rem+1.5rem)] z-50 h-3.5 w-[calc(100%-45*0.25rem-7.8rem)] rounded-full [corner-shape:bevel] md:left-[calc(75*0.25rem+1.5rem)] md:w-[calc(100%-75*0.25rem-8.5rem)]"
         />
         <button
-          className={`ease-over pointer-events-auto absolute right-4 bottom-3 z-50 size-8 cursor-pointer text-[#F43F5E] transition-all duration-400 hover:scale-110 active:scale-95 md:right-4`}
+          className={`ease-over font-dot pointer-events-auto absolute right-14 bottom-3 z-50 size-8 cursor-pointer tracking-tighter text-[#F43F5E] transition-all duration-400 select-none hover:scale-110 active:scale-95`}
+          onClick={() => {
+            const nextIndex = (playbackRateIndex + 1) % playbackRateList.length;
+            clock.setPlaybackRate(playbackRateList[nextIndex]);
+            setPlaybackRateIndex(nextIndex);
+          }}
+        >
+          x{playbackRateList[playbackRateIndex]}
+        </button>
+        <button
+          className={`ease-over pointer-events-auto absolute right-4 bottom-3 z-50 size-8 cursor-pointer text-[#F43F5E] transition-all duration-400 select-none hover:scale-110 active:scale-95`}
           onClick={handleLoopToggle}
         >
           <MediaLoopIcon isLoop={isLoop} className="size-7 fill-current" />
