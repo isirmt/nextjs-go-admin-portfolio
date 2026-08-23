@@ -13,6 +13,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Sparkle from "@/components/shapes/sparkle";
 import { Slider } from "@/components/public/slider";
 import MediaPauserIcon from "@/components/public/mediaPauserIcon";
+import MediaLoopIcon from "@/components/public/mediaLoopIcon";
 
 const WAVE_KEYFRAMES: Keyframe[] = [
   { transform: "translateY(0)" },
@@ -78,6 +79,7 @@ export default function OpeningHeroPage() {
   const [colorfulOverride, setColorfulOverride] = useState<boolean | null>(
     null,
   );
+  const [isLoop, setIsLoop] = useState(false);
   const { bind, snapshot, timeline } = useWaapiTimeline(
     openingTimelineDefinition,
   );
@@ -102,6 +104,12 @@ export default function OpeningHeroPage() {
       timeline.pause();
     }
   }, [timeline]);
+
+  const handleLoopToggle = useCallback(() => {
+    const nextLoop = !isLoop;
+    timeline.setLoop(nextLoop);
+    setIsLoop(nextLoop);
+  }, [isLoop, timeline]);
 
   return (
     <HeroPageFrame>
@@ -135,8 +143,14 @@ export default function OpeningHeroPage() {
           secondaryColor="#EEE"
           onPointerDown={handleSeekBarPointerDown}
           onPointerUp={handleSeekBarPointerUp}
-          className="pointer-events-auto absolute bottom-5 left-[calc(45*0.25rem+1.5rem)] z-50 h-3.5 w-[calc(100%-45*0.25rem-3rem)] rounded-full [corner-shape:bevel] md:left-[calc(75*0.25rem+1.5rem)] md:w-[calc(100%-75*0.25rem-3rem)]"
+          className="pointer-events-auto absolute bottom-5 left-[calc(45*0.25rem+1.5rem)] z-50 h-3.5 w-[calc(100%-45*0.25rem-7rem)] rounded-full [corner-shape:bevel] md:left-[calc(75*0.25rem+1.5rem)] md:w-[calc(100%-75*0.25rem-10rem)]"
         />
+        <button
+          className={`ease-over pointer-events-auto absolute right-4 bottom-3 z-50 size-8 cursor-pointer text-[#F43F5E] transition-all duration-400 hover:scale-110 active:scale-95 md:right-4`}
+          onClick={handleLoopToggle}
+        >
+          <MediaLoopIcon isLoop={isLoop} className="size-7 fill-current" />
+        </button>
         {/* Gray scale */}
         <div
           className={`absolute z-10 aspect-square rounded-full bg-transparent backdrop-grayscale-100 transition-all duration-1500 ease-in-out ${isColorful ? "size-0" : "size-[calc(max(100dvh,100dvw)*1.414)]"}`}
