@@ -155,11 +155,11 @@ export default function WorksList() {
               </fieldset>
             </div>
           </div>
-          <div className="relative w-full">
+          <div className="relative flex w-full flex-col space-y-2">
             {isOpeningFilter && (
               <React.Fragment>
                 <button
-                  className={`w-fit scale-100 cursor-pointer rounded-full border border-[#eb6854] bg-white px-2 py-0.5 text-sm text-[#eb6854] transition-[background-color,opacity,scale] duration-[250ms,100ms,500ms] ease-[linear,linear,cubic-bezier(0.34,1.56,0.64,1)] hover:scale-110 hover:bg-[#ffe4e0] ${selectedTechIds.size > 0 ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`}
+                  className={`w-fit scale-100 cursor-pointer rounded-full border border-[#eb6854] bg-white px-2 py-0.5 text-sm text-[#eb6854] transition-[background-color,opacity,scale] duration-[250ms,100ms,500ms] ease-[linear,linear,cubic-bezier(0.34,1.56,0.64,1)] select-none hover:scale-110 hover:bg-[#ffe4e0] ${selectedTechIds.size > 0 ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`}
                   onClick={clearTechs}
                 >
                   CLEAR
@@ -168,7 +168,7 @@ export default function WorksList() {
                   {techs.map((tech) => (
                     <li key={tech.id}>
                       <button
-                        className={`pointer-events-auto scale-100 cursor-pointer rounded-full border border-[#6354EB] px-2 py-0.5 text-sm transition-[background-color,color,scale] duration-[250ms,250ms,500ms] ease-[linear,linear,cubic-bezier(0.34,1.56,0.64,1)] hover:scale-110 ${selectedTechIds.has(tech.id) ? "bg-[#6354EB] text-white" : "bg-white text-[#6354EB] hover:bg-[#e4e0ff]"}`}
+                        className={`pointer-events-auto scale-100 cursor-pointer rounded-full border border-[#6354EB] px-2 py-0.5 text-sm transition-[background-color,color,scale] duration-[250ms,250ms,500ms] ease-[linear,linear,cubic-bezier(0.34,1.56,0.64,1)] select-none hover:scale-110 ${selectedTechIds.has(tech.id) ? "bg-[#6354EB] text-white" : "bg-white text-[#6354EB] hover:bg-[#e4e0ff]"}`}
                         onClick={() => toggleTech(tech.id)}
                       >
                         #{tech.name}
@@ -181,15 +181,29 @@ export default function WorksList() {
           </div>
         </div>
         <div className="flex w-fit flex-wrap justify-center gap-x-24 gap-y-24">
-          {visibleWorks.map((work) => (
-            <WorkCard
-              key={work.id}
-              work={work}
-              selectingId={selectingWorkId}
-              selectingFunc={handleSelectWork}
-              onRecordClick={recordClick}
-            />
-          ))}
+          {visibleWorks.length > 0 ? (
+            visibleWorks.map((work) => (
+              <WorkCard
+                key={work.id}
+                work={work}
+                selectingId={selectingWorkId}
+                selectingFunc={handleSelectWork}
+                onRecordClick={recordClick}
+              />
+            ))
+          ) : (
+            <div className="font-noto pointer-events-none z-10 text-center text-4xl font-black text-[#555] select-none md:text-6xl">
+              <div className="leading-relaxed">
+                お探しの条件では見つかりませんでした(T_T)
+              </div>
+              <button
+                className={`w-fit scale-100 cursor-pointer rounded-full border border-[#eb6854] bg-white px-2 py-0.5 text-sm text-[#eb6854] transition-[background-color,opacity,scale] duration-[250ms,100ms,500ms] ease-[linear,linear,cubic-bezier(0.34,1.56,0.64,1)] select-none hover:scale-110 hover:bg-[#ffe4e0] ${selectedTechIds.size > 0 ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`}
+                onClick={clearTechs}
+              >
+                CLEAR
+              </button>
+            </div>
+          )}
         </div>
       </div>
       <SelectedDetailScreen
