@@ -17,7 +17,7 @@ import { Slider } from "@/components/public/slider";
 import MediaPauserIcon from "@/components/public/mediaPauserIcon";
 import MediaLoopIcon from "@/components/public/mediaLoopIcon";
 
-const playbackRateList = [0.5, 1, 1.5, 2];
+const playbackRateList = [0.5, 1, 1.5, 2, 4];
 
 const WAVE_KEYFRAMES: Keyframe[] = [
   { transform: "translateY(0)" },
