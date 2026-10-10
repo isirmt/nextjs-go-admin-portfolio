@@ -16,18 +16,24 @@ import (
 )
 
 var (
-	Q                   = new(Query)
-	CommonImage         *commonImage
-	CommonTechStack     *commonTechStack
-	IsirmtWork          *isirmtWork
-	IsirmtWorkClick     *isirmtWorkClick
-	IsirmtWorkImage     *isirmtWorkImage
-	IsirmtWorkTechStack *isirmtWorkTechStack
-	IsirmtWorkURL       *isirmtWorkURL
+	Q                      = new(Query)
+	BlogArticle            *blogArticle
+	BlogArticleImage       *blogArticleImage
+	BlogArticlePreviewLink *blogArticlePreviewLink
+	CommonImage            *commonImage
+	CommonTechStack        *commonTechStack
+	IsirmtWork             *isirmtWork
+	IsirmtWorkClick        *isirmtWorkClick
+	IsirmtWorkImage        *isirmtWorkImage
+	IsirmtWorkTechStack    *isirmtWorkTechStack
+	IsirmtWorkURL          *isirmtWorkURL
 )
 
 func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	*Q = *Use(db, opts...)
+	BlogArticle = &Q.BlogArticle
+	BlogArticleImage = &Q.BlogArticleImage
+	BlogArticlePreviewLink = &Q.BlogArticlePreviewLink
 	CommonImage = &Q.CommonImage
 	CommonTechStack = &Q.CommonTechStack
 	IsirmtWork = &Q.IsirmtWork
@@ -39,41 +45,50 @@ func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 
 func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 	return &Query{
-		db:                  db,
-		CommonImage:         newCommonImage(db, opts...),
-		CommonTechStack:     newCommonTechStack(db, opts...),
-		IsirmtWork:          newIsirmtWork(db, opts...),
-		IsirmtWorkClick:     newIsirmtWorkClick(db, opts...),
-		IsirmtWorkImage:     newIsirmtWorkImage(db, opts...),
-		IsirmtWorkTechStack: newIsirmtWorkTechStack(db, opts...),
-		IsirmtWorkURL:       newIsirmtWorkURL(db, opts...),
+		db:                     db,
+		BlogArticle:            newBlogArticle(db, opts...),
+		BlogArticleImage:       newBlogArticleImage(db, opts...),
+		BlogArticlePreviewLink: newBlogArticlePreviewLink(db, opts...),
+		CommonImage:            newCommonImage(db, opts...),
+		CommonTechStack:        newCommonTechStack(db, opts...),
+		IsirmtWork:             newIsirmtWork(db, opts...),
+		IsirmtWorkClick:        newIsirmtWorkClick(db, opts...),
+		IsirmtWorkImage:        newIsirmtWorkImage(db, opts...),
+		IsirmtWorkTechStack:    newIsirmtWorkTechStack(db, opts...),
+		IsirmtWorkURL:          newIsirmtWorkURL(db, opts...),
 	}
 }
 
 type Query struct {
 	db *gorm.DB
 
-	CommonImage         commonImage
-	CommonTechStack     commonTechStack
-	IsirmtWork          isirmtWork
-	IsirmtWorkClick     isirmtWorkClick
-	IsirmtWorkImage     isirmtWorkImage
-	IsirmtWorkTechStack isirmtWorkTechStack
-	IsirmtWorkURL       isirmtWorkURL
+	BlogArticle            blogArticle
+	BlogArticleImage       blogArticleImage
+	BlogArticlePreviewLink blogArticlePreviewLink
+	CommonImage            commonImage
+	CommonTechStack        commonTechStack
+	IsirmtWork             isirmtWork
+	IsirmtWorkClick        isirmtWorkClick
+	IsirmtWorkImage        isirmtWorkImage
+	IsirmtWorkTechStack    isirmtWorkTechStack
+	IsirmtWorkURL          isirmtWorkURL
 }
 
 func (q *Query) Available() bool { return q.db != nil }
 
 func (q *Query) clone(db *gorm.DB) *Query {
 	return &Query{
-		db:                  db,
-		CommonImage:         q.CommonImage.clone(db),
-		CommonTechStack:     q.CommonTechStack.clone(db),
-		IsirmtWork:          q.IsirmtWork.clone(db),
-		IsirmtWorkClick:     q.IsirmtWorkClick.clone(db),
-		IsirmtWorkImage:     q.IsirmtWorkImage.clone(db),
-		IsirmtWorkTechStack: q.IsirmtWorkTechStack.clone(db),
-		IsirmtWorkURL:       q.IsirmtWorkURL.clone(db),
+		db:                     db,
+		BlogArticle:            q.BlogArticle.clone(db),
+		BlogArticleImage:       q.BlogArticleImage.clone(db),
+		BlogArticlePreviewLink: q.BlogArticlePreviewLink.clone(db),
+		CommonImage:            q.CommonImage.clone(db),
+		CommonTechStack:        q.CommonTechStack.clone(db),
+		IsirmtWork:             q.IsirmtWork.clone(db),
+		IsirmtWorkClick:        q.IsirmtWorkClick.clone(db),
+		IsirmtWorkImage:        q.IsirmtWorkImage.clone(db),
+		IsirmtWorkTechStack:    q.IsirmtWorkTechStack.clone(db),
+		IsirmtWorkURL:          q.IsirmtWorkURL.clone(db),
 	}
 }
 
@@ -87,36 +102,45 @@ func (q *Query) WriteDB() *Query {
 
 func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 	return &Query{
-		db:                  db,
-		CommonImage:         q.CommonImage.replaceDB(db),
-		CommonTechStack:     q.CommonTechStack.replaceDB(db),
-		IsirmtWork:          q.IsirmtWork.replaceDB(db),
-		IsirmtWorkClick:     q.IsirmtWorkClick.replaceDB(db),
-		IsirmtWorkImage:     q.IsirmtWorkImage.replaceDB(db),
-		IsirmtWorkTechStack: q.IsirmtWorkTechStack.replaceDB(db),
-		IsirmtWorkURL:       q.IsirmtWorkURL.replaceDB(db),
+		db:                     db,
+		BlogArticle:            q.BlogArticle.replaceDB(db),
+		BlogArticleImage:       q.BlogArticleImage.replaceDB(db),
+		BlogArticlePreviewLink: q.BlogArticlePreviewLink.replaceDB(db),
+		CommonImage:            q.CommonImage.replaceDB(db),
+		CommonTechStack:        q.CommonTechStack.replaceDB(db),
+		IsirmtWork:             q.IsirmtWork.replaceDB(db),
+		IsirmtWorkClick:        q.IsirmtWorkClick.replaceDB(db),
+		IsirmtWorkImage:        q.IsirmtWorkImage.replaceDB(db),
+		IsirmtWorkTechStack:    q.IsirmtWorkTechStack.replaceDB(db),
+		IsirmtWorkURL:          q.IsirmtWorkURL.replaceDB(db),
 	}
 }
 
 type queryCtx struct {
-	CommonImage         ICommonImageDo
-	CommonTechStack     ICommonTechStackDo
-	IsirmtWork          IIsirmtWorkDo
-	IsirmtWorkClick     IIsirmtWorkClickDo
-	IsirmtWorkImage     IIsirmtWorkImageDo
-	IsirmtWorkTechStack IIsirmtWorkTechStackDo
-	IsirmtWorkURL       IIsirmtWorkURLDo
+	BlogArticle            IBlogArticleDo
+	BlogArticleImage       IBlogArticleImageDo
+	BlogArticlePreviewLink IBlogArticlePreviewLinkDo
+	CommonImage            ICommonImageDo
+	CommonTechStack        ICommonTechStackDo
+	IsirmtWork             IIsirmtWorkDo
+	IsirmtWorkClick        IIsirmtWorkClickDo
+	IsirmtWorkImage        IIsirmtWorkImageDo
+	IsirmtWorkTechStack    IIsirmtWorkTechStackDo
+	IsirmtWorkURL          IIsirmtWorkURLDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
-		CommonImage:         q.CommonImage.WithContext(ctx),
-		CommonTechStack:     q.CommonTechStack.WithContext(ctx),
-		IsirmtWork:          q.IsirmtWork.WithContext(ctx),
-		IsirmtWorkClick:     q.IsirmtWorkClick.WithContext(ctx),
-		IsirmtWorkImage:     q.IsirmtWorkImage.WithContext(ctx),
-		IsirmtWorkTechStack: q.IsirmtWorkTechStack.WithContext(ctx),
-		IsirmtWorkURL:       q.IsirmtWorkURL.WithContext(ctx),
+		BlogArticle:            q.BlogArticle.WithContext(ctx),
+		BlogArticleImage:       q.BlogArticleImage.WithContext(ctx),
+		BlogArticlePreviewLink: q.BlogArticlePreviewLink.WithContext(ctx),
+		CommonImage:            q.CommonImage.WithContext(ctx),
+		CommonTechStack:        q.CommonTechStack.WithContext(ctx),
+		IsirmtWork:             q.IsirmtWork.WithContext(ctx),
+		IsirmtWorkClick:        q.IsirmtWorkClick.WithContext(ctx),
+		IsirmtWorkImage:        q.IsirmtWorkImage.WithContext(ctx),
+		IsirmtWorkTechStack:    q.IsirmtWorkTechStack.WithContext(ctx),
+		IsirmtWorkURL:          q.IsirmtWorkURL.WithContext(ctx),
 	}
 }
 
