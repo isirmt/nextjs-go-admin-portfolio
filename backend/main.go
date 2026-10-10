@@ -99,6 +99,10 @@ func main() {
 	epWorks.PUT("/:id", pSrv.requireAdmin(pSrv.handleUpdateWork))
 	epWorks.DELETE("/:id", pSrv.requireAdmin(pSrv.handleDeleteWork))
 
+	epBlogs := router.Group("/blogs")
+	epBlogs.GET("", pSrv.handleGetBlogArticles)
+	epBlogs.GET("/:identifier", pSrv.handleGetBlogArticle)
+
 	addr := getEnv("HOST", "0.0.0.0") + ":" + getEnv("PORT", "4000")
 	log.Printf("backend listening on %s", addr)
 
