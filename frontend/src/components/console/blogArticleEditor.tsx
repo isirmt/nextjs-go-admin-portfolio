@@ -48,6 +48,7 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
   const [isThumbnailDialogOpen, setIsThumbnailDialogOpen] = useState(false);
   const [isBodyImageDialogOpen, setIsBodyImageDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
   const bodyRef = useRef<HTMLTextAreaElement>(null);
@@ -154,6 +155,26 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
     }
   };
 
+  const handleDelete = async () => {
+    if (!articleId || !window.confirm("この記事を削除しますか？")) return;
+    setIsDeleting(true);
+    setSubmitError(null);
+    try {
+      const response = await backendApi(`/blogs/${articleId}`, {
+        method: "DELETE",
+      });
+      if (!response.ok)
+        throw new Error((await response.text()) || "記事の削除に失敗しました");
+      router.replace("/console/blogs");
+    } catch (reason) {
+      setSubmitError(
+        reason instanceof Error ? reason.message : "記事の削除に失敗しました",
+      );
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <main className="relative w-full space-y-8 px-2.5 py-8 lg:px-16">
       <header className="flex flex-wrap items-center justify-between gap-4">
@@ -231,6 +252,16 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
           <ConsoleButton type="submit" disabled={isSubmitting}>
             {isSubmitting ? "保存中" : "保存"}
           </ConsoleButton>
+          {articleId ? (
+            <ConsoleButton
+              className="mt-20"
+              disabled={isSubmitting || isDeleting}
+              onClick={handleDelete}
+              variant="danger"
+            >
+              {isDeleting ? "削除中" : "削除"}
+            </ConsoleButton>
+          ) : null}
         </footer>
       </form>
       <ImageSelectingDialog
