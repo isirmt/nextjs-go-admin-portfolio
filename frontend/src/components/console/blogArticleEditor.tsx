@@ -284,7 +284,7 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
 
 export default function BlogArticleEditor(props: BlogArticleEditorProps) {
   return (
-    <ImagesProvider>
+    <ImagesProvider access="admin">
       <BlogArticleEditorForm {...props} />
     </ImagesProvider>
   );

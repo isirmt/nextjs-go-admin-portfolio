@@ -1,6 +1,7 @@
 "use client";
 
 import { CommonImage } from "@/types/images/common";
+import backendApi from "@/lib/auth/backendFetch";
 import React, {
   createContext,
   useCallback,
@@ -19,7 +20,15 @@ type ImagesContextValue = {
 
 const ImagesContext = createContext<ImagesContextValue | null>(null);
 
-export function ImagesProvider({ children }: { children: React.ReactNode }) {
+type ImagesProviderProps = {
+  children: React.ReactNode;
+  access?: "public" | "admin";
+};
+
+export function ImagesProvider({
+  children,
+  access = "public",
+}: ImagesProviderProps) {
   const [images, setImages] = useState<CommonImage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -28,7 +37,14 @@ export function ImagesProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch("/api/images");
+      let response: Response;
+      if (access === "admin") {
+        response = await backendApi("/images");
+        if (response.status === 401 || response.status === 403)
+          response = await fetch("/api/images");
+      } else {
+        response = await fetch("/api/images");
+      }
       if (!response.ok) throw new Error("画像の取得に失敗しました");
       const parsedImages = (await response.json()) as CommonImage[];
       setImages(parsedImages);
@@ -39,7 +55,7 @@ export function ImagesProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [access]);
 
   useEffect(() => {
     fetchImages();

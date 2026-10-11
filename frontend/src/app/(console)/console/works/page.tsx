@@ -7,7 +7,7 @@ import { WorksProvider } from "@/contexts/worksContext";
 export default async function ImagesConsolePage() {
   return (
     <main className="relative w-full space-y-8 px-2.5 py-8 lg:px-16">
-      <ImagesProvider>
+      <ImagesProvider access="admin">
         <WorksProvider>
           <TechsProvider>
             <WorkRegisterForm />
