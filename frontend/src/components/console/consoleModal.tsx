@@ -23,7 +23,7 @@ export default function ConsoleModal({
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-70 bg-[#054a5c]/45" />
         <Dialog.Content className="fixed top-1/2 left-1/2 z-80 flex max-h-[calc(100dvh-2rem)] w-[min(64rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-xl border-2 border-[#7e11d1] bg-white outline-none">
-          <header className="flex items-start justify-between gap-4 bg-[#7e11d1] px-5 py-4">
+          <div className="flex items-start justify-between gap-4 bg-[#7e11d1] px-5 py-4">
             <div>
               <Dialog.Title className="text-xl font-bold text-white">
                 {title}
@@ -38,7 +38,7 @@ export default function ConsoleModal({
             >
               ×
             </Dialog.Close>
-          </header>
+          </div>
           <div className="overflow-y-auto px-5 py-6">{children}</div>
         </Dialog.Content>
       </Dialog.Portal>

@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import backendApi from "@/lib/auth/backendFetch";
@@ -8,7 +9,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import ImageSelectingBox from "./imageSelectingBox";
+import ImageSelectingDialog from "./imageSelectingDialog";
 import StackSelectingBox from "./stackSelectingBox";
 import ConsoleButton from "./consoleButton";
 import { ConsoleTextArea, ConsoleTextField } from "./consoleField";
@@ -60,6 +61,29 @@ const initializeUrlItems = (
   }));
 };
 
+function SelectedImageTiles({ imageIds }: { imageIds: string[] }) {
+  if (imageIds.length === 0) {
+    return <p className="text-sm text-[#7e11d1]">画像未選択</p>;
+  }
+
+  return (
+    <div className="flex flex-wrap gap-3">
+      {imageIds.map((imageId) => (
+        <div
+          key={imageId}
+          className="size-20 overflow-hidden border-2 border-[#67c8e6] bg-white"
+        >
+          <img
+            src={`/api/images/${imageId}/raw`}
+            alt=""
+            className="size-full object-contain"
+          />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function WorkRegisterForm({
   mode = "post",
   workId,
@@ -87,6 +111,8 @@ export default function WorkRegisterForm({
   const [inputUrls, setInputUrls] = useState<WorkUrlItem[]>(
     initializeUrlItems(initialValues?.urls),
   );
+  const [isThumbnailDialogOpen, setIsThumbnailDialogOpen] = useState(false);
+  const [isWorkImagesDialogOpen, setIsWorkImagesDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
@@ -284,22 +310,27 @@ export default function WorkRegisterForm({
               className="w-full"
             />
           </LabelBox>
-          <LabelBox isLong>
+          <LabelBox>
             <LabelText required>サムネイル</LabelText>
-            <ImageSelectingBox
-              onChange={handleThumbnailSelected}
-              initialSelectedIds={
-                inputThumbnailImage ? [inputThumbnailImage] : []
-              }
+            <ConsoleButton
+              type="button"
+              onClick={() => setIsThumbnailDialogOpen(true)}
+            >
+              画像を選択
+            </ConsoleButton>
+            <SelectedImageTiles
+              imageIds={inputThumbnailImage ? [inputThumbnailImage] : []}
             />
           </LabelBox>
-          <LabelBox isLong>
+          <LabelBox>
             <LabelText required>参考画像</LabelText>
-            <ImageSelectingBox
-              multiple
-              onChange={handleWorkImagesSelected}
-              initialSelectedIds={inputWorkImages}
-            />
+            <ConsoleButton
+              type="button"
+              onClick={() => setIsWorkImagesDialogOpen(true)}
+            >
+              画像を選択
+            </ConsoleButton>
+            <SelectedImageTiles imageIds={inputWorkImages} />
           </LabelBox>
           <LabelBox isLong>
             <LabelText required>説明</LabelText>
@@ -322,6 +353,19 @@ export default function WorkRegisterForm({
           </LabelBox>
         </div>
       </form>
+      <ImageSelectingDialog
+        open={isThumbnailDialogOpen}
+        onOpenChange={setIsThumbnailDialogOpen}
+        initialSelectedIds={inputThumbnailImage ? [inputThumbnailImage] : []}
+        onSelect={handleThumbnailSelected}
+      />
+      <ImageSelectingDialog
+        open={isWorkImagesDialogOpen}
+        onOpenChange={setIsWorkImagesDialogOpen}
+        initialSelectedIds={inputWorkImages}
+        multiple
+        onSelect={handleWorkImagesSelected}
+      />
     </section>
   );
 }
