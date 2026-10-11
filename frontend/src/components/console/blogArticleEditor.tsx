@@ -8,6 +8,7 @@ import ConsoleButton from "./consoleButton";
 import { ConsoleTextArea, ConsoleTextField } from "./consoleField";
 import ImageSelectingDialog from "./imageSelectingDialog";
 import { LabelBox, LabelText } from "./labelBlock";
+import ConsoleSegmentedControl from "./consoleSegmentedControl";
 
 type BlogArticleEditorProps = { articleId?: string };
 
@@ -33,6 +34,7 @@ function SelectedImageTiles({ imageIds }: { imageIds: string[] }) {
 }
 
 function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
+  const [status, setStatus] = useState<"draft" | "published">("draft");
   const [thumbnailImageIds, setThumbnailImageIds] = useState<string[]>([]);
   const [bodyImageIds, setBodyImageIds] = useState<string[]>([]);
   const [isThumbnailDialogOpen, setIsThumbnailDialogOpen] = useState(false);
@@ -55,13 +57,15 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <LabelBox>
             <LabelText required>状態</LabelText>
-            <select
-              defaultValue="draft"
-              className="w-full border-b-2 border-[#c68ef0] px-4 py-2"
-            >
-              <option>下書き</option>
-              <option>公開</option>
-            </select>
+            <ConsoleSegmentedControl
+              name="status"
+              value={status}
+              onChange={setStatus}
+              options={[
+                { value: "draft", label: "下書き" },
+                { value: "published", label: "公開" },
+              ]}
+            />
           </LabelBox>
           <LabelBox>
             <LabelText>公開日時</LabelText>
