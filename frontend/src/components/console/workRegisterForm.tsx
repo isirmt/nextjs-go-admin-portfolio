@@ -11,6 +11,7 @@ import React, {
 import ImageSelectingBox from "./imageSelectingBox";
 import StackSelectingBox from "./stackSelectingBox";
 import ConsoleButton from "./consoleButton";
+import { ConsoleTextArea, ConsoleTextField } from "./consoleField";
 import { LabelBox, LabelText } from "./labelBlock";
 import WorkUrlsInput, {
   WorkUrlItem,
@@ -234,24 +235,22 @@ export default function WorkRegisterForm({
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <LabelBox>
             <LabelText required>制作物名</LabelText>
-            <input
+            <ConsoleTextField
               name="title"
               value={inputTitle}
               onChange={(e) => setInputTitle(e.target.value)}
               required
               placeholder="アプリケーション名"
-              className="w-full border-b-2 border-[#c68ef0] px-4 py-2 outline-none focus:border-[#7e11d1]"
             />
           </LabelBox>
           <LabelBox>
             <LabelText required>コメント</LabelText>
-            <input
+            <ConsoleTextField
               name="comment"
               value={inputComment}
               onChange={(e) => setInputComment(e.target.value)}
               required
               placeholder="ここに一言コメント！"
-              className="w-full border-b-2 border-[#c68ef0] px-4 py-2 outline-none focus:border-[#7e11d1]"
             />
           </LabelBox>
           <LabelBox isLong>
@@ -267,13 +266,12 @@ export default function WorkRegisterForm({
           </LabelBox>
           <LabelBox>
             <LabelText required>作成日</LabelText>
-            <input
+            <ConsoleTextField
               name="published_date"
               value={inputPublishedDate}
               onChange={(e) => setInputPublishedDate(e.target.value)}
               type="date"
               required
-              className="w-full border-b-2 border-[#c68ef0] px-4 py-2 outline-none focus:border-[#7e11d1]"
             />
           </LabelBox>
           <LabelBox>
@@ -306,12 +304,11 @@ export default function WorkRegisterForm({
           </LabelBox>
           <LabelBox isLong>
             <LabelText required>説明</LabelText>
-            <textarea
+            <ConsoleTextArea
               name="description"
               value={inputDescription}
               onChange={(e) => setInputDescription(e.target.value)}
               rows={5}
-              className="field-sizing-content min-h-[5lh] w-full border-y border-[#c68ef0] px-4 py-3 outline-none focus:border-[#7e11d1]"
             />
           </LabelBox>
           <LabelBox isLong>

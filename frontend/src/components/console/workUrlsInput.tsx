@@ -2,6 +2,7 @@
 
 import { useCallback } from "react";
 import ConsoleButton from "./consoleButton";
+import { ConsoleTextField } from "./consoleField";
 import { LabelText } from "./labelBlock";
 
 export type WorkUrlItem = {
@@ -79,8 +80,7 @@ export default function WorkUrlsInput({ items, onChange }: WorkUrlsInputProps) {
           </div>
           <label>
             <LabelText required>ラベル</LabelText>
-            <input
-              className="w-full border-b-2 border-[#c68ef0] px-4 py-1 outline-none focus:border-[#7e11d1]"
+            <ConsoleTextField
               value={item.label}
               onChange={(e) =>
                 handleFieldChange(item.id, "label", e.target.value)
@@ -90,9 +90,8 @@ export default function WorkUrlsInput({ items, onChange }: WorkUrlsInputProps) {
           </label>
           <label>
             <LabelText required>URL</LabelText>
-            <input
+            <ConsoleTextField
               type="url"
-              className="w-full border-b-2 border-[#c68ef0] px-4 py-1 outline-none focus:border-[#7e11d1]"
               value={item.url}
               onChange={(e) =>
                 handleFieldChange(item.id, "url", e.target.value)

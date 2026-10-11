@@ -3,6 +3,7 @@
 import backendApi from "@/lib/auth/backendFetch";
 import { useCallback, useState } from "react";
 import ConsoleButton from "./consoleButton";
+import { ConsoleTextField } from "./consoleField";
 import { LabelText } from "./labelBlock";
 import { useTechsContext } from "@/contexts/techsContext";
 
@@ -97,8 +98,7 @@ export default function StackSelectingBox({
       <div className="flex flex-col gap-4 border-y border-dashed border-[#c6a5ec] bg-white p-4">
         <label className="text-xs font-semibold text-gray-600">
           <LabelText required>スタック名</LabelText>
-          <input
-            className="mt-1 w-full border-b-2 border-[#c68ef0] px-2 py-1 outline-none focus:border-[#7e11d1]"
+          <ConsoleTextField
             value={newStackName}
             onChange={(e) => setNewStackName(e.target.value)}
             placeholder="Next.js"
