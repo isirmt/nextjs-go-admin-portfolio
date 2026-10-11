@@ -182,7 +182,7 @@ export default function WorkRegisterForm({
           const message = await response.text();
           throw new Error(
             message ||
-            (isEditingMode ? "更新に失敗しました" : "登録に失敗しました"),
+              (isEditingMode ? "更新に失敗しました" : "登録に失敗しました"),
           );
         }
 
