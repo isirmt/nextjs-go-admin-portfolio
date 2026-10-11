@@ -13,6 +13,7 @@ import ImageSelectingDialog from "./imageSelectingDialog";
 import { LabelBox, LabelText } from "./labelBlock";
 import ConsoleSegmentedControl from "./consoleSegmentedControl";
 import useConsoleTextField from "@/hooks/useConsoleTextField";
+import BlogMarkdownPreview from "@/components/blogs/blogMarkdownPreview";
 
 type BlogArticleEditorProps = { articleId?: string };
 
@@ -45,6 +46,11 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
   const publishedAt = useConsoleTextField();
   const [thumbnailImageIds, setThumbnailImageIds] = useState<string[]>([]);
   const bodyMarkdown = useConsoleTextField();
+  const { reset: resetTitle } = title;
+  const { reset: resetSlug } = slug;
+  const { reset: resetPublishedAt } = publishedAt;
+  const { reset: resetBodyMarkdown } = bodyMarkdown;
+  const [bodyView, setBodyView] = useState<"edit" | "preview">("edit");
   const [isThumbnailDialogOpen, setIsThumbnailDialogOpen] = useState(false);
   const [isBodyImageDialogOpen, setIsBodyImageDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -67,19 +73,21 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
         const article = (await response.json()) as BlogArticle;
         if (!isCurrent) return;
         setStatus(article.status);
-        title.setValue(article.title);
-        slug.setValue(article.slug);
-        bodyMarkdown.setValue(article.body_markdown);
+        resetTitle(article.title);
+        resetSlug(article.slug);
+        resetBodyMarkdown(article.body_markdown);
         setThumbnailImageIds(
           article.thumbnail_image_id ? [article.thumbnail_image_id] : [],
         );
         if (article.published_at) {
           const date = new Date(article.published_at);
-          publishedAt.setValue(
+          resetPublishedAt(
             new Date(date.getTime() - date.getTimezoneOffset() * 60_000)
               .toISOString()
               .slice(0, 16),
           );
+        } else {
+          resetPublishedAt();
         }
       } catch (reason) {
         if (isCurrent)
@@ -93,7 +101,7 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
     return () => {
       isCurrent = false;
     };
-  }, [articleId, bodyMarkdown, publishedAt, slug, title]);
+  }, [articleId, resetBodyMarkdown, resetPublishedAt, resetSlug, resetTitle]);
 
   const openBodyImageDialog = () => {
     const textarea = bodyRef.current;
@@ -235,11 +243,24 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
           </LabelBox>
           <LabelBox isLong>
             <LabelText required>本文（Markdown）</LabelText>
-            <ConsoleTextArea
-              ref={bodyRef}
-              required
-              {...bodyMarkdown.inputProps}
+            <ConsoleSegmentedControl
+              name="body-view"
+              value={bodyView}
+              onChange={setBodyView}
+              options={[
+                { value: "edit", label: "編集" },
+                { value: "preview", label: "プレビュー" },
+              ]}
             />
+            {bodyView === "edit" ? (
+              <ConsoleTextArea
+                ref={bodyRef}
+                required
+                {...bodyMarkdown.inputProps}
+              />
+            ) : (
+              <BlogMarkdownPreview content={bodyMarkdown.value} />
+            )}
           </LabelBox>
         </div>
         <footer className="mt-8">
