@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
+import ConsoleButton from "./consoleButton";
 import { LabelText } from "./labelBlock";
 
 export type WorkUrlItem = {
@@ -53,12 +54,9 @@ export default function WorkUrlsInput({ items, onChange }: WorkUrlsInputProps) {
   if (!items.length) {
     return (
       <div className="flex flex-col items-center justify-center gap-4">
-        <button
-          onClick={handleAddItem}
-          className="flex size-8 cursor-pointer items-center justify-center border border-[#7e11d1] text-xl leading-none font-bold text-[#7e11d1] transition hover:bg-[#7e11d1] hover:text-white"
-        >
+        <ConsoleButton onClick={handleAddItem} variant="icon">
           +
-        </button>
+        </ConsoleButton>
       </div>
     );
   }
@@ -72,13 +70,12 @@ export default function WorkUrlsInput({ items, onChange }: WorkUrlsInputProps) {
         >
           <div className="flex items-center justify-between text-sm font-semibold text-[#7e11d1] select-none">
             <span>LINK {index + 1}</span>
-            <button
-              type="button"
+            <ConsoleButton
               onClick={() => handleRemove(item.id)}
-              className="cursor-pointer text-xs text-[#e04787] underline underline-offset-2 hover:text-[#b03062]"
+              variant="danger"
             >
               削除
-            </button>
+            </ConsoleButton>
           </div>
           <label>
             <LabelText required>ラベル</LabelText>
@@ -105,13 +102,9 @@ export default function WorkUrlsInput({ items, onChange }: WorkUrlsInputProps) {
           </label>
         </div>
       ))}
-      <button
-        type="button"
-        onClick={handleAddItem}
-        className="flex size-8 cursor-pointer items-center justify-center border border-[#7e11d1] text-xl leading-none font-bold text-[#7e11d1] transition hover:bg-[#7e11d1] hover:text-white"
-      >
+      <ConsoleButton onClick={handleAddItem} variant="icon">
         +
-      </button>
+      </ConsoleButton>
     </div>
   );
 }

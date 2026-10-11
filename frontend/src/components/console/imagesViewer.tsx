@@ -5,6 +5,7 @@ import { useImagesContext } from "@/contexts/imagesContext";
 import backendApi from "@/lib/auth/backendFetch";
 import Link from "next/link";
 import { useCallback, useState } from "react";
+import ConsoleButton from "./consoleButton";
 
 export default function ImagesViewer() {
   const { images, error, refreshImages } = useImagesContext();
@@ -50,13 +51,13 @@ export default function ImagesViewer() {
               className="relative flex flex-col items-end gap-1"
               key={imageIdx}
             >
-              <button
+              <ConsoleButton
                 disabled={isDeleting}
                 onClick={() => handleDelete(image.id)}
-                className="mr-1 cursor-pointer border-b text-sm leading-none font-bold text-[#e04787] transition-all duration-200 hover:text-[#b03062]"
+                variant="danger"
               >
                 {isDeleting ? "削除中" : "削除"}
-              </button>
+              </ConsoleButton>
               <Link
                 className="relative block size-48 bg-white"
                 href={`/api/images/${image.id}/raw`}

@@ -10,6 +10,7 @@ import React, {
 } from "react";
 import ImageSelectingBox from "./imageSelectingBox";
 import StackSelectingBox from "./stackSelectingBox";
+import ConsoleButton from "./consoleButton";
 import { LabelBox, LabelText } from "./labelBlock";
 import WorkUrlsInput, {
   WorkUrlItem,
@@ -320,12 +321,9 @@ export default function WorkRegisterForm({
             {submitSuccess && (
               <p className="text-sm text-[#0c8d62]">{submitSuccess}</p>
             )}
-            <input
-              type="submit"
-              disabled={isSubmitting}
-              value={isSubmitting ? "送信中" : "登録"}
-              className="relative top-0 block w-full cursor-pointer bg-[#67c8e6] px-4 py-2 text-center text-xl font-bold text-white transition-all select-none hover:top-[.1rem] hover:bg-[#48a3be] disabled:cursor-not-allowed disabled:bg-gray-300"
-            />
+            <ConsoleButton type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "送信中" : "登録"}
+            </ConsoleButton>
           </LabelBox>
         </div>
       </form>

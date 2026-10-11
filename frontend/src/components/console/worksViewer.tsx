@@ -5,6 +5,7 @@ import backendApi from "@/lib/auth/backendFetch";
 import { useCallback, useMemo, useState } from "react";
 import WorkRegisterForm from "./workRegisterForm";
 import { Work } from "@/types/works/common";
+import ConsoleButton from "./consoleButton";
 
 const initializeWorkValues = (work: Work) => {
   const sortedImages = [...(work.images ?? [])]
@@ -96,19 +97,19 @@ export default function WorksViewer() {
                   <p className="text-sm font-semibold">{work.title}</p>
                   <p className="text-xs">{work.comment}</p>
                 </div>
-                <button
+                <ConsoleButton
                   onClick={() => handleToggleEdit(work.id)}
-                  className="cursor-pointer border-b text-sm leading-none font-bold text-[#7e11d1] transition-all duration-200 hover:text-[#c68ef0]"
+                  variant="text"
                 >
                   {isEditing ? "閉じる" : "編集"}
-                </button>
-                <button
+                </ConsoleButton>
+                <ConsoleButton
                   disabled={isDeleting}
                   onClick={() => handleDelete(work.id)}
-                  className="cursor-pointer border-b text-sm leading-none font-bold text-[#e04787] transition-all duration-200 hover:text-[#b03062]"
+                  variant="danger"
                 >
                   {isDeleting ? "削除中" : "削除"}
-                </button>
+                </ConsoleButton>
               </div>
               <div
                 className={`overflow-hidden ${isEditing ? "max-h-[5000px]" : "max-h-0"}`}

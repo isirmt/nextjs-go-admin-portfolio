@@ -2,6 +2,7 @@
 
 import backendApi from "@/lib/auth/backendFetch";
 import { useCallback, useState } from "react";
+import ConsoleButton from "./consoleButton";
 import { LabelText } from "./labelBlock";
 import { useTechsContext } from "@/contexts/techsContext";
 
@@ -104,14 +105,12 @@ export default function StackSelectingBox({
           />
         </label>
         {submitError && <p className="text-sm text-[#e04787]">{submitError}</p>}
-        <button
-          type="button"
+        <ConsoleButton
           onClick={() => handleCreateTechStack()}
           disabled={isSubmitting}
-          className="relative top-0 block w-full cursor-pointer bg-[#67c8e6] px-4 py-1 text-center font-bold text-white [box-shadow:0_.15rem_0_0_#67c8e6] transition-all select-none hover:top-[.1rem] hover:bg-[#48a3be] hover:[box-shadow:0_.05rem_0_0_#48a3be]"
         >
           追加
-        </button>
+        </ConsoleButton>
       </div>
     </div>
   );
