@@ -12,6 +12,7 @@ import { ConsoleTextArea, ConsoleTextField } from "./consoleField";
 import ImageSelectingDialog from "./imageSelectingDialog";
 import { LabelBox, LabelText } from "./labelBlock";
 import ConsoleSegmentedControl from "./consoleSegmentedControl";
+import useConsoleTextField from "@/hooks/useConsoleTextField";
 
 type BlogArticleEditorProps = { articleId?: string };
 
@@ -39,11 +40,11 @@ function SelectedImageTiles({ imageIds }: { imageIds: string[] }) {
 function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
   const router = useRouter();
   const [status, setStatus] = useState<"draft" | "published">("draft");
-  const [title, setTitle] = useState("");
-  const [slug, setSlug] = useState("");
-  const [publishedAt, setPublishedAt] = useState("");
+  const title = useConsoleTextField();
+  const slug = useConsoleTextField();
+  const publishedAt = useConsoleTextField();
   const [thumbnailImageIds, setThumbnailImageIds] = useState<string[]>([]);
-  const [bodyMarkdown, setBodyMarkdown] = useState("");
+  const bodyMarkdown = useConsoleTextField();
   const [isThumbnailDialogOpen, setIsThumbnailDialogOpen] = useState(false);
   const [isBodyImageDialogOpen, setIsBodyImageDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -65,15 +66,15 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
         const article = (await response.json()) as BlogArticle;
         if (!isCurrent) return;
         setStatus(article.status);
-        setTitle(article.title);
-        setSlug(article.slug);
-        setBodyMarkdown(article.body_markdown);
+        title.setValue(article.title);
+        slug.setValue(article.slug);
+        bodyMarkdown.setValue(article.body_markdown);
         setThumbnailImageIds(
           article.thumbnail_image_id ? [article.thumbnail_image_id] : [],
         );
         if (article.published_at) {
           const date = new Date(article.published_at);
-          setPublishedAt(
+          publishedAt.setValue(
             new Date(date.getTime() - date.getTimezoneOffset() * 60_000)
               .toISOString()
               .slice(0, 16),
@@ -91,13 +92,13 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
     return () => {
       isCurrent = false;
     };
-  }, [articleId]);
+  }, [articleId, bodyMarkdown, publishedAt, slug, title]);
 
   const openBodyImageDialog = () => {
     const textarea = bodyRef.current;
     bodySelectionRef.current = {
-      start: textarea?.selectionStart ?? bodyMarkdown.length,
-      end: textarea?.selectionEnd ?? bodyMarkdown.length,
+      start: textarea?.selectionStart ?? bodyMarkdown.value.length,
+      end: textarea?.selectionEnd ?? bodyMarkdown.value.length,
     };
     setIsBodyImageDialogOpen(true);
   };
@@ -106,7 +107,7 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
     if (!imageId) return;
     const { start, end } = bodySelectionRef.current;
     const markdown = `![画像](/api/images/${imageId}/raw)`;
-    setBodyMarkdown(
+    bodyMarkdown.setValue(
       (current) => `${current.slice(0, start)}${markdown}${current.slice(end)}`,
     );
     requestAnimationFrame(() => {
@@ -129,12 +130,12 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             status,
-            title: title.trim(),
-            slug: slug.trim(),
-            body_markdown: bodyMarkdown.trim(),
+            title: title.value.trim(),
+            slug: slug.value.trim(),
+            body_markdown: bodyMarkdown.value.trim(),
             thumbnail_image_id: thumbnailImageIds[0] ?? null,
-            published_at: publishedAt
-              ? new Date(publishedAt).toISOString()
+            published_at: publishedAt.value
+              ? new Date(publishedAt.value).toISOString()
               : null,
           }),
         },
@@ -184,25 +185,16 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
             <LabelText>公開日時</LabelText>
             <ConsoleTextField
               type="datetime-local"
-              value={publishedAt}
-              onChange={(event) => setPublishedAt(event.target.value)}
+              {...publishedAt.inputProps}
             />
           </LabelBox>
           <LabelBox isLong>
             <LabelText required>タイトル</LabelText>
-            <ConsoleTextField
-              required
-              value={title}
-              onChange={(event) => setTitle(event.target.value)}
-            />
+            <ConsoleTextField required {...title.inputProps} />
           </LabelBox>
           <LabelBox isLong>
             <LabelText required>SLUG</LabelText>
-            <ConsoleTextField
-              required
-              value={slug}
-              onChange={(event) => setSlug(event.target.value)}
-            />
+            <ConsoleTextField required {...slug.inputProps} />
           </LabelBox>
           <LabelBox>
             <LabelText>サムネイル画像</LabelText>
@@ -225,8 +217,7 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
             <ConsoleTextArea
               ref={bodyRef}
               required
-              value={bodyMarkdown}
-              onChange={(event) => setBodyMarkdown(event.target.value)}
+              {...bodyMarkdown.inputProps}
             />
           </LabelBox>
         </div>
