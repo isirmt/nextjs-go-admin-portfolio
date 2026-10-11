@@ -446,6 +446,29 @@ func (pSrv *server) handleGetBlogPreviewLinks(c echo.Context) error {
 	return c.JSON(http.StatusOK, response)
 }
 
+func (pSrv *server) handleRevokeBlogPreviewLink(c echo.Context) error {
+	articleID := strings.TrimSpace(c.Param("id"))
+	linkID := strings.TrimSpace(c.Param("linkId"))
+	if articleID == "" || linkID == "" {
+		return c.String(http.StatusBadRequest, "article id and preview link id are required")
+	}
+
+	now := time.Now().UTC()
+	result, err := pSrv.q.BlogArticlePreviewLink.WithContext(c.Request().Context()).
+		Where(
+			pSrv.q.BlogArticlePreviewLink.ID.Eq(linkID),
+			pSrv.q.BlogArticlePreviewLink.ArticleID.Eq(articleID),
+		).
+		Updates(map[string]interface{}{"revoked_at": now})
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "failed to revoke preview link")
+	}
+	if result.RowsAffected == 0 {
+		return c.String(http.StatusNotFound, "preview link not found")
+	}
+	return c.NoContent(http.StatusNoContent)
+}
+
 func (pSrv *server) handleGetBlogPreview(c echo.Context) error {
 	token := strings.TrimSpace(c.Param("token"))
 	if token == "" {
