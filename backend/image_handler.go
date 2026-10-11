@@ -18,7 +18,42 @@ import (
 )
 
 func (pSrv *server) handleGetImages(c echo.Context) error {
-	images, err := pSrv.q.CommonImage.WithContext(c.Request().Context()).Find()
+	ctx := c.Request().Context()
+	var images []*model.CommonImage
+	var err error
+	if pSrv.isAdminRequest(c) {
+		images, err = pSrv.q.CommonImage.WithContext(ctx).
+			Order(pSrv.q.CommonImage.UploadedAt.Desc()).
+			Find()
+	} else {
+		err = pSrv.db.WithContext(ctx).Raw(`
+			SELECT common_images.*
+			FROM common_images
+			WHERE EXISTS (
+				SELECT 1 FROM isirmt_works
+				WHERE isirmt_works.thumbnail_image_id = common_images.id
+			)
+			OR EXISTS (
+				SELECT 1 FROM isirmt_work_images
+				WHERE isirmt_work_images.image_id = common_images.id
+			)
+			OR EXISTS (
+				SELECT 1 FROM blog_articles
+				WHERE blog_articles.thumbnail_image_id = common_images.id
+				AND blog_articles.status = 'published'
+				AND blog_articles.published_at <= NOW()
+			)
+			OR EXISTS (
+				SELECT 1
+				FROM blog_article_images
+				INNER JOIN blog_articles ON blog_articles.id = blog_article_images.article_id
+				WHERE blog_article_images.image_id = common_images.id
+				AND blog_articles.status = 'published'
+				AND blog_articles.published_at <= NOW()
+			)
+			ORDER BY common_images.uploaded_at DESC
+		`).Scan(&images).Error
+	}
 	if err != nil {
 		return c.String(500, "internal server error")
 	}
