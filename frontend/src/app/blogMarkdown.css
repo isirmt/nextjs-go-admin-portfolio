@@ -1,0 +1,118 @@
+.markdown * {
+  @apply scroll-mt-16;
+}
+
+.markdown h1 {
+  @apply my-4 text-3xl;
+}
+
+.markdown h2 {
+  @apply relative mt-4 w-full text-2xl font-bold;
+}
+
+.markdown h2#footnote-label {
+  @apply pl-4;
+}
+
+.markdown h3 {
+  @apply my-2 font-bold text-blue-800;
+}
+
+.markdown iframe,
+.markdown img {
+  @apply mx-auto my-4 max-w-full;
+}
+
+.markdown p {
+  @apply my-2 leading-8;
+}
+
+.markdown p * {
+  @apply break-all;
+}
+
+.markdown hr {
+  @apply my-10;
+}
+
+.markdown code {
+  @apply mx-1 rounded-sm bg-gray-100 px-1.5 py-0.5 text-blue-900 transition-colors;
+}
+
+.markdown a.post_hyper_url {
+  @apply mx-0.5 break-all text-blue-700 underline transition-colors hover:no-underline;
+}
+
+.markdown sup > a.post_hyper_url {
+  @apply mr-0.5 rounded bg-blue-100 px-1 py-0.5 text-blue-800 no-underline hover:bg-blue-200 hover:no-underline;
+}
+
+.markdown section.footnotes {
+  @apply rounded bg-gray-100 py-1;
+}
+
+.markdown section.footnotes .data-footnote-backref {
+  @apply relative text-[0];
+}
+
+.markdown section.footnotes .data-footnote-backref::after {
+  content: "ref";
+  @apply relative inline-block rounded bg-blue-100 px-1 py-0.5 text-xs font-normal text-blue-800 transition-colors hover:bg-blue-200;
+}
+
+.markdown ul:not(.contains-task-list),
+.markdown ol {
+  @apply my-2 ml-8 flex flex-col gap-2.5;
+}
+
+.markdown ul:not(.contains-task-list) li {
+  @apply list-disc;
+}
+
+.markdown ol li {
+  @apply list-decimal;
+}
+
+.markdown table {
+  @apply my-3 w-full border-collapse border-spacing-0 text-center;
+}
+
+.markdown table th {
+  @apply rounded-t-sm border-2 border-solid border-white bg-sky-100 p-2;
+}
+
+.markdown table td {
+  @apply border-2 border-white p-2;
+}
+
+.markdown table tr:nth-child(2n) {
+  @apply bg-gray-100;
+}
+
+.markdown .post_codeblock {
+  @apply my-4;
+}
+
+.markdown .post_fname {
+  @apply flex h-6 w-full items-center justify-center gap-2 rounded-t-lg bg-slate-600 px-2 py-0.5 text-center leading-none text-white transition-colors;
+}
+
+.markdown pre {
+  @apply rounded-lg !p-4;
+}
+
+.markdown .post_shiki pre {
+  @apply m-0 overflow-x-auto;
+}
+
+.post_fname + .post_shiki pre {
+  @apply rounded-lg rounded-t-none;
+}
+
+.markdown pre > code {
+  @apply rounded-none bg-transparent p-0;
+}
+
+.markdown blockquote {
+  @apply my-4 border-l-4 border-[#555] bg-[#f5f5f5] py-0.5 pl-4 text-[#555] transition-colors;
+}
