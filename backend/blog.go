@@ -411,6 +411,41 @@ func (pSrv *server) handleDeleteBlogArticle(c echo.Context) error {
 	}
 	return c.NoContent(http.StatusNoContent)
 }
+
+func hashPreviewToken(token string) string {
+	digest := sha256.Sum256([]byte(token))
+	return hex.EncodeToString(digest[:])
+}
+func (pSrv *server) handleGetBlogPreviewLinks(c echo.Context) error {
+	articleID := strings.TrimSpace(c.Param("id"))
+	if articleID == "" {
+		return c.String(http.StatusBadRequest, "article id is required")
+	}
+
+	links, err := pSrv.q.BlogArticlePreviewLink.WithContext(c.Request().Context()).
+		Where(pSrv.q.BlogArticlePreviewLink.ArticleID.Eq(articleID)).
+		Order(pSrv.q.BlogArticlePreviewLink.CreatedAt.Desc()).
+		Find()
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "failed to fetch preview links")
+	}
+
+	response := make([]blogPreviewLinkResponse, 0, len(links))
+	for _, link := range links {
+		linkID := ""
+		if link.ID != nil {
+			linkID = *link.ID
+		}
+		response = append(response, blogPreviewLinkResponse{
+			ID:        linkID,
+			ExpiresAt: formatOptionalBlogTime(link.ExpiresAt),
+			RevokedAt: formatOptionalBlogTime(link.RevokedAt),
+			CreatedAt: formatBlogTime(link.CreatedAt),
+		})
+	}
+	return c.JSON(http.StatusOK, response)
+}
+
 func (pSrv *server) handleGetBlogPreview(c echo.Context) error {
 	token := strings.TrimSpace(c.Param("token"))
 	if token == "" {
