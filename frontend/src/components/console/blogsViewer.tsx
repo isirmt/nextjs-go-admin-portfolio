@@ -25,7 +25,10 @@ export default function BlogsViewer() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await backendApi("/blogs");
+      let response = await backendApi("/blogs");
+      if (response.status === 401 || response.status === 403) {
+        response = await fetch("/api/blogs");
+      }
       if (!response.ok)
         throw new Error(
           (await response.text()) || "記事一覧の取得に失敗しました",
