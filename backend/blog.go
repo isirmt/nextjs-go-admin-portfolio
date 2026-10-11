@@ -411,3 +411,33 @@ func (pSrv *server) handleDeleteBlogArticle(c echo.Context) error {
 	}
 	return c.NoContent(http.StatusNoContent)
 }
+func (pSrv *server) handleGetBlogPreview(c echo.Context) error {
+	token := strings.TrimSpace(c.Param("token"))
+	if token == "" {
+		return c.String(http.StatusBadRequest, "preview token is required")
+	}
+
+	link, err := pSrv.q.BlogArticlePreviewLink.WithContext(c.Request().Context()).
+		Where(pSrv.q.BlogArticlePreviewLink.TokenHash.Eq(hashPreviewToken(token))).First()
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return c.String(http.StatusNotFound, "preview not found")
+		}
+		return c.String(http.StatusInternalServerError, "failed to fetch preview")
+	}
+	if link.RevokedAt != nil || (link.ExpiresAt != nil && !link.ExpiresAt.After(time.Now())) {
+		return c.String(http.StatusNotFound, "preview not found")
+	}
+
+	article, err := pSrv.withBlogArticleRelations(pSrv.q.BlogArticle.WithContext(c.Request().Context())).
+		Where(pSrv.q.BlogArticle.ID.Eq(link.ArticleID)).First()
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return c.String(http.StatusNotFound, "preview not found")
+		}
+		return c.String(http.StatusInternalServerError, "failed to fetch preview article")
+	}
+	c.Response().Header().Set(echo.HeaderCacheControl, "private, no-store")
+	c.Response().Header().Set("X-Robots-Tag", "noindex, nofollow")
+	return c.JSON(http.StatusOK, blogArticleDetail(article, true))
+}
