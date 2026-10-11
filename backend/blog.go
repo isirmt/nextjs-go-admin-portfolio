@@ -1,6 +1,10 @@
 package main
 
 import (
+	"crypto/rand"
+	"crypto/sha256"
+	"encoding/base64"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"net/http"
@@ -42,6 +46,18 @@ type blogArticleInput struct {
 	thumbnailImageID *string
 	publishedAt      *time.Time
 	bodyImageIDs     []string
+}
+
+type createBlogPreviewLinkRequest struct {
+	ExpiresAt *string `json:"expires_at"`
+}
+
+type blogPreviewLinkResponse struct {
+	ID        string  `json:"id"`
+	Token     string  `json:"token,omitempty"`
+	ExpiresAt *string `json:"expires_at"`
+	RevokedAt *string `json:"revoked_at"`
+	CreatedAt string  `json:"created_at"`
 }
 
 type blogArticleSummaryResponse struct {
@@ -416,6 +432,77 @@ func hashPreviewToken(token string) string {
 	digest := sha256.Sum256([]byte(token))
 	return hex.EncodeToString(digest[:])
 }
+
+func newPreviewToken() (string, error) {
+	bytes := make([]byte, 32)
+	if _, err := rand.Read(bytes); err != nil {
+		return "", err
+	}
+	return base64.RawURLEncoding.EncodeToString(bytes), nil
+}
+
+func parsePreviewLinkExpiry(raw *string) (*time.Time, error) {
+	if raw == nil || strings.TrimSpace(*raw) == "" {
+		return nil, nil
+	}
+	parsed, err := time.Parse(time.RFC3339, strings.TrimSpace(*raw))
+	if err != nil {
+		return nil, errors.New("expires_at must be RFC3339")
+	}
+	utc := parsed.UTC()
+	return &utc, nil
+}
+
+func (pSrv *server) handleCreateBlogPreviewLink(c echo.Context) error {
+	articleID := strings.TrimSpace(c.Param("id"))
+	if articleID == "" {
+		return c.String(http.StatusBadRequest, "article id is required")
+	}
+
+	var req createBlogPreviewLinkRequest
+	if err := c.Bind(&req); err != nil {
+		return c.String(http.StatusBadRequest, "invalid request body")
+	}
+	expiresAt, err := parsePreviewLinkExpiry(req.ExpiresAt)
+	if err != nil {
+		return c.String(http.StatusBadRequest, err.Error())
+	}
+	if expiresAt != nil && !expiresAt.After(time.Now()) {
+		return c.String(http.StatusBadRequest, "expires_at must be in the future")
+	}
+	if _, err := pSrv.q.BlogArticle.WithContext(c.Request().Context()).
+		Where(pSrv.q.BlogArticle.ID.Eq(articleID)).First(); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return c.String(http.StatusNotFound, "blog article not found")
+		}
+		return c.String(http.StatusInternalServerError, "failed to fetch blog article")
+	}
+
+	token, err := newPreviewToken()
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "failed to create preview token")
+	}
+	link := &model.BlogArticlePreviewLink{
+		ArticleID: articleID,
+		TokenHash: hashPreviewToken(token),
+		ExpiresAt: expiresAt,
+	}
+	if err := pSrv.q.BlogArticlePreviewLink.WithContext(c.Request().Context()).Create(link); err != nil {
+		return c.String(http.StatusInternalServerError, "failed to create preview link")
+	}
+
+	linkID := ""
+	if link.ID != nil {
+		linkID = *link.ID
+	}
+	return c.JSON(http.StatusCreated, blogPreviewLinkResponse{
+		ID:        linkID,
+		Token:     token,
+		ExpiresAt: formatOptionalBlogTime(link.ExpiresAt),
+		CreatedAt: formatBlogTime(link.CreatedAt),
+	})
+}
+
 func (pSrv *server) handleGetBlogPreviewLinks(c echo.Context) error {
 	articleID := strings.TrimSpace(c.Param("id"))
 	if articleID == "" {
