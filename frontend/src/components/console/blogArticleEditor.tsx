@@ -2,8 +2,11 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import { ImagesProvider } from "@/contexts/imagesContext";
+import backendApi from "@/lib/auth/backendFetch";
+import type { BlogArticle } from "@/types/blogs/common";
 import ConsoleButton from "./consoleButton";
 import { ConsoleTextArea, ConsoleTextField } from "./consoleField";
 import ImageSelectingDialog from "./imageSelectingDialog";
@@ -34,13 +37,61 @@ function SelectedImageTiles({ imageIds }: { imageIds: string[] }) {
 }
 
 function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
+  const router = useRouter();
   const [status, setStatus] = useState<"draft" | "published">("draft");
+  const [title, setTitle] = useState("");
+  const [slug, setSlug] = useState("");
+  const [publishedAt, setPublishedAt] = useState("");
   const [thumbnailImageIds, setThumbnailImageIds] = useState<string[]>([]);
   const [bodyMarkdown, setBodyMarkdown] = useState("");
   const [isThumbnailDialogOpen, setIsThumbnailDialogOpen] = useState(false);
   const [isBodyImageDialogOpen, setIsBodyImageDialogOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
   const bodyRef = useRef<HTMLTextAreaElement>(null);
   const bodySelectionRef = useRef({ start: 0, end: 0 });
+
+  useEffect(() => {
+    if (!articleId) return;
+    let isCurrent = true;
+    (async () => {
+      try {
+        const response = await backendApi(`/blogs/${articleId}`);
+        if (!response.ok)
+          throw new Error(
+            (await response.text()) || "記事の取得に失敗しました",
+          );
+        const article = (await response.json()) as BlogArticle;
+        if (!isCurrent) return;
+        setStatus(article.status);
+        setTitle(article.title);
+        setSlug(article.slug);
+        setBodyMarkdown(article.body_markdown);
+        setThumbnailImageIds(
+          article.thumbnail_image_id ? [article.thumbnail_image_id] : [],
+        );
+        if (article.published_at) {
+          const date = new Date(article.published_at);
+          setPublishedAt(
+            new Date(date.getTime() - date.getTimezoneOffset() * 60_000)
+              .toISOString()
+              .slice(0, 16),
+          );
+        }
+      } catch (reason) {
+        if (isCurrent)
+          setSubmitError(
+            reason instanceof Error
+              ? reason.message
+              : "記事の取得に失敗しました",
+          );
+      }
+    })();
+    return () => {
+      isCurrent = false;
+    };
+  }, [articleId]);
 
   const openBodyImageDialog = () => {
     const textarea = bodyRef.current;
@@ -65,6 +116,43 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
     });
   };
 
+  const handleSubmit = async (event: React.SubmitEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsSubmitting(true);
+    setSubmitError(null);
+    setSubmitSuccess(null);
+    try {
+      const response = await backendApi(
+        articleId ? `/blogs/${articleId}` : "/blogs",
+        {
+          method: articleId ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            status,
+            title: title.trim(),
+            slug: slug.trim(),
+            body_markdown: bodyMarkdown.trim(),
+            thumbnail_image_id: thumbnailImageIds[0] ?? null,
+            published_at: publishedAt
+              ? new Date(publishedAt).toISOString()
+              : null,
+          }),
+        },
+      );
+      if (!response.ok)
+        throw new Error((await response.text()) || "記事の保存に失敗しました");
+      const saved = (await response.json()) as BlogArticle;
+      setSubmitSuccess(articleId ? "更新しました" : "作成しました");
+      if (!articleId) router.replace(`/console/blogs/${saved.id}`);
+    } catch (reason) {
+      setSubmitError(
+        reason instanceof Error ? reason.message : "記事の保存に失敗しました",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <main className="relative w-full space-y-8 px-2.5 py-8 lg:px-16">
       <header className="flex flex-wrap items-center justify-between gap-4">
@@ -78,7 +166,7 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
           記事一覧へ戻る
         </Link>
       </header>
-      <form>
+      <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <LabelBox>
             <LabelText required>状態</LabelText>
@@ -94,15 +182,27 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
           </LabelBox>
           <LabelBox>
             <LabelText>公開日時</LabelText>
-            <ConsoleTextField type="datetime-local" />
+            <ConsoleTextField
+              type="datetime-local"
+              value={publishedAt}
+              onChange={(event) => setPublishedAt(event.target.value)}
+            />
           </LabelBox>
           <LabelBox isLong>
             <LabelText required>タイトル</LabelText>
-            <ConsoleTextField required />
+            <ConsoleTextField
+              required
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+            />
           </LabelBox>
           <LabelBox isLong>
             <LabelText required>SLUG</LabelText>
-            <ConsoleTextField required />
+            <ConsoleTextField
+              required
+              value={slug}
+              onChange={(event) => setSlug(event.target.value)}
+            />
           </LabelBox>
           <LabelBox>
             <LabelText>サムネイル画像</LabelText>
@@ -131,7 +231,15 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
           </LabelBox>
         </div>
         <footer className="mt-8">
-          <ConsoleButton type="submit">保存</ConsoleButton>
+          {submitError ? (
+            <p className="mb-2 text-sm text-[#e04787]">{submitError}</p>
+          ) : null}
+          {submitSuccess ? (
+            <p className="mb-2 text-sm text-[#0c8d62]">{submitSuccess}</p>
+          ) : null}
+          <ConsoleButton type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "保存中" : "保存"}
+          </ConsoleButton>
         </footer>
       </form>
       <ImageSelectingDialog
