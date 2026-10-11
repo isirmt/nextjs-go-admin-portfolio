@@ -35,7 +35,7 @@ func main() {
 
 	commonImage := g.GenerateModel("common_images")
 	commonTechStack := g.GenerateModel("common_tech_stacks")
-	
+
 	blogArticlePreviewLink := g.GenerateModel(
 		"blog_article_preview_links",
 
