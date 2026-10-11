@@ -6,6 +6,7 @@ import ConsoleButton from "./consoleButton";
 import { ConsoleTextField } from "./consoleField";
 import { LabelText } from "./labelBlock";
 import { useTechsContext } from "@/contexts/techsContext";
+import useConsoleTextField from "@/hooks/useConsoleTextField";
 
 type StackSelectingBoxProps = {
   onChange: (ids: string[]) => void;
@@ -20,7 +21,7 @@ export default function StackSelectingBox({
   const [selectedIds, setSelectedIds] = useState<string[]>(
     initialSelectedIds ?? [],
   );
-  const [newStackName, setNewStackName] = useState("");
+  const stackName = useConsoleTextField();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -37,7 +38,7 @@ export default function StackSelectingBox({
   );
 
   const handleCreateTechStack = useCallback(async () => {
-    const trimmedName = newStackName.trim();
+    const trimmedName = stackName.value.trim();
     if (!trimmedName) {
       setSubmitError("スタック名を入力してください");
       return;
@@ -63,7 +64,7 @@ export default function StackSelectingBox({
       }
 
       refreshTechs();
-      setNewStackName("");
+      stackName.reset();
     } catch (error) {
       setSubmitError(
         error instanceof Error ? error.message : "登録に失敗しました",
@@ -71,7 +72,7 @@ export default function StackSelectingBox({
     } finally {
       setIsSubmitting(false);
     }
-  }, [newStackName, refreshTechs]);
+  }, [refreshTechs, stackName]);
 
   return (
     <div className="relative flex w-full flex-col gap-4 bg-[#f8f8f8] p-4">
@@ -98,11 +99,7 @@ export default function StackSelectingBox({
       <div className="flex flex-col gap-4 border-y border-dashed border-[#c6a5ec] bg-white p-4">
         <label className="text-xs font-semibold text-gray-600">
           <LabelText required>スタック名</LabelText>
-          <ConsoleTextField
-            value={newStackName}
-            onChange={(e) => setNewStackName(e.target.value)}
-            placeholder="Next.js"
-          />
+          <ConsoleTextField {...stackName.inputProps} placeholder="Next.js" />
         </label>
         {submitError && <p className="text-sm text-[#e04787]">{submitError}</p>}
         <ConsoleButton

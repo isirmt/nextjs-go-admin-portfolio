@@ -18,6 +18,7 @@ import WorkUrlsInput, {
   createEmptyWorkUrlItem,
 } from "./workUrlsInput";
 import { useWorksContext } from "@/contexts/worksContext";
+import useConsoleTextField from "@/hooks/useConsoleTextField";
 
 type WorkRegisterFormMode = "post" | "put";
 
@@ -65,16 +66,12 @@ export default function WorkRegisterForm({
   initialValues,
   onSubmitted,
 }: WorkRegisterFormProps) {
-  const [inputTitle, setInputTitle] = useState<string>(
-    initialValues?.title ?? "",
-  );
-  const [inputComment, setInputComment] = useState<string>(
-    initialValues?.comment ?? "",
-  );
-  const [inputPublishedDate, setInputPublishedDate] = useState<string>(
+  const title = useConsoleTextField(initialValues?.title ?? "");
+  const comment = useConsoleTextField(initialValues?.comment ?? "");
+  const publishedDate = useConsoleTextField(
     initialValues?.publishedDate || new Date().toISOString().split("T")[0],
   );
-  const [inputAccentColor, setInputAccentColor] = useState<string>(
+  const accentColor = useConsoleTextField(
     initialValues?.accentColor ?? "#000000",
   );
   const [inputThumbnailImage, setInputThumbnailImage] = useState<string>(
@@ -86,9 +83,7 @@ export default function WorkRegisterForm({
   const [inputTechStacks, setInputTechStacks] = useState<string[]>(
     initialValues?.techStackIds ?? [],
   );
-  const [inputDescription, setInputDescription] = useState<string>(
-    initialValues?.description ?? "",
-  );
+  const description = useConsoleTextField(initialValues?.description ?? "");
   const [inputUrls, setInputUrls] = useState<WorkUrlItem[]>(
     initializeUrlItems(initialValues?.urls),
   );
@@ -108,20 +103,28 @@ export default function WorkRegisterForm({
       return;
     }
     lastInitialKeyRef.current = initialKey;
-    setInputTitle(initialValues?.title ?? "");
-    setInputComment(initialValues?.comment ?? "");
-    setInputPublishedDate(
+    title.reset(initialValues?.title ?? "");
+    comment.reset(initialValues?.comment ?? "");
+    publishedDate.reset(
       initialValues?.publishedDate || new Date().toISOString().split("T")[0],
     );
-    setInputAccentColor(initialValues?.accentColor ?? "#000000");
+    accentColor.reset(initialValues?.accentColor ?? "#000000");
     setInputThumbnailImage(initialValues?.thumbnailImageId ?? "");
     setInputWorkImages(initialValues?.workImageIds ?? []);
     setInputTechStacks(initialValues?.techStackIds ?? []);
-    setInputDescription(initialValues?.description ?? "");
+    description.reset(initialValues?.description ?? "");
     setInputUrls(initializeUrlItems(initialValues?.urls));
     setSubmitError(null);
     setSubmitSuccess(null);
-  }, [initialKey, initialValues]);
+  }, [
+    initialKey,
+    initialValues,
+    accentColor,
+    comment,
+    description,
+    publishedDate,
+    title,
+  ]);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent<HTMLFormElement>) => {
@@ -148,11 +151,11 @@ export default function WorkRegisterForm({
 
       try {
         const payload = {
-          title: inputTitle.trim(),
-          comment: inputComment.trim(),
-          published_date: inputPublishedDate || undefined,
-          accent_color: inputAccentColor,
-          description: inputDescription.trim(),
+          title: title.value.trim(),
+          comment: comment.value.trim(),
+          published_date: publishedDate.value || undefined,
+          accent_color: accentColor.value,
+          description: description.value.trim(),
           thumbnail_image_id: inputThumbnailImage,
           work_image_ids: inputWorkImages,
           tech_stack_ids: inputTechStacks,
@@ -179,7 +182,7 @@ export default function WorkRegisterForm({
           const message = await response.text();
           throw new Error(
             message ||
-              (isEditingMode ? "更新に失敗しました" : "登録に失敗しました"),
+            (isEditingMode ? "更新に失敗しました" : "登録に失敗しました"),
           );
         }
 
@@ -201,18 +204,18 @@ export default function WorkRegisterForm({
       }
     },
     [
-      inputAccentColor,
-      inputComment,
-      inputDescription,
-      inputPublishedDate,
       inputTechStacks,
       inputThumbnailImage,
-      inputTitle,
       inputUrls,
       inputWorkImages,
       isEditingMode,
       onSubmitted,
       refreshWorks,
+      accentColor.value,
+      comment.value,
+      description.value,
+      publishedDate.value,
+      title.value,
       workId,
     ],
   );
@@ -237,8 +240,7 @@ export default function WorkRegisterForm({
             <LabelText required>制作物名</LabelText>
             <ConsoleTextField
               name="title"
-              value={inputTitle}
-              onChange={(e) => setInputTitle(e.target.value)}
+              {...title.inputProps}
               required
               placeholder="アプリケーション名"
             />
@@ -247,8 +249,7 @@ export default function WorkRegisterForm({
             <LabelText required>コメント</LabelText>
             <ConsoleTextField
               name="comment"
-              value={inputComment}
-              onChange={(e) => setInputComment(e.target.value)}
+              {...comment.inputProps}
               required
               placeholder="ここに一言コメント！"
             />
@@ -268,8 +269,7 @@ export default function WorkRegisterForm({
             <LabelText required>作成日</LabelText>
             <ConsoleTextField
               name="published_date"
-              value={inputPublishedDate}
-              onChange={(e) => setInputPublishedDate(e.target.value)}
+              {...publishedDate.inputProps}
               type="date"
               required
             />
@@ -278,8 +278,7 @@ export default function WorkRegisterForm({
             <LabelText required>アクセントカラー</LabelText>
             <input
               name="accent_color"
-              value={inputAccentColor}
-              onChange={(e) => setInputAccentColor(e.target.value || "#000000")}
+              {...accentColor.inputProps}
               type="color"
               required
               className="w-full"
@@ -306,8 +305,7 @@ export default function WorkRegisterForm({
             <LabelText required>説明</LabelText>
             <ConsoleTextArea
               name="description"
-              value={inputDescription}
-              onChange={(e) => setInputDescription(e.target.value)}
+              {...description.inputProps}
               rows={5}
             />
           </LabelBox>
