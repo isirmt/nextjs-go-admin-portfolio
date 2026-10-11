@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ImagesProvider } from "@/contexts/imagesContext";
 import ConsoleButton from "./consoleButton";
 import { ConsoleTextArea, ConsoleTextField } from "./consoleField";
@@ -36,9 +36,34 @@ function SelectedImageTiles({ imageIds }: { imageIds: string[] }) {
 function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
   const [status, setStatus] = useState<"draft" | "published">("draft");
   const [thumbnailImageIds, setThumbnailImageIds] = useState<string[]>([]);
-  const [bodyImageIds, setBodyImageIds] = useState<string[]>([]);
+  const [bodyMarkdown, setBodyMarkdown] = useState("");
   const [isThumbnailDialogOpen, setIsThumbnailDialogOpen] = useState(false);
-  const [isBodyImagesDialogOpen, setIsBodyImagesDialogOpen] = useState(false);
+  const [isBodyImageDialogOpen, setIsBodyImageDialogOpen] = useState(false);
+  const bodyRef = useRef<HTMLTextAreaElement>(null);
+  const bodySelectionRef = useRef({ start: 0, end: 0 });
+
+  const openBodyImageDialog = () => {
+    const textarea = bodyRef.current;
+    bodySelectionRef.current = {
+      start: textarea?.selectionStart ?? bodyMarkdown.length,
+      end: textarea?.selectionEnd ?? bodyMarkdown.length,
+    };
+    setIsBodyImageDialogOpen(true);
+  };
+
+  const insertBodyImage = ([imageId]: string[]) => {
+    if (!imageId) return;
+    const { start, end } = bodySelectionRef.current;
+    const markdown = `![画像](/api/images/${imageId}/raw)`;
+    setBodyMarkdown(
+      (current) => `${current.slice(0, start)}${markdown}${current.slice(end)}`,
+    );
+    requestAnimationFrame(() => {
+      const cursor = start + markdown.length;
+      bodyRef.current?.focus();
+      bodyRef.current?.setSelectionRange(cursor, cursor);
+    });
+  };
 
   return (
     <main className="relative w-full space-y-8 px-2.5 py-8 lg:px-16">
@@ -90,18 +115,19 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
             <SelectedImageTiles imageIds={thumbnailImageIds} />
           </LabelBox>
           <LabelBox>
-            <LabelText>本文画像</LabelText>
-            <ConsoleButton
-              type="button"
-              onClick={() => setIsBodyImagesDialogOpen(true)}
-            >
-              画像を選択
+            <LabelText>本文への画像挿入</LabelText>
+            <ConsoleButton type="button" onClick={openBodyImageDialog}>
+              画像を挿入
             </ConsoleButton>
-            <SelectedImageTiles imageIds={bodyImageIds} />
           </LabelBox>
           <LabelBox isLong>
             <LabelText required>本文（Markdown）</LabelText>
-            <ConsoleTextArea required />
+            <ConsoleTextArea
+              ref={bodyRef}
+              required
+              value={bodyMarkdown}
+              onChange={(event) => setBodyMarkdown(event.target.value)}
+            />
           </LabelBox>
         </div>
         <footer className="mt-8">
@@ -114,13 +140,14 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
         initialSelectedIds={thumbnailImageIds}
         onSelect={setThumbnailImageIds}
       />
-      <ImageSelectingDialog
-        open={isBodyImagesDialogOpen}
-        onOpenChange={setIsBodyImagesDialogOpen}
-        initialSelectedIds={bodyImageIds}
-        multiple
-        onSelect={setBodyImageIds}
-      />
+      {isBodyImageDialogOpen ? (
+        <ImageSelectingDialog
+          open
+          onOpenChange={setIsBodyImageDialogOpen}
+          initialSelectedIds={[]}
+          onSelect={insertBodyImage}
+        />
+      ) : null}
     </main>
   );
 }

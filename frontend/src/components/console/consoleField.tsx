@@ -1,4 +1,8 @@
-import type { InputHTMLAttributes, TextareaHTMLAttributes } from "react";
+import {
+  forwardRef,
+  type InputHTMLAttributes,
+  type TextareaHTMLAttributes,
+} from "react";
 
 type ConsoleTextFieldProps = InputHTMLAttributes<HTMLInputElement>;
 type ConsoleTextAreaProps = TextareaHTMLAttributes<HTMLTextAreaElement>;
@@ -15,11 +19,15 @@ export function ConsoleTextField({
   );
 }
 
-export function ConsoleTextArea({ className, ...props }: ConsoleTextAreaProps) {
+export const ConsoleTextArea = forwardRef<
+  HTMLTextAreaElement,
+  ConsoleTextAreaProps
+>(function ConsoleTextArea({ className, ...props }, ref) {
   return (
     <textarea
+      ref={ref}
       className={`field-sizing-content min-h-[5lh] w-full border-y border-[#c68ef0] px-4 py-3 outline-none focus:border-[#7e11d1] ${className ?? ""}`}
       {...props}
     />
   );
-}
+});
