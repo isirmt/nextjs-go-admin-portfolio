@@ -31,10 +31,10 @@ export default async function BlogArticlePage({
   return (
     <main className="relative w-full">
       <section className="grid grid-cols-3">
-        <div className="col-span-2 pb-40">
+        <div className="col-span-3 pb-40 lg:col-span-2">
           <BlogArticleContent article={article} />
         </div>
-        <aside className="col-span-1 bg-[#fafafa] pb-40">
+        <aside className="col-span-1 hidden bg-[#fafafa] pb-40 lg:block">
           <div className="sticky top-4 self-start">
             <BlogTableOfContents
               content={article.body_markdown}

@@ -67,7 +67,7 @@ const components: Components = {
   h2: ({ node, children, ...props }) => {
     const id = getHeadingId(children);
     return (
-      <div className="mt-3 mb-4 border-b-2 border-blue-200 text-blue-700 transition-colors">
+      <div className="mt-3 mb-4 border-b-2 border-blue-200 px-2.5 text-blue-700 transition-colors">
         <h2 {...props} data-blog-heading-id={id} id={id}>
           {children}
         </h2>
@@ -122,7 +122,7 @@ export default function BlogMarkdownPreview({
   if (!content.trim()) return null;
 
   return (
-    <div className="markdown">
+    <div className="markdown font-noto">
       <ReactMarkdown
         components={components}
         disallowedElements={["h1"]}

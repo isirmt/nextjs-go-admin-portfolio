@@ -7,7 +7,7 @@
 }
 
 .markdown h2 {
-  @apply relative mt-4 w-full text-2xl font-bold;
+  @apply relative mt-4 w-full scroll-mt-36 text-2xl font-bold;
 }
 
 .markdown h2#footnote-label {
@@ -15,12 +15,12 @@
 }
 
 .markdown h3 {
-  @apply my-2 font-bold text-blue-800;
+  @apply my-2 scroll-mt-36 font-bold text-blue-800;
 }
 
 .markdown iframe,
 .markdown img {
-  @apply mx-auto my-4 max-w-full;
+  @apply mx-auto my-6 aspect-auto max-h-[50dvh] max-w-full shadow-[.5rem_.5rem_0_#eee];
 }
 
 .markdown p {

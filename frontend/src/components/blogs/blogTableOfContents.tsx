@@ -36,10 +36,10 @@ function TableOfContentsItem({
   const isActive = activeId === id;
 
   return (
-    <li className="group relative w-full list-none before:pointer-events-none before:absolute before:top-0 before:bottom-0 before:left-3.5 before:w-px before:bg-[#b2b7c7] first:before:top-1/2 last:before:bottom-1/2">
+    <li className="group font-noto relative w-full list-none leading-[1.75] before:pointer-events-none before:absolute before:top-0 before:bottom-0 before:left-3.5 before:w-px before:bg-[#b2b7c7] first:before:top-1/2 last:before:bottom-1/2">
       <span
         aria-hidden
-        className={`${isH3 ? "left-2.5 size-2" : "left-2 size-3"} pointer-events-none absolute top-1/2 z-20 -translate-y-1/2 rounded-full border transition-all duration-200 group-hover:border-[#8e9ed3] group-hover:bg-[#8e9ed3] ${
+        className={`${isH3 ? "left-2.5 size-2" : "left-2 size-3"} pointer-events-none absolute top-1/2 z-20 -translate-y-1/2 rounded-full border transition-all duration-200 group-hover:border-[#708dec] group-hover:bg-[#708dec] ${
           isActive
             ? "border-[#5f7bd6]! bg-[#5f7bd6]!"
             : "border-[#b2b7c7] bg-[#b2b7c7]"
@@ -109,7 +109,7 @@ export default function BlogTableOfContents({
     }
 
     const updateActiveHeading = () => {
-      const offset = 80;
+      const offset = 144;
       let currentId = "";
 
       for (const heading of headings) {

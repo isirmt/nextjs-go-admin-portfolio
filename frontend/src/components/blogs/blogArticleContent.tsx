@@ -27,7 +27,7 @@ export default function BlogArticleContent({
           {article.title}
         </h1>
       </PageContentHeader>
-      <div className="mx-auto px-4 lg:px-0 w-full max-w-[960px]">
+      <div className="mx-auto w-full max-w-[960px] px-4 lg:px-0">
         <BlogMarkdownPreview content={article.body_markdown} />
       </div>
     </article>
