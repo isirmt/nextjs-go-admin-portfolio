@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import backendApi from "@/lib/auth/backendFetch";
@@ -8,14 +9,17 @@ import React, {
   useRef,
   useState,
 } from "react";
-import ImageSelectingBox from "./imageSelectingBox";
+import ImageSelectingDialog from "./imageSelectingDialog";
 import StackSelectingBox from "./stackSelectingBox";
+import ConsoleButton from "./consoleButton";
+import { ConsoleTextArea, ConsoleTextField } from "./consoleField";
 import { LabelBox, LabelText } from "./labelBlock";
 import WorkUrlsInput, {
   WorkUrlItem,
   createEmptyWorkUrlItem,
 } from "./workUrlsInput";
 import { useWorksContext } from "@/contexts/worksContext";
+import useConsoleTextField from "@/hooks/useConsoleTextField";
 
 type WorkRegisterFormMode = "post" | "put";
 
@@ -57,22 +61,41 @@ const initializeUrlItems = (
   }));
 };
 
+function SelectedImageTiles({ imageIds }: { imageIds: string[] }) {
+  if (imageIds.length === 0) {
+    return <p className="text-sm text-[#7e11d1]">画像未選択</p>;
+  }
+
+  return (
+    <div className="flex flex-wrap gap-3">
+      {imageIds.map((imageId) => (
+        <div
+          key={imageId}
+          className="size-20 overflow-hidden border-2 border-[#67c8e6] bg-white"
+        >
+          <img
+            src={`/api/images/${imageId}/raw`}
+            alt=""
+            className="size-full object-contain"
+          />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function WorkRegisterForm({
   mode = "post",
   workId,
   initialValues,
   onSubmitted,
 }: WorkRegisterFormProps) {
-  const [inputTitle, setInputTitle] = useState<string>(
-    initialValues?.title ?? "",
-  );
-  const [inputComment, setInputComment] = useState<string>(
-    initialValues?.comment ?? "",
-  );
-  const [inputPublishedDate, setInputPublishedDate] = useState<string>(
+  const title = useConsoleTextField(initialValues?.title ?? "");
+  const comment = useConsoleTextField(initialValues?.comment ?? "");
+  const publishedDate = useConsoleTextField(
     initialValues?.publishedDate || new Date().toISOString().split("T")[0],
   );
-  const [inputAccentColor, setInputAccentColor] = useState<string>(
+  const accentColor = useConsoleTextField(
     initialValues?.accentColor ?? "#000000",
   );
   const [inputThumbnailImage, setInputThumbnailImage] = useState<string>(
@@ -84,12 +107,12 @@ export default function WorkRegisterForm({
   const [inputTechStacks, setInputTechStacks] = useState<string[]>(
     initialValues?.techStackIds ?? [],
   );
-  const [inputDescription, setInputDescription] = useState<string>(
-    initialValues?.description ?? "",
-  );
+  const description = useConsoleTextField(initialValues?.description ?? "");
   const [inputUrls, setInputUrls] = useState<WorkUrlItem[]>(
     initializeUrlItems(initialValues?.urls),
   );
+  const [isThumbnailDialogOpen, setIsThumbnailDialogOpen] = useState(false);
+  const [isWorkImagesDialogOpen, setIsWorkImagesDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
@@ -106,20 +129,28 @@ export default function WorkRegisterForm({
       return;
     }
     lastInitialKeyRef.current = initialKey;
-    setInputTitle(initialValues?.title ?? "");
-    setInputComment(initialValues?.comment ?? "");
-    setInputPublishedDate(
+    title.reset(initialValues?.title ?? "");
+    comment.reset(initialValues?.comment ?? "");
+    publishedDate.reset(
       initialValues?.publishedDate || new Date().toISOString().split("T")[0],
     );
-    setInputAccentColor(initialValues?.accentColor ?? "#000000");
+    accentColor.reset(initialValues?.accentColor ?? "#000000");
     setInputThumbnailImage(initialValues?.thumbnailImageId ?? "");
     setInputWorkImages(initialValues?.workImageIds ?? []);
     setInputTechStacks(initialValues?.techStackIds ?? []);
-    setInputDescription(initialValues?.description ?? "");
+    description.reset(initialValues?.description ?? "");
     setInputUrls(initializeUrlItems(initialValues?.urls));
     setSubmitError(null);
     setSubmitSuccess(null);
-  }, [initialKey, initialValues]);
+  }, [
+    initialKey,
+    initialValues,
+    accentColor,
+    comment,
+    description,
+    publishedDate,
+    title,
+  ]);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent<HTMLFormElement>) => {
@@ -146,11 +177,11 @@ export default function WorkRegisterForm({
 
       try {
         const payload = {
-          title: inputTitle.trim(),
-          comment: inputComment.trim(),
-          published_date: inputPublishedDate || undefined,
-          accent_color: inputAccentColor,
-          description: inputDescription.trim(),
+          title: title.value.trim(),
+          comment: comment.value.trim(),
+          published_date: publishedDate.value || undefined,
+          accent_color: accentColor.value,
+          description: description.value.trim(),
           thumbnail_image_id: inputThumbnailImage,
           work_image_ids: inputWorkImages,
           tech_stack_ids: inputTechStacks,
@@ -199,18 +230,18 @@ export default function WorkRegisterForm({
       }
     },
     [
-      inputAccentColor,
-      inputComment,
-      inputDescription,
-      inputPublishedDate,
       inputTechStacks,
       inputThumbnailImage,
-      inputTitle,
       inputUrls,
       inputWorkImages,
       isEditingMode,
       onSubmitted,
       refreshWorks,
+      accentColor.value,
+      comment.value,
+      description.value,
+      publishedDate.value,
+      title.value,
       workId,
     ],
   );
@@ -233,24 +264,20 @@ export default function WorkRegisterForm({
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <LabelBox>
             <LabelText required>制作物名</LabelText>
-            <input
+            <ConsoleTextField
               name="title"
-              value={inputTitle}
-              onChange={(e) => setInputTitle(e.target.value)}
+              {...title.inputProps}
               required
               placeholder="アプリケーション名"
-              className="w-full border-b-2 border-[#c68ef0] px-4 py-2 outline-none focus:border-[#7e11d1]"
             />
           </LabelBox>
           <LabelBox>
             <LabelText required>コメント</LabelText>
-            <input
+            <ConsoleTextField
               name="comment"
-              value={inputComment}
-              onChange={(e) => setInputComment(e.target.value)}
+              {...comment.inputProps}
               required
               placeholder="ここに一言コメント！"
-              className="w-full border-b-2 border-[#c68ef0] px-4 py-2 outline-none focus:border-[#7e11d1]"
             />
           </LabelBox>
           <LabelBox isLong>
@@ -266,51 +293,51 @@ export default function WorkRegisterForm({
           </LabelBox>
           <LabelBox>
             <LabelText required>作成日</LabelText>
-            <input
+            <ConsoleTextField
               name="published_date"
-              value={inputPublishedDate}
-              onChange={(e) => setInputPublishedDate(e.target.value)}
+              {...publishedDate.inputProps}
               type="date"
               required
-              className="w-full border-b-2 border-[#c68ef0] px-4 py-2 outline-none focus:border-[#7e11d1]"
             />
           </LabelBox>
           <LabelBox>
             <LabelText required>アクセントカラー</LabelText>
             <input
               name="accent_color"
-              value={inputAccentColor}
-              onChange={(e) => setInputAccentColor(e.target.value || "#000000")}
+              {...accentColor.inputProps}
               type="color"
               required
               className="w-full"
             />
           </LabelBox>
-          <LabelBox isLong>
+          <LabelBox>
             <LabelText required>サムネイル</LabelText>
-            <ImageSelectingBox
-              onChange={handleThumbnailSelected}
-              initialSelectedIds={
-                inputThumbnailImage ? [inputThumbnailImage] : []
-              }
+            <ConsoleButton
+              type="button"
+              onClick={() => setIsThumbnailDialogOpen(true)}
+            >
+              画像を選択
+            </ConsoleButton>
+            <SelectedImageTiles
+              imageIds={inputThumbnailImage ? [inputThumbnailImage] : []}
             />
           </LabelBox>
-          <LabelBox isLong>
+          <LabelBox>
             <LabelText required>参考画像</LabelText>
-            <ImageSelectingBox
-              multiple
-              onChange={handleWorkImagesSelected}
-              initialSelectedIds={inputWorkImages}
-            />
+            <ConsoleButton
+              type="button"
+              onClick={() => setIsWorkImagesDialogOpen(true)}
+            >
+              画像を選択
+            </ConsoleButton>
+            <SelectedImageTiles imageIds={inputWorkImages} />
           </LabelBox>
           <LabelBox isLong>
             <LabelText required>説明</LabelText>
-            <textarea
+            <ConsoleTextArea
               name="description"
-              value={inputDescription}
-              onChange={(e) => setInputDescription(e.target.value)}
+              {...description.inputProps}
               rows={5}
-              className="field-sizing-content min-h-[5lh] w-full border-y border-[#c68ef0] px-4 py-3 outline-none focus:border-[#7e11d1]"
             />
           </LabelBox>
           <LabelBox isLong>
@@ -320,15 +347,25 @@ export default function WorkRegisterForm({
             {submitSuccess && (
               <p className="text-sm text-[#0c8d62]">{submitSuccess}</p>
             )}
-            <input
-              type="submit"
-              disabled={isSubmitting}
-              value={isSubmitting ? "送信中" : "登録"}
-              className="relative top-0 block w-full cursor-pointer bg-[#67c8e6] px-4 py-2 text-center text-xl font-bold text-white transition-all select-none hover:top-[.1rem] hover:bg-[#48a3be] disabled:cursor-not-allowed disabled:bg-gray-300"
-            />
+            <ConsoleButton type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "送信中" : "登録"}
+            </ConsoleButton>
           </LabelBox>
         </div>
       </form>
+      <ImageSelectingDialog
+        open={isThumbnailDialogOpen}
+        onOpenChange={setIsThumbnailDialogOpen}
+        initialSelectedIds={inputThumbnailImage ? [inputThumbnailImage] : []}
+        onSelect={handleThumbnailSelected}
+      />
+      <ImageSelectingDialog
+        open={isWorkImagesDialogOpen}
+        onOpenChange={setIsWorkImagesDialogOpen}
+        initialSelectedIds={inputWorkImages}
+        multiple
+        onSelect={handleWorkImagesSelected}
+      />
     </section>
   );
 }

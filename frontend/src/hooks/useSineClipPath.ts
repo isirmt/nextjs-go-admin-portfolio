@@ -11,6 +11,7 @@ import { useEffect, useRef } from "react";
 export type UseSineClipPathOptions = {
   edge?: SineClipPathEdge;
   loopDurationMs?: number;
+  updateFps?: number;
   waveHeightPx?: number;
   waveLengthPx?: number;
 };
@@ -18,6 +19,7 @@ export type UseSineClipPathOptions = {
 export function useSineClipPath<T extends HTMLElement>({
   edge = "top",
   loopDurationMs = DEFAULT_SINE_WAVE_LOOP_DURATION_MS,
+  updateFps,
   waveHeightPx,
   waveLengthPx,
 }: UseSineClipPathOptions = {}) {
@@ -32,7 +34,10 @@ export function useSineClipPath<T extends HTMLElement>({
     let phase = 0;
     let animationFrame: number | null = null;
     let lastTimestamp = performance.now();
+    let lastAppliedTimestamp = -Infinity;
     const safeLoopDuration = Math.max(1, loopDurationMs);
+    const minimumUpdateInterval =
+      updateFps === undefined ? 0 : 1000 / Math.max(1, updateFps);
 
     const applyClipPath = () => {
       element.style.clipPath = createSineClipPath(width, height, {
@@ -56,7 +61,10 @@ export function useSineClipPath<T extends HTMLElement>({
       phase =
         (phase + (deltaTime / safeLoopDuration) * SINE_WAVE_FULL_PHASE) %
         SINE_WAVE_FULL_PHASE;
-      applyClipPath();
+      if (timestamp - lastAppliedTimestamp >= minimumUpdateInterval) {
+        applyClipPath();
+        lastAppliedTimestamp = timestamp;
+      }
       animationFrame = requestAnimationFrame(render);
     };
 
@@ -93,7 +101,7 @@ export function useSineClipPath<T extends HTMLElement>({
         cancelAnimationFrame(animationFrame);
       }
     };
-  }, [edge, loopDurationMs, waveHeightPx, waveLengthPx]);
+  }, [edge, loopDurationMs, updateFps, waveHeightPx, waveLengthPx]);
 
   return elementRef;
 }

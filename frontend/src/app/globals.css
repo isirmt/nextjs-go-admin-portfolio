@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./blogMarkdown.css";
 
 @theme inline {
   --color-background: var(--background);
@@ -185,12 +186,31 @@
   will-change: transform;
 }
 
+.animate-latest-article-loop {
+  animation: latest-article-loop 50s linear infinite;
+  will-change: transform;
+}
+
+.latest-article-loop-section:hover .animate-latest-article-loop,
+.latest-article-loop-section:focus-within .animate-latest-article-loop {
+  animation-play-state: paused;
+}
+
 @keyframes vertical-loop {
   from {
     transform: translateY(0);
   }
   to {
     transform: translateY(-50%);
+  }
+}
+
+@keyframes latest-article-loop {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-33.333333%);
   }
 }
 

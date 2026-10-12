@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback } from "react";
+import ConsoleButton from "./consoleButton";
+import { ConsoleTextField } from "./consoleField";
 import { LabelText } from "./labelBlock";
 
 export type WorkUrlItem = {
@@ -53,12 +55,9 @@ export default function WorkUrlsInput({ items, onChange }: WorkUrlsInputProps) {
   if (!items.length) {
     return (
       <div className="flex flex-col items-center justify-center gap-4">
-        <button
-          onClick={handleAddItem}
-          className="flex size-8 cursor-pointer items-center justify-center border border-[#7e11d1] text-xl leading-none font-bold text-[#7e11d1] transition hover:bg-[#7e11d1] hover:text-white"
-        >
+        <ConsoleButton onClick={handleAddItem} variant="icon">
           +
-        </button>
+        </ConsoleButton>
       </div>
     );
   }
@@ -72,18 +71,16 @@ export default function WorkUrlsInput({ items, onChange }: WorkUrlsInputProps) {
         >
           <div className="flex items-center justify-between text-sm font-semibold text-[#7e11d1] select-none">
             <span>LINK {index + 1}</span>
-            <button
-              type="button"
+            <ConsoleButton
               onClick={() => handleRemove(item.id)}
-              className="cursor-pointer text-xs text-[#e04787] underline underline-offset-2 hover:text-[#b03062]"
+              variant="danger"
             >
               削除
-            </button>
+            </ConsoleButton>
           </div>
           <label>
             <LabelText required>ラベル</LabelText>
-            <input
-              className="w-full border-b-2 border-[#c68ef0] px-4 py-1 outline-none focus:border-[#7e11d1]"
+            <ConsoleTextField
               value={item.label}
               onChange={(e) =>
                 handleFieldChange(item.id, "label", e.target.value)
@@ -93,9 +90,8 @@ export default function WorkUrlsInput({ items, onChange }: WorkUrlsInputProps) {
           </label>
           <label>
             <LabelText required>URL</LabelText>
-            <input
+            <ConsoleTextField
               type="url"
-              className="w-full border-b-2 border-[#c68ef0] px-4 py-1 outline-none focus:border-[#7e11d1]"
               value={item.url}
               onChange={(e) =>
                 handleFieldChange(item.id, "url", e.target.value)
@@ -105,13 +101,9 @@ export default function WorkUrlsInput({ items, onChange }: WorkUrlsInputProps) {
           </label>
         </div>
       ))}
-      <button
-        type="button"
-        onClick={handleAddItem}
-        className="flex size-8 cursor-pointer items-center justify-center border border-[#7e11d1] text-xl leading-none font-bold text-[#7e11d1] transition hover:bg-[#7e11d1] hover:text-white"
-      >
+      <ConsoleButton onClick={handleAddItem} variant="icon">
         +
-      </button>
+      </ConsoleButton>
     </div>
   );
 }

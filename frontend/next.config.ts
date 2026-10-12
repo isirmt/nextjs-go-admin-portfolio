@@ -11,6 +11,7 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     authInterrupts: true,
+    turbopackFileSystemCacheForDev: false,
   },
 };
 

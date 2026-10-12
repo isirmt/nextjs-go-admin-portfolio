@@ -5,6 +5,8 @@ import backendApi from "@/lib/auth/backendFetch";
 import { useCallback, useMemo, useState } from "react";
 import WorkRegisterForm from "./workRegisterForm";
 import { Work } from "@/types/works/common";
+import ConsoleButton from "./consoleButton";
+import ConsoleModal from "./consoleModal";
 
 const initializeWorkValues = (work: Work) => {
   const sortedImages = [...(work.images ?? [])]
@@ -45,10 +47,6 @@ export default function WorksViewer() {
     [works],
   );
 
-  const handleToggleEdit = useCallback((workId: string) => {
-    setEditingWorkId((prev) => (prev === workId ? null : workId));
-  }, []);
-
   const handleDelete = useCallback(
     async (workId: string) => {
       const shouldDelete = window.confirm("削除しますか？");
@@ -78,56 +76,66 @@ export default function WorksViewer() {
     [editingWorkId, refreshWorks],
   );
 
+  const editingWork = editingWorkId
+    ? works.find((work) => work.id === editingWorkId)
+    : undefined;
+  const editingInitialValues = editingWorkId
+    ? workInitialValues.get(editingWorkId)
+    : undefined;
+
   return (
     <div className="space-y-4">
       <ul className="flex flex-col gap-4">
         {works.map((work) => {
-          const isEditing = editingWorkId === work.id;
           const isDeleting = deletingWorkId === work.id;
-          const initialValues = workInitialValues.get(work.id);
 
           return (
             <li
               key={work.id}
-              className={`flex flex-col overflow-hidden rounded border border-[#c68ef0] bg-white shadow-[.2rem_.2rem_0_0_#c68ef0] transition-all`}
+              className="flex flex-col overflow-hidden rounded border border-[#c68ef0] bg-white shadow-[.2rem_.2rem_0_0_#c68ef0]"
             >
               <div className="flex flex-wrap items-center gap-4 px-4 py-3">
                 <div className="flex-1">
                   <p className="text-sm font-semibold">{work.title}</p>
                   <p className="text-xs">{work.comment}</p>
                 </div>
-                <button
-                  onClick={() => handleToggleEdit(work.id)}
-                  className="cursor-pointer border-b text-sm leading-none font-bold text-[#7e11d1] transition-all duration-200 hover:text-[#c68ef0]"
+                <ConsoleButton
+                  onClick={() => setEditingWorkId(work.id)}
+                  variant="text"
                 >
-                  {isEditing ? "閉じる" : "編集"}
-                </button>
-                <button
+                  編集
+                </ConsoleButton>
+                <ConsoleButton
                   disabled={isDeleting}
                   onClick={() => handleDelete(work.id)}
-                  className="cursor-pointer border-b text-sm leading-none font-bold text-[#e04787] transition-all duration-200 hover:text-[#b03062]"
+                  variant="danger"
                 >
                   {isDeleting ? "削除中" : "削除"}
-                </button>
-              </div>
-              <div
-                className={`overflow-hidden ${isEditing ? "max-h-[5000px]" : "max-h-0"}`}
-              >
-                {isEditing && initialValues && (
-                  <div className="border-t border-dashed border-[#c68ef0] bg-white px-4 py-6">
-                    <WorkRegisterForm
-                      mode="put"
-                      workId={work.id}
-                      initialValues={initialValues}
-                      onSubmitted={() => setEditingWorkId(null)}
-                    />
-                  </div>
-                )}
+                </ConsoleButton>
               </div>
             </li>
           );
         })}
       </ul>
+      {editingWork && editingInitialValues ? (
+        <ConsoleModal
+          open
+          onOpenChange={(open) => {
+            if (!open) {
+              setEditingWorkId(null);
+            }
+          }}
+          title="制作物編集"
+          description={editingWork.title}
+        >
+          <WorkRegisterForm
+            mode="put"
+            workId={editingWork.id}
+            initialValues={editingInitialValues}
+            onSubmitted={() => setEditingWorkId(null)}
+          />
+        </ConsoleModal>
+      ) : null}
     </div>
   );
 }

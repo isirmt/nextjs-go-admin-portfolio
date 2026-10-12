@@ -2,8 +2,11 @@
 
 import backendApi from "@/lib/auth/backendFetch";
 import { useCallback, useState } from "react";
+import ConsoleButton from "./consoleButton";
+import { ConsoleTextField } from "./consoleField";
 import { LabelText } from "./labelBlock";
 import { useTechsContext } from "@/contexts/techsContext";
+import useConsoleTextField from "@/hooks/useConsoleTextField";
 
 type StackSelectingBoxProps = {
   onChange: (ids: string[]) => void;
@@ -18,7 +21,7 @@ export default function StackSelectingBox({
   const [selectedIds, setSelectedIds] = useState<string[]>(
     initialSelectedIds ?? [],
   );
-  const [newStackName, setNewStackName] = useState("");
+  const stackName = useConsoleTextField();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -35,7 +38,7 @@ export default function StackSelectingBox({
   );
 
   const handleCreateTechStack = useCallback(async () => {
-    const trimmedName = newStackName.trim();
+    const trimmedName = stackName.value.trim();
     if (!trimmedName) {
       setSubmitError("スタック名を入力してください");
       return;
@@ -61,7 +64,7 @@ export default function StackSelectingBox({
       }
 
       refreshTechs();
-      setNewStackName("");
+      stackName.reset();
     } catch (error) {
       setSubmitError(
         error instanceof Error ? error.message : "登録に失敗しました",
@@ -69,7 +72,7 @@ export default function StackSelectingBox({
     } finally {
       setIsSubmitting(false);
     }
-  }, [newStackName, refreshTechs]);
+  }, [refreshTechs, stackName]);
 
   return (
     <div className="relative flex w-full flex-col gap-4 bg-[#f8f8f8] p-4">
@@ -96,22 +99,15 @@ export default function StackSelectingBox({
       <div className="flex flex-col gap-4 border-y border-dashed border-[#c6a5ec] bg-white p-4">
         <label className="text-xs font-semibold text-gray-600">
           <LabelText required>スタック名</LabelText>
-          <input
-            className="mt-1 w-full border-b-2 border-[#c68ef0] px-2 py-1 outline-none focus:border-[#7e11d1]"
-            value={newStackName}
-            onChange={(e) => setNewStackName(e.target.value)}
-            placeholder="Next.js"
-          />
+          <ConsoleTextField {...stackName.inputProps} placeholder="Next.js" />
         </label>
         {submitError && <p className="text-sm text-[#e04787]">{submitError}</p>}
-        <button
-          type="button"
+        <ConsoleButton
           onClick={() => handleCreateTechStack()}
           disabled={isSubmitting}
-          className="relative top-0 block w-full cursor-pointer bg-[#67c8e6] px-4 py-1 text-center font-bold text-white [box-shadow:0_.15rem_0_0_#67c8e6] transition-all select-none hover:top-[.1rem] hover:bg-[#48a3be] hover:[box-shadow:0_.05rem_0_0_#48a3be]"
         >
           追加
-        </button>
+        </ConsoleButton>
       </div>
     </div>
   );

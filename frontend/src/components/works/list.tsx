@@ -7,14 +7,21 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useInViewAnimation } from "@/hooks/useInViewAnimation";
 import { useScrollbarControl } from "@/hooks/useScrollbarControl";
 import { useWorkListView, WORK_SORT_OPTIONS } from "@/hooks/useWorkListView";
-import { smoochSans } from "@/lib/fonts";
+import { delaGothicOne, smoochSans } from "@/lib/fonts";
 import { SectionText } from "./sectionText";
 import { CloudLarge, CloudSmall } from "./clouds";
 import SelectedDetailScreen from "./selectedDetailScreen";
 import WorkCard from "./workCard";
 import { useTechsContext } from "@/contexts/techsContext";
+import type { BlogArticleSummary } from "@/types/blogs/common";
+import LatestArticleLoop from "@/components/blogs/latestArticleLoop";
+import Link from "next/link";
 
-export default function WorksList() {
+type WorksListProps = {
+  latestArticles: BlogArticleSummary[];
+};
+
+export default function WorksList({ latestArticles }: WorksListProps) {
   const { works } = useWorksContext();
   const { techs } = useTechsContext();
   const {
@@ -92,7 +99,7 @@ export default function WorksList() {
   return (
     <React.Fragment>
       <div
-        className={`relative flex flex-col items-center justify-center overflow-x-hidden bg-[#fcfcfc] px-8 pt-32 pb-60 sm:px-20`}
+        className={`relative flex flex-col items-center justify-center overflow-x-clip bg-[#fcfcfc] px-8 pt-32 pb-60 sm:px-20`}
       >
         <CloudLarge className="animate-up-down absolute bottom-[5%] left-[10%] size-36 [animation-delay:.13s] [animation-duration:1s]" />
         <CloudLarge className="animate-up-down absolute right-[30%] bottom-[35%] size-36 [animation-delay:.23s] [animation-duration:2s]" />
@@ -106,6 +113,18 @@ export default function WorksList() {
         >
           And More
         </div>
+        <div
+          className={`${delaGothicOne.className} mt-4 text-4xl text-[#6354eb] select-none`}
+        >
+          最新記事
+        </div>
+        <LatestArticleLoop articles={latestArticles} />
+        <Link
+          href="/blogs"
+          className={`font-noto mb-16 rounded-full border bg-white px-3 py-2 text-xl text-[#6354EB] transition-[background-color,color,scale] duration-[250ms,250ms,500ms] ease-[linear,linear,cubic-bezier(0.34,1.56,0.64,1)] select-none hover:scale-110 hover:bg-[#e4e0ff]`}
+        >
+          ブログ投稿一覧へ
+        </Link>
         <SectionText />
         <div className="relative mt-8 mb-28 flex w-full flex-col items-center justify-center sm:items-end">
           <div className="relative flex w-full flex-col-reverse items-center justify-center gap-8 md:flex-row md:gap-12">

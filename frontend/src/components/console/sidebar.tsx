@@ -42,6 +42,15 @@ export default function ConsoleSidebar() {
                 画像管理
               </Link>
             </li>
+            <li>
+              <Link
+                onClick={() => setIsOpen(false)}
+                className="block w-full rounded px-4 py-2 text-lg font-semibold transition-all hover:bg-[#dcf7fd]"
+                href={`/console/blogs/`}
+              >
+                ブログ管理
+              </Link>
+            </li>
           </ul>
         </div>
         <Link

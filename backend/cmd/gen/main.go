@@ -35,6 +35,75 @@ func main() {
 
 	commonImage := g.GenerateModel("common_images")
 	commonTechStack := g.GenerateModel("common_tech_stacks")
+
+	blogArticlePreviewLink := g.GenerateModel(
+		"blog_article_preview_links",
+
+		gen.FieldJSONTag("article_id", "-"),
+	)
+	blogArticleImage := g.GenerateModel(
+		"blog_article_images",
+
+		gen.FieldJSONTag("article_id", "-"),
+
+		gen.FieldRelate(
+			field.BelongsTo,
+			"Image",
+			commonImage,
+			&field.RelateConfig{
+				RelatePointer: true,
+				JSONTag:       "-",
+				GORMTag: field.GormTag{
+					"foreignKey": []string{"ImageID"},
+					"references": []string{"ID"},
+				},
+			},
+		),
+	)
+	blogArticle := g.GenerateModel(
+		"blog_articles",
+
+		gen.FieldRelate(
+			field.HasMany,
+			"PreviewLinks",
+			blogArticlePreviewLink,
+			&field.RelateConfig{
+				RelateSlicePointer: true,
+				JSONTag:            "-",
+				GORMTag: field.GormTag{
+					"foreignKey": []string{"ArticleID"},
+					"references": []string{"ID"},
+				},
+			},
+		),
+
+		gen.FieldRelate(
+			field.HasMany,
+			"BodyImages",
+			blogArticleImage,
+			&field.RelateConfig{
+				RelateSlicePointer: true,
+				JSONTag:            "-",
+				GORMTag: field.GormTag{
+					"foreignKey": []string{"ArticleID"},
+					"references": []string{"ID"},
+				},
+			},
+		),
+
+		gen.FieldRelate(
+			field.BelongsTo,
+			"ThumbnailImage",
+			commonImage,
+			&field.RelateConfig{
+				RelatePointer: true,
+				GORMTag: field.GormTag{
+					"foreignKey": []string{"ThumbnailImageID"},
+					"references": []string{"ID"},
+				},
+			},
+		),
+	)
 	workTechStack := g.GenerateModel("isirmt_work_tech_stacks")
 	workClick := g.GenerateModel("isirmt_work_clicks")
 
@@ -125,6 +194,9 @@ func main() {
 	g.ApplyBasic(
 		commonImage,
 		commonTechStack,
+		blogArticle,
+		blogArticleImage,
+		blogArticlePreviewLink,
 		work,
 		workImage,
 		workURL,
