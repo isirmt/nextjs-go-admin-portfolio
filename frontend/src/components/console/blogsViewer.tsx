@@ -4,16 +4,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import backendApi from "@/lib/auth/backendFetch";
+import { formatJapaneseDateTime } from "@/lib/date";
 import type { BlogArticleSummary } from "@/types/blogs/common";
 import ConsoleButton from "./consoleButton";
-
-const formatDateTime = (value: string | null) =>
-  value
-    ? new Intl.DateTimeFormat("ja-JP", {
-        dateStyle: "medium",
-        timeStyle: "short",
-      }).format(new Date(value))
-    : "未公開";
 
 export default function BlogsViewer() {
   const router = useRouter();
@@ -102,8 +95,8 @@ export default function BlogsViewer() {
               </ConsoleButton>
             </div>
             <div className="bg-[#f5f5f5] px-4 py-2 text-xs text-[#444]">
-              公開日時: {formatDateTime(article.published_at)} / 更新日時:{" "}
-              {formatDateTime(article.updated_at)}
+              公開日時: {formatJapaneseDateTime(article.published_at, "未公開")}{" "}
+              / 更新日時: {formatJapaneseDateTime(article.updated_at)}
             </div>
           </li>
         ))}
