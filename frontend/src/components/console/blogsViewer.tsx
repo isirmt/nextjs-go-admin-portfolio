@@ -53,7 +53,6 @@ export default function BlogsViewer() {
   return (
     <main className="relative w-full space-y-8 px-2.5 py-8 lg:px-16">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold text-[#7e11d1]">ブログ管理</h1>
         <Link
           className="bg-[#67c8e6] px-4 py-2 text-lg font-bold text-white transition hover:bg-[#65b9d2]"
           href="/console/blogs/new"
