@@ -18,6 +18,15 @@ export async function generateMetadata({
   return {
     title: `${article.title} | isirmt`,
     alternates: { canonical: `/blogs/${article.slug}` },
+    openGraph: {
+      type: "article",
+      publishedTime: article.published_at ?? undefined,
+      modifiedTime: article.updated_at,
+      url: `/blogs/${article.slug}`,
+    },
+    twitter: {
+      card: "summary_large_image",
+    },
   };
 }
 
