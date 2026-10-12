@@ -109,7 +109,7 @@ export default function BlogTableOfContents({
     }
 
     const updateActiveHeading = () => {
-      const offset = 144;
+      const offset = 200;
       let currentId = "";
 
       for (const heading of headings) {
