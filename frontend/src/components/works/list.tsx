@@ -14,13 +14,13 @@ import SelectedDetailScreen from "./selectedDetailScreen";
 import WorkCard from "./workCard";
 import { useTechsContext } from "@/contexts/techsContext";
 import type { BlogArticleSummary } from "@/types/blogs/common";
-import LatestNewsLoop from "@/components/blogs/latestNewsLoop";
+import LatestArticleLoop from "@/components/blogs/latestArticleLoop";
 
 type WorksListProps = {
-  latestBlogArticles: BlogArticleSummary[];
+  latestArticles: BlogArticleSummary[];
 };
 
-export default function WorksList({ latestBlogArticles }: WorksListProps) {
+export default function WorksList({ latestArticles }: WorksListProps) {
   const { works } = useWorksContext();
   const { techs } = useTechsContext();
   const {
@@ -112,7 +112,7 @@ export default function WorksList({ latestBlogArticles }: WorksListProps) {
         >
           And More
         </div>
-        <LatestNewsLoop articles={latestBlogArticles} />
+        <LatestArticleLoop articles={latestArticles} />
         <SectionText />
         <div className="relative mt-8 mb-28 flex w-full flex-col items-center justify-center sm:items-end">
           <div className="relative flex w-full flex-col-reverse items-center justify-center gap-8 md:flex-row md:gap-12">

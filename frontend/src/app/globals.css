@@ -186,13 +186,13 @@
   will-change: transform;
 }
 
-.animate-latest-news-loop {
-  animation: latest-news-loop 50s linear infinite;
+.animate-latest-article-loop {
+  animation: latest-article-loop 50s linear infinite;
   will-change: transform;
 }
 
-.latest-news-loop-section:hover .animate-latest-news-loop,
-.latest-news-loop-section:focus-within .animate-latest-news-loop {
+.latest-article-loop-section:hover .animate-latest-article-loop,
+.latest-article-loop-section:focus-within .animate-latest-article-loop {
   animation-play-state: paused;
 }
 
@@ -205,7 +205,7 @@
   }
 }
 
-@keyframes latest-news-loop {
+@keyframes latest-article-loop {
   from {
     transform: translateX(0);
   }

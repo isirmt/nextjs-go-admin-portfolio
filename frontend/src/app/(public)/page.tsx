@@ -37,7 +37,7 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-  const latestBlogArticles = (await getPublicBlogArticles()).slice(0, 5);
+  const latestArticles = (await getPublicBlogArticles()).slice(0, 5);
   const birthDate = new Date(2004, 3 - 1, 8);
   const today = new Date();
   const hasHadBirthday =
@@ -64,7 +64,7 @@ export default async function Home() {
               <Navigation />
               <ProfileSection age={age} />
               <section aria-label="works-display" className="relative w-full">
-                <WorkConveyer latestBlogArticles={latestBlogArticles} />
+                <WorkConveyer latestArticles={latestArticles} />
               </section>
             </SelectingCubeContextProvider>
           </TechsProvider>
