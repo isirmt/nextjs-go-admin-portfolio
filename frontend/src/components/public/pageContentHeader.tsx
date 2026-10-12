@@ -15,7 +15,7 @@ export default function PageContentHeader({
   return (
     <div
       ref={waveRef}
-      className="mb-16 flex flex-col gap-2.5 bg-[#ecf3fa] px-12 pt-36 pb-32"
+      className="mb-16 flex flex-col gap-2.5 bg-[#ecf3fa] px-12 pt-36 pb-32 select-none"
     >
       {children}
     </div>

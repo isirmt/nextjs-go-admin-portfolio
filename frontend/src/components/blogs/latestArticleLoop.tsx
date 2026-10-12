@@ -14,7 +14,7 @@ export default function LatestArticleLoop({
   if (!articles.length) return null;
 
   return (
-    <section className="latest-article-loop-section relative z-10 mb-12 w-screen overflow-x-clip py-12">
+    <section className="latest-article-loop-section relative z-10 mb-8 w-screen overflow-x-clip py-12 select-none">
       <div className="animate-latest-article-loop flex w-max">
         {Array.from({ length: loopCount }, (_, loopIndex) => (
           <div key={loopIndex} className="flex shrink-0 gap-8 pr-8">
