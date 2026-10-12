@@ -7,7 +7,7 @@ import type { MouseEvent } from "react";
 const publicLinks = [
   { href: "#profile", label: "Profile", subLabel: "プロフィール" },
   { href: "#works", label: "Works", subLabel: "制作物" },
-  { href: "/blogs", label: "Blog", subLabel: "ブログ" },
+  { href: "/blogs", label: "Blogs", subLabel: "ブログ" },
 ];
 
 export default function Navigation() {
