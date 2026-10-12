@@ -18,7 +18,7 @@ export default async function BlogsPage() {
         <h1 className="text-center text-4xl font-bold">ブログ</h1>
       </PageContentHeader>
       {articles.length ? (
-        <div className="flex flex-wrap gap-8">
+        <div className="mx-auto flex flex-col items-center gap-8 lg:flex-row lg:flex-wrap lg:items-start lg:px-8">
           {articles.map((article) => (
             <BlogArticleCard key={article.id} article={article} />
           ))}
