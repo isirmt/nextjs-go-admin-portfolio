@@ -157,7 +157,7 @@ export default function BlogTableOfContents({
   }, [content]);
 
   return (
-    <nav className="flex flex-col px-3 pt-6 pb-3">
+    <nav className="flex flex-col px-3 pt-6 pb-3 select-none">
       <TableOfContentsContext.Provider value={{ activeId }}>
         <ol className="max-h-dvh w-full overflow-y-auto pt-2 pl-2">
           <TableOfContentsItem activeId={activeId} id="" level={1}>

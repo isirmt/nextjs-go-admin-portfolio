@@ -22,7 +22,7 @@ export default function BlogArticleContent({
         )}
         <DateCard date={article.published_at ?? article.created_at} />
         <h1
-          className={`${lineSeedJp.className} text-3xl font-bold text-[#202733] lg:text-4xl`}
+          className={`${lineSeedJp.className} text-3xl font-bold text-[#202733] select-text lg:text-4xl`}
         >
           {article.title}
         </h1>
