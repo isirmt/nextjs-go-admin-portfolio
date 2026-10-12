@@ -13,8 +13,14 @@ import { CloudLarge, CloudSmall } from "./clouds";
 import SelectedDetailScreen from "./selectedDetailScreen";
 import WorkCard from "./workCard";
 import { useTechsContext } from "@/contexts/techsContext";
+import type { BlogArticleSummary } from "@/types/blogs/common";
+import LatestNewsLoop from "@/components/blogs/latestNewsLoop";
 
-export default function WorksList() {
+type WorksListProps = {
+  latestBlogArticles: BlogArticleSummary[];
+};
+
+export default function WorksList({ latestBlogArticles }: WorksListProps) {
   const { works } = useWorksContext();
   const { techs } = useTechsContext();
   const {
@@ -92,7 +98,7 @@ export default function WorksList() {
   return (
     <React.Fragment>
       <div
-        className={`relative flex flex-col items-center justify-center overflow-x-hidden bg-[#fcfcfc] px-8 pt-32 pb-60 sm:px-20`}
+        className={`relative flex flex-col items-center justify-center overflow-x-clip bg-[#fcfcfc] px-8 pt-32 pb-60 sm:px-20`}
       >
         <CloudLarge className="animate-up-down absolute bottom-[5%] left-[10%] size-36 [animation-delay:.13s] [animation-duration:1s]" />
         <CloudLarge className="animate-up-down absolute right-[30%] bottom-[35%] size-36 [animation-delay:.23s] [animation-duration:2s]" />
@@ -106,6 +112,7 @@ export default function WorksList() {
         >
           And More
         </div>
+        <LatestNewsLoop articles={latestBlogArticles} />
         <SectionText />
         <div className="relative mt-8 mb-28 flex w-full flex-col items-center justify-center sm:items-end">
           <div className="relative flex w-full flex-col-reverse items-center justify-center gap-8 md:flex-row md:gap-12">

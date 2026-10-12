@@ -186,12 +186,31 @@
   will-change: transform;
 }
 
+.animate-latest-news-loop {
+  animation: latest-news-loop 50s linear infinite;
+  will-change: transform;
+}
+
+.latest-news-loop-section:hover .animate-latest-news-loop,
+.latest-news-loop-section:focus-within .animate-latest-news-loop {
+  animation-play-state: paused;
+}
+
 @keyframes vertical-loop {
   from {
     transform: translateY(0);
   }
   to {
     transform: translateY(-50%);
+  }
+}
+
+@keyframes latest-news-loop {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-33.333333%);
   }
 }
 
