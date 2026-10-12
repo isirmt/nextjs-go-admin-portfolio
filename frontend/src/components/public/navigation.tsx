@@ -4,10 +4,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { MouseEvent } from "react";
 
-const links = [
+const publicLinks = [
   { href: "#profile", label: "Profile", subLabel: "プロフィール" },
   { href: "#works", label: "Works", subLabel: "制作物" },
-  { href: "/console/works", label: "Console", subLabel: "コンソール" },
+  { href: "/blogs", label: "Blog", subLabel: "ブログ" },
 ];
 
 export default function Navigation() {
@@ -26,20 +26,31 @@ export default function Navigation() {
 
   return (
     <nav className="pointer-events-none relative top-0 z-50 h-24 w-full">
-      <ul className="font-dot flex h-full w-full items-center justify-start gap-6 px-4 tracking-wide select-none md:px-10">
-        {links.map(({ href, label, subLabel }) => (
-          <li key={href}>
-            <Link
-              href={href}
-              onClick={href.startsWith("#") ? handleHashClick(href) : undefined}
-              className="pointer-events-auto inline-flex flex-col items-center justify-center transition-all duration-200 hover:scale-105"
-            >
-              <div className="text-2xl leading-none">{label}</div>
-              <div className="text-sm leading-none">{subLabel}</div>
-            </Link>
-          </li>
-        ))}
-      </ul>
+      <div className="font-dot flex h-full items-center justify-between px-4 tracking-wide select-none md:px-10">
+        <ul className="flex items-center gap-6">
+          {publicLinks.map(({ href, label, subLabel }) => (
+            <li key={href}>
+              <Link
+                href={href}
+                onClick={
+                  href.startsWith("#") ? handleHashClick(href) : undefined
+                }
+                className="pointer-events-auto inline-flex flex-col items-center justify-center transition-all duration-200 hover:scale-105"
+              >
+                <div className="text-2xl leading-none">{label}</div>
+                <div className="text-sm leading-none">{subLabel}</div>
+              </Link>
+            </li>
+          ))}
+        </ul>
+        <Link
+          className="pointer-events-auto inline-flex flex-col items-center justify-center transition-all duration-200 hover:scale-105"
+          href="/console/works"
+        >
+          <div className="text-2xl leading-none">Console</div>
+          <div className="text-sm leading-none">コンソール</div>
+        </Link>
+      </div>
     </nav>
   );
 }
