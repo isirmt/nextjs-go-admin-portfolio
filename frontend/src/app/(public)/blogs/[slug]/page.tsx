@@ -36,6 +36,6 @@ export default async function BlogArticlePage({
         <div />
       </section>
       <section />
-    </main >
+    </main>
   );
 }
