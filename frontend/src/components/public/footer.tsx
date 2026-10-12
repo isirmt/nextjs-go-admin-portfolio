@@ -14,17 +14,17 @@ export default function Footer() {
     handleSpotlightLeave,
     getSpotlightSide,
   } = useSpotlightSketch();
-  const waveRef = useSineClipPath<HTMLDivElement>();
+  const waveRef = useSineClipPath<HTMLDivElement>({ updateFps: 30 });
   const { mq } = useCustomMediaQuery();
 
   return (
-    <footer className="relative -mt-20 overflow-hidden bg-transparent select-none">
+    <footer className="relative isolate -mt-20 overflow-hidden bg-transparent select-none">
       <div className="absolute left-[10%] z-1 aspect-946/2472 h-full bg-[url('/footer_stripe.svg')] bg-center bg-no-repeat opacity-5 bg-blend-saturation" />
       <div className="absolute left-[70%] z-1 aspect-946/2472 h-full bg-[url('/footer_stripe.svg')] bg-center bg-no-repeat opacity-12 bg-blend-saturation" />
       <div className="absolute left-[90%] z-1 aspect-946/2472 h-full bg-[url('/footer_stripe.svg')] bg-center bg-no-repeat opacity-8 bg-blend-saturation" />
       <div
         ref={waveRef}
-        className="pointer-events-none absolute top-0 left-0 z-0 h-full w-full"
+        className="pointer-events-none absolute top-0 left-0 z-0 h-full w-full will-change-[clip-path]"
       >
         <div ref={sketchContainerRef} className="h-full w-full" />
       </div>
