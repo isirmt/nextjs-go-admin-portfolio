@@ -39,6 +39,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    restart: unless-stopped
 
   backend:
     image: golang:1.23-bookworm
