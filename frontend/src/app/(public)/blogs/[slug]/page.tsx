@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import BlogArticleContent from "@/components/blogs/blogArticleContent";
+import BlogTableOfContents from "@/components/blogs/blogTableOfContents";
 import { getPublicBlogArticle } from "@/lib/blogs/publicApi";
 
 type BlogArticlePageProps = {
@@ -30,10 +31,17 @@ export default async function BlogArticlePage({
   return (
     <main className="relative w-full">
       <section className="grid grid-cols-3">
-        <div className="col-span-2">
+        <div className="col-span-2 pb-40">
           <BlogArticleContent article={article} />
         </div>
-        <div />
+        <aside className="col-span-1 bg-[#fafafa] pb-40">
+          <div className="sticky top-4 self-start">
+            <BlogTableOfContents
+              content={article.body_markdown}
+              title={article.title}
+            />
+          </div>
+        </aside>
       </section>
       <section />
     </main>
