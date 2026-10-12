@@ -98,7 +98,7 @@
 }
 
 .markdown pre {
-  @apply rounded-lg !p-4;
+  @apply rounded-lg p-4!;
 }
 
 .markdown .post_shiki pre {
