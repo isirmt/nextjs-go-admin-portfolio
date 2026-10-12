@@ -2,12 +2,16 @@ import type { BlogArticle, BlogArticleSummary } from "@/types/blogs/common";
 
 const backendBaseUrl = process.env.BACKEND_BASE_URL;
 
-async function fetchPublicBlogs<T>(path: string): Promise<T | null> {
+async function fetchPublicBlogs<T>(
+  path: string,
+  revalidate?: number,
+): Promise<T | null> {
   if (!backendBaseUrl) throw new Error("BACKEND_BASE_URL is not configured");
 
-  const response = await fetch(new URL(path, backendBaseUrl), {
-    cache: "no-store",
-  });
+  const response = await fetch(
+    new URL(path, backendBaseUrl),
+    revalidate === undefined ? { cache: "no-store" } : { next: { revalidate } },
+  );
   if (response.status === 404) return null;
   if (!response.ok) throw new Error("ブログの取得に失敗しました");
 
@@ -18,6 +22,9 @@ export async function getPublicBlogArticles(): Promise<BlogArticleSummary[]> {
   return (await fetchPublicBlogs<BlogArticleSummary[]>("/blogs")) ?? [];
 }
 
-export function getPublicBlogArticle(slug: string) {
-  return fetchPublicBlogs<BlogArticle>(`/blogs/${encodeURIComponent(slug)}`);
+export function getPublicBlogArticle(slug: string, revalidate?: number) {
+  return fetchPublicBlogs<BlogArticle>(
+    `/blogs/${encodeURIComponent(slug)}`,
+    revalidate,
+  );
 }
