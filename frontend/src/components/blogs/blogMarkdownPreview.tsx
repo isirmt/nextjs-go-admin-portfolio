@@ -5,6 +5,7 @@ import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useEffect, useState } from "react";
 import type { BundledLanguage } from "shiki";
+import { getHeadingId } from "@/lib/blogs/headings";
 
 type BlogMarkdownPreviewProps = {
   content: string;
@@ -63,11 +64,24 @@ function BlogCodeBlock({
 }
 
 const components: Components = {
-  h2: ({ node, ...props }) => (
-    <div className="mt-3 mb-4 border-b-2 border-blue-200 text-blue-700 transition-colors">
-      <h2 {...props} />
-    </div>
-  ),
+  h2: ({ node, children, ...props }) => {
+    const id = getHeadingId(children);
+    return (
+      <div className="mt-3 mb-4 border-b-2 border-blue-200 text-blue-700 transition-colors">
+        <h2 {...props} data-blog-heading-id={id} id={id}>
+          {children}
+        </h2>
+      </div>
+    );
+  },
+  h3: ({ node, children, ...props }) => {
+    const id = getHeadingId(children);
+    return (
+      <h3 {...props} data-blog-heading-id={id} id={id}>
+        {children}
+      </h3>
+    );
+  },
   a: ({ node, href, ...props }) => {
     const isInternalLink = href?.startsWith("/") || href?.startsWith("#");
     return isInternalLink ? (
