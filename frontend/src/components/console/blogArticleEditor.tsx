@@ -259,7 +259,13 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
                 {...bodyMarkdown.inputProps}
               />
             ) : (
-              <BlogMarkdownPreview content={bodyMarkdown.value} />
+              <div className="min-h-64 border border-[#c68ef0] bg-white px-4 py-3 text-[#222]">
+                {bodyMarkdown.value.trim() ? (
+                  <BlogMarkdownPreview content={bodyMarkdown.value} />
+                ) : (
+                  <p className="text-sm text-[#7e11d1]">本文がありません</p>
+                )}
+              </div>
             )}
           </LabelBox>
         </div>

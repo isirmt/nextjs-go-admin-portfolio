@@ -64,7 +64,7 @@ function BlogCodeBlock({
 
 const components: Components = {
   h2: ({ node, ...props }) => (
-    <div className="mt-3 mb-4 border-b-2 border-blue-200 text-blue-700 transition-colors dark:border-slate-700 dark:text-white">
+    <div className="mt-3 mb-4 border-b-2 border-blue-200 text-blue-700 transition-colors">
       <h2 {...props} />
     </div>
   ),
@@ -105,19 +105,17 @@ const components: Components = {
 export default function BlogMarkdownPreview({
   content,
 }: BlogMarkdownPreviewProps) {
+  if (!content.trim()) return null;
+
   return (
-    <div className="markdown min-h-64 border border-[#c68ef0] bg-white px-4 py-3 text-[#222]">
-      {content.trim() ? (
-        <ReactMarkdown
-          components={components}
-          disallowedElements={["h1"]}
-          remarkPlugins={[remarkGfm]}
-        >
-          {content}
-        </ReactMarkdown>
-      ) : (
-        <p className="text-sm text-[#7e11d1]">本文がありません</p>
-      )}
+    <div className="markdown">
+      <ReactMarkdown
+        components={components}
+        disallowedElements={["h1"]}
+        remarkPlugins={[remarkGfm]}
+      >
+        {content}
+      </ReactMarkdown>
     </div>
   );
 }
