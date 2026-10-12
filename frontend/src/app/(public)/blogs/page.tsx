@@ -24,15 +24,15 @@ export default async function BlogsPage() {
           {articles.map((article) => (
             <div
               key={article.id}
-              className="group relative w-84 filter-[drop-shadow(0.5rem_0.5rem_0_#c5dbec)] transition-all hover:scale-105 hover:-rotate-3"
+              className="group ease-over relative w-84 filter-[drop-shadow(0.5rem_0.5rem_0_#c5dbec)] transition-all hover:scale-105 hover:-rotate-3"
             >
               <Link
-                className="font-noto relative block border border-[#c5dbec] bg-[#f6faff] p-3 [clip-path:polygon(2.5rem_0,100%_0,100%_100%,0_100%,0_2.5rem)] group-hover:[clip-path:polygon(3.5rem_0,100%_0,100%_100%,0_100%,0_3.5rem)] before:absolute before:-top-1 before:-left-1 before:z-10 before:size-[calc(2.5rem+2px)] before:bg-[#c5dbec] before:[clip-path:polygon(100%_0,100%_100%,0_100%)] group-hover:before:size-[calc(3.5rem+2px)]"
+                className="font-noto ease-over before:ease-over relative block rounded-lg border border-[#c5dbec] bg-[#f6faff] p-3 transition-[clip-path] duration-300 [clip-path:polygon(2.5rem_0,100%_0,100%_100%,0_100%,0_2.5rem)] group-hover:[clip-path:polygon(3.5rem_0,100%_0,100%_100%,0_100%,0_3.5rem)] before:absolute before:-top-1 before:-left-1 before:z-10 before:size-[calc(2.5rem+2px)] before:rounded-br-lg before:bg-[#c5dbec] before:transition-[width,height] before:duration-300 before:[clip-path:polygon(100%_0,100%_100%,0_100%)] group-hover:before:size-[calc(3.5rem+2px)]"
                 href={`/blogs/${article.slug}`}
               >
                 <div className="relative flex aspect-1200/630 w-full items-center justify-center overflow-hidden">
                   <img
-                    className="absolute"
+                    className="absolute rounded-xs"
                     src={`/blogs/${article.slug}/og-image`}
                     alt={article.title}
                   />
