@@ -32,7 +32,7 @@ export default async function BlogsPage() {
               >
                 <div className="relative flex aspect-1200/630 w-full items-center justify-center overflow-hidden">
                   <img
-                    className="absolute rounded-xs"
+                    className="pointer-events-none absolute rounded-xs select-none"
                     src={`/blogs/${article.slug}/og-image`}
                     alt={article.title}
                   />
