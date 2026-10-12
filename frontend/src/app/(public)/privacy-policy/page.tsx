@@ -1,11 +1,16 @@
 import PageContentHeader from "@/components/public/pageContentHeader";
+import { delaGothicOne } from "@/lib/fonts";
 import Link from "next/link";
 
 export default async function ClientPage() {
   return (
     <main className="relative w-full pb-40">
       <PageContentHeader>
-        <h1 className="text-center text-4xl font-bold">プライバシーポリシー</h1>
+        <h1
+          className={`${delaGothicOne.className} text-center text-4xl font-bold text-[#12385f]`}
+        >
+          プライバシーポリシー
+        </h1>
       </PageContentHeader>
       <div className="max-w-96rem mx-auto flex w-fit flex-col gap-6">
         <p>

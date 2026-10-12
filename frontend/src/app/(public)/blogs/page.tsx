@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getPublicBlogArticles } from "@/lib/blogs/publicApi";
 import PageContentHeader from "@/components/public/pageContentHeader";
 import BlogArticleCard from "@/components/blogs/blogArticleCard";
+import { delaGothicOne } from "@/lib/fonts";
 
 export const metadata: Metadata = {
   title: "ブログ | isirmt",
@@ -15,7 +16,11 @@ export default async function BlogsPage() {
   return (
     <main className="relative w-full pb-40">
       <PageContentHeader>
-        <h1 className="text-center text-4xl font-bold">ブログ</h1>
+        <h1
+          className={`${delaGothicOne.className} text-center text-4xl font-bold text-[#12385f]`}
+        >
+          ブログ
+        </h1>
       </PageContentHeader>
       {articles.length ? (
         <div className="mx-auto flex flex-col items-center gap-8 lg:flex-row lg:flex-wrap lg:items-start lg:px-8">
