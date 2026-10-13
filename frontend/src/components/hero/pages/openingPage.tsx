@@ -21,7 +21,7 @@ const playbackRateList = [0.5, 1, 1.5, 2, 4];
 
 const WAVE_KEYFRAMES: Keyframe[] = [
   { transform: "translateY(0)" },
-  { transform: "translateY(-600dvh)" },
+  { transform: "translateY(-600svh)" },
 ];
 
 const APPEAR_KEYFRAMES: Keyframe[] = [
@@ -179,14 +179,14 @@ export default function OpeningHeroPage() {
         </button>
         {/* Gray scale */}
         <div
-          className={`absolute z-10 aspect-square rounded-full bg-transparent backdrop-grayscale-100 transition-all duration-1500 ease-in-out ${isColorful ? "size-0" : "size-[calc(max(100dvh,100dvw)*1.414)]"}`}
+          className={`absolute z-10 aspect-square rounded-full bg-transparent backdrop-grayscale-100 transition-all duration-1500 ease-in-out ${isColorful ? "size-0" : "size-[calc(max(100svh,100dvw)*1.414)]"}`}
         />
         <div
           ref={bind("background")}
           className="absolute top-0 left-0 flex size-full transform-[translateY(-130%)] items-center justify-center"
         >
-          <div className="absolute -top-[85dvh] h-[180dvh] w-[180dvw] rounded-b-full bg-[linear-gradient(45deg,#d1fafa_40vw,#d1f0ff_140vw)]" />
-          <div className="animate-up-down-smooth absolute -top-[110dvh] h-[120dvh] w-[120dvw] translate-x-[30dvw] rounded-b-full bg-[linear-gradient(45deg,#baf8dd_40vw,#cdfefe_140vw)] [animation-delay:0.5s]" />
+          <div className="absolute -top-[85svh] h-[180svh] w-[180dvw] rounded-b-full bg-[linear-gradient(45deg,#d1fafa_40vw,#d1f0ff_140vw)]" />
+          <div className="animate-up-down-smooth absolute -top-[110svh] h-[120svh] w-[120dvw] translate-x-[30dvw] rounded-b-full bg-[linear-gradient(45deg,#baf8dd_40vw,#cdfefe_140vw)] [animation-delay:0.5s]" />
 
           <div
             ref={bind("circles")}
@@ -221,11 +221,11 @@ export default function OpeningHeroPage() {
         </div>
         <div
           ref={bind("pink-wave")}
-          className="absolute top-[300dvh] right-0 h-[300dvh] w-[300dvh] rounded-full bg-[linear-gradient(180deg,#faddf1,#f5c2e5)] ease-out md:right-1/3"
+          className="absolute top-[300svh] right-0 h-[300svh] w-[300svh] rounded-full bg-[linear-gradient(180deg,#faddf1,#f5c2e5)] ease-out md:right-1/3"
         />
         <div
           ref={bind("blue-wave")}
-          className="absolute top-[300dvh] left-0 h-[300dvh] w-[300dvh] rounded-full bg-[linear-gradient(180deg,#cbf9ff,#b2f2fb)] ease-out md:left-1/3"
+          className="absolute top-[300svh] left-0 h-[300svh] w-[300svh] rounded-full bg-[linear-gradient(180deg,#cbf9ff,#b2f2fb)] ease-out md:left-1/3"
         />
         <div className="flex flex-col items-center justify-center gap-6">
           <div className="animate-up-down-smooth flex flex-row items-center justify-center gap-12">
