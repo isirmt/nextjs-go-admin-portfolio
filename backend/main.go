@@ -99,6 +99,11 @@ func main() {
 	epWorks.PUT("/:id", pSrv.requireAdmin(pSrv.handleUpdateWork))
 	epWorks.DELETE("/:id", pSrv.requireAdmin(pSrv.handleDeleteWork))
 
+	epBlogTags := router.Group("/blog-tags")
+	epBlogTags.GET("", pSrv.handleGetBlogTags)
+	epBlogTags.GET("/:id", pSrv.handleGetBlogTag)
+	epBlogTags.POST("", pSrv.requireAdmin(pSrv.handleCreateBlogTag))
+
 	epBlogs := router.Group("/blogs")
 	epBlogs.GET("", pSrv.handleGetBlogArticles)
 	epBlogs.POST("", pSrv.requireAdmin(pSrv.handleCreateBlogArticle))
