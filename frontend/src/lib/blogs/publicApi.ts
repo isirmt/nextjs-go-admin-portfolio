@@ -28,3 +28,15 @@ export function getPublicBlogArticle(slug: string, revalidate?: number) {
     revalidate,
   );
 }
+
+export async function getPublicRelatedBlogArticles(
+  slug: string,
+  revalidate?: number,
+): Promise<BlogArticleSummary[]> {
+  return (
+    (await fetchPublicBlogs<BlogArticleSummary[]>(
+      `/blogs/${encodeURIComponent(slug)}/related`,
+      revalidate,
+    )) ?? []
+  );
+}
