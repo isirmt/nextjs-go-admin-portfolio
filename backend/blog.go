@@ -30,12 +30,13 @@ var (
 )
 
 type blogArticleRequest struct {
-	Status           string  `json:"status"`
-	Title            string  `json:"title"`
-	Slug             string  `json:"slug"`
-	BodyMarkdown     string  `json:"body_markdown"`
-	ThumbnailImageID *string `json:"thumbnail_image_id"`
-	PublishedAt      *string `json:"published_at"`
+	Status           string   `json:"status"`
+	Title            string   `json:"title"`
+	Slug             string   `json:"slug"`
+	BodyMarkdown     string   `json:"body_markdown"`
+	ThumbnailImageID *string  `json:"thumbnail_image_id"`
+	PublishedAt      *string  `json:"published_at"`
+	TagIDs           []string `json:"tag_ids"`
 }
 
 type blogArticleInput struct {
@@ -46,6 +47,7 @@ type blogArticleInput struct {
 	thumbnailImageID *string
 	publishedAt      *time.Time
 	bodyImageIDs     []string
+	tagIDs           []string
 }
 
 type createBlogPreviewLinkRequest struct {
@@ -61,14 +63,15 @@ type blogPreviewLinkResponse struct {
 }
 
 type blogArticleSummaryResponse struct {
-	ID               string  `json:"id"`
-	Status           string  `json:"status,omitempty"`
-	Title            string  `json:"title"`
-	Slug             string  `json:"slug"`
-	ThumbnailImageID *string `json:"thumbnail_image_id"`
-	CreatedAt        string  `json:"created_at"`
-	PublishedAt      *string `json:"published_at"`
-	UpdatedAt        string  `json:"updated_at"`
+	ID               string            `json:"id"`
+	Status           string            `json:"status,omitempty"`
+	Title            string            `json:"title"`
+	Slug             string            `json:"slug"`
+	ThumbnailImageID *string           `json:"thumbnail_image_id"`
+	CreatedAt        string            `json:"created_at"`
+	PublishedAt      *string           `json:"published_at"`
+	UpdatedAt        string            `json:"updated_at"`
+	Tags             []blogTagResponse `json:"tags"`
 }
 
 type blogArticleResponse struct {
@@ -102,6 +105,10 @@ func blogArticleSummary(article *model.BlogArticle, includeStatus bool) blogArti
 	if article.ID != nil {
 		articleID = *article.ID
 	}
+	tags := make([]blogTagResponse, 0, len(article.Tags))
+	for _, tag := range article.Tags {
+		tags = append(tags, blogTagSummary(tag))
+	}
 	return blogArticleSummaryResponse{
 		ID:               articleID,
 		Status:           status,
@@ -111,6 +118,7 @@ func blogArticleSummary(article *model.BlogArticle, includeStatus bool) blogArti
 		CreatedAt:        formatBlogTime(article.CreatedAt),
 		PublishedAt:      formatOptionalBlogTime(article.PublishedAt),
 		UpdatedAt:        formatBlogTime(article.UpdatedAt),
+		Tags:             tags,
 	}
 }
 
@@ -127,7 +135,11 @@ func blogArticleDetail(article *model.BlogArticle, includeStatus bool) blogArtic
 }
 
 func (pSrv *server) withBlogArticleRelations(articleQuery query.IBlogArticleDo) query.IBlogArticleDo {
-	return articleQuery.Preload(pSrv.q.BlogArticle.BodyImages)
+	return pSrv.withBlogArticleTags(articleQuery).Preload(pSrv.q.BlogArticle.BodyImages)
+}
+
+func (pSrv *server) withBlogArticleTags(articleQuery query.IBlogArticleDo) query.IBlogArticleDo {
+	return articleQuery.Preload(pSrv.q.BlogArticle.Tags)
 }
 
 func parseBlogArticleInput(req blogArticleRequest) (blogArticleInput, error) {
@@ -181,7 +193,25 @@ func parseBlogArticleInput(req blogArticleRequest) (blogArticleInput, error) {
 		thumbnailImageID: thumbnailImageID,
 		publishedAt:      publishedAt,
 		bodyImageIDs:     extractBlogImageIDs(bodyMarkdown),
+		tagIDs:           normalizeBlogTagIDs(req.TagIDs),
 	}, nil
+}
+
+func normalizeBlogTagIDs(ids []string) []string {
+	seen := make(map[string]struct{}, len(ids))
+	normalized := make([]string, 0, len(ids))
+	for _, id := range ids {
+		trimmed := strings.TrimSpace(id)
+		if trimmed == "" {
+			continue
+		}
+		if _, exists := seen[trimmed]; exists {
+			continue
+		}
+		seen[trimmed] = struct{}{}
+		normalized = append(normalized, trimmed)
+	}
+	return normalized
 }
 
 func extractBlogImageIDs(markdown string) []string {
@@ -226,6 +256,21 @@ func validateBlogImageIDs(ctx echo.Context, q *query.Query, thumbnailImageID *st
 	return nil
 }
 
+func validateBlogTagIDs(ctx echo.Context, q *query.Query, tagIDs []string) error {
+	if len(tagIDs) == 0 {
+		return nil
+	}
+	count, err := q.BlogTag.WithContext(ctx.Request().Context()).
+		Where(q.BlogTag.ID.In(tagIDs...)).Count()
+	if err != nil {
+		return fmt.Errorf("validate blog tags: %w", err)
+	}
+	if int(count) != len(tagIDs) {
+		return echo.NewHTTPError(http.StatusBadRequest, "unknown blog tag id provided")
+	}
+	return nil
+}
+
 func syncBlogArticleImages(ctx echo.Context, tx *query.Query, articleID string, imageIDs []string) error {
 	if _, err := tx.BlogArticleImage.WithContext(ctx.Request().Context()).
 		Where(tx.BlogArticleImage.ArticleID.Eq(articleID)).Delete(); err != nil {
@@ -245,6 +290,22 @@ func syncBlogArticleImages(ctx echo.Context, tx *query.Query, articleID string, 
 	return tx.BlogArticleImage.WithContext(ctx.Request().Context()).Create(images...)
 }
 
+func syncBlogArticleTags(ctx echo.Context, tx *query.Query, articleID string, tagIDs []string) error {
+	if _, err := tx.BlogArticleTag.WithContext(ctx.Request().Context()).
+		Where(tx.BlogArticleTag.ArticleID.Eq(articleID)).Delete(); err != nil {
+		return err
+	}
+	if len(tagIDs) == 0 {
+		return nil
+	}
+
+	tags := make([]*model.BlogArticleTag, 0, len(tagIDs))
+	for _, tagID := range tagIDs {
+		tags = append(tags, &model.BlogArticleTag{ArticleID: articleID, TagID: tagID})
+	}
+	return tx.BlogArticleTag.WithContext(ctx.Request().Context()).Create(tags...)
+}
+
 func (pSrv *server) ensureBlogSlugAvailable(c echo.Context, slug, ignoredArticleID string) error {
 	article, err := pSrv.q.BlogArticle.WithContext(c.Request().Context()).
 		Where(pSrv.q.BlogArticle.Slug.Eq(slug)).First()
@@ -262,7 +323,7 @@ func (pSrv *server) ensureBlogSlugAvailable(c echo.Context, slug, ignoredArticle
 
 func (pSrv *server) handleGetBlogArticles(c echo.Context) error {
 	isAdmin := pSrv.isAdminRequest(c)
-	articleQuery := pSrv.q.BlogArticle.WithContext(c.Request().Context())
+	articleQuery := pSrv.withBlogArticleTags(pSrv.q.BlogArticle.WithContext(c.Request().Context()))
 	if isAdmin {
 		articleQuery = articleQuery.Order(pSrv.q.BlogArticle.UpdatedAt.Desc())
 	} else {
@@ -329,6 +390,9 @@ func (pSrv *server) handleCreateBlogArticle(c echo.Context) error {
 	if err := validateBlogImageIDs(c, pSrv.q, input.thumbnailImageID, input.bodyImageIDs); err != nil {
 		return err
 	}
+	if err := validateBlogTagIDs(c, pSrv.q, input.tagIDs); err != nil {
+		return err
+	}
 
 	status := input.status
 	article := &model.BlogArticle{
@@ -346,7 +410,10 @@ func (pSrv *server) handleCreateBlogArticle(c echo.Context) error {
 		if article.ID == nil {
 			return errors.New("failed to generate blog article id")
 		}
-		return syncBlogArticleImages(c, tx, *article.ID, input.bodyImageIDs)
+		if err := syncBlogArticleImages(c, tx, *article.ID, input.bodyImageIDs); err != nil {
+			return err
+		}
+		return syncBlogArticleTags(c, tx, *article.ID, input.tagIDs)
 	}); err != nil {
 		return c.String(http.StatusInternalServerError, "failed to create blog article")
 	}
@@ -386,6 +453,9 @@ func (pSrv *server) handleUpdateBlogArticle(c echo.Context) error {
 	if err := validateBlogImageIDs(c, pSrv.q, input.thumbnailImageID, input.bodyImageIDs); err != nil {
 		return err
 	}
+	if err := validateBlogTagIDs(c, pSrv.q, input.tagIDs); err != nil {
+		return err
+	}
 
 	if err := pSrv.q.Transaction(func(tx *query.Query) error {
 		if _, err := tx.BlogArticle.WithContext(c.Request().Context()).
@@ -399,7 +469,10 @@ func (pSrv *server) handleUpdateBlogArticle(c echo.Context) error {
 		}); err != nil {
 			return err
 		}
-		return syncBlogArticleImages(c, tx, articleID, input.bodyImageIDs)
+		if err := syncBlogArticleImages(c, tx, articleID, input.bodyImageIDs); err != nil {
+			return err
+		}
+		return syncBlogArticleTags(c, tx, articleID, input.tagIDs)
 	}); err != nil {
 		return c.String(http.StatusInternalServerError, "failed to update blog article")
 	}
