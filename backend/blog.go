@@ -375,6 +375,85 @@ func (pSrv *server) handleGetBlogArticle(c echo.Context) error {
 	return c.JSON(http.StatusOK, blogArticleDetail(article, isAdmin))
 }
 
+type relatedBlogArticleRow struct {
+	ID string `gorm:"column:id"`
+}
+
+func (pSrv *server) handleGetRelatedBlogArticles(c echo.Context) error {
+	identifier := strings.TrimSpace(c.Param("identifier"))
+	if identifier == "" {
+		return c.String(http.StatusBadRequest, "article identifier is required")
+	}
+
+	sourceQuery := pSrv.q.BlogArticle.WithContext(c.Request().Context()).Where(
+		pSrv.q.BlogArticle.Status.Eq(blogArticleStatusPublished),
+		pSrv.q.BlogArticle.PublishedAt.Lte(time.Now()),
+	)
+	if _, err := uuid.Parse(identifier); err == nil {
+		sourceQuery = sourceQuery.Where(pSrv.q.BlogArticle.ID.Eq(identifier))
+	} else {
+		sourceQuery = sourceQuery.Where(pSrv.q.BlogArticle.Slug.Eq(strings.ToLower(identifier)))
+	}
+	sourceArticle, err := sourceQuery.First()
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return c.String(http.StatusNotFound, "blog article not found")
+		}
+		return c.String(http.StatusInternalServerError, "failed to fetch blog article")
+	}
+	if sourceArticle.ID == nil {
+		return c.String(http.StatusInternalServerError, "blog article id is missing")
+	}
+
+	rows := make([]relatedBlogArticleRow, 0, 5)
+	err = pSrv.db.WithContext(c.Request().Context()).Raw(`
+		SELECT candidate.id
+		FROM blog_article_tags AS source_tag
+		INNER JOIN blog_article_tags AS candidate_tag
+			ON candidate_tag.tag_id = source_tag.tag_id
+		INNER JOIN blog_articles AS candidate
+			ON candidate.id = candidate_tag.article_id
+		WHERE source_tag.article_id = ?
+			AND candidate.id <> ?
+			AND candidate.status = ?
+			AND candidate.published_at <= NOW()
+		GROUP BY candidate.id, candidate.published_at
+		ORDER BY COUNT(DISTINCT source_tag.tag_id) DESC, candidate.published_at DESC
+		LIMIT 5
+	`, *sourceArticle.ID, *sourceArticle.ID, blogArticleStatusPublished).Scan(&rows).Error
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "failed to fetch related blog articles")
+	}
+	if len(rows) == 0 {
+		return c.JSON(http.StatusOK, []blogArticleSummaryResponse{})
+	}
+
+	articleIDs := make([]string, 0, len(rows))
+	for _, row := range rows {
+		articleIDs = append(articleIDs, row.ID)
+	}
+	articles, err := pSrv.withBlogArticleTags(pSrv.q.BlogArticle.WithContext(c.Request().Context())).
+		Where(pSrv.q.BlogArticle.ID.In(articleIDs...)).
+		Find()
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "failed to fetch related blog article details")
+	}
+
+	articlesByID := make(map[string]*model.BlogArticle, len(articles))
+	for _, article := range articles {
+		if article.ID != nil {
+			articlesByID[*article.ID] = article
+		}
+	}
+	response := make([]blogArticleSummaryResponse, 0, len(rows))
+	for _, row := range rows {
+		if article, ok := articlesByID[row.ID]; ok {
+			response = append(response, blogArticleSummary(article, false))
+		}
+	}
+	return c.JSON(http.StatusOK, response)
+}
+
 func (pSrv *server) handleCreateBlogArticle(c echo.Context) error {
 	var req blogArticleRequest
 	if err := c.Bind(&req); err != nil {

@@ -108,6 +108,7 @@ func main() {
 	epBlogs.GET("", pSrv.handleGetBlogArticles)
 	epBlogs.POST("", pSrv.requireAdmin(pSrv.handleCreateBlogArticle))
 	epBlogs.GET("/previews/:token", pSrv.handleGetBlogPreview)
+	epBlogs.GET("/:identifier/related", pSrv.handleGetRelatedBlogArticles)
 	epBlogs.GET("/:id/preview-links", pSrv.requireAdmin(pSrv.handleGetBlogPreviewLinks))
 	epBlogs.POST("/:id/preview-links", pSrv.requireAdmin(pSrv.handleCreateBlogPreviewLink))
 	epBlogs.DELETE("/:id/preview-links/:linkId", pSrv.requireAdmin(pSrv.handleRevokeBlogPreviewLink))
