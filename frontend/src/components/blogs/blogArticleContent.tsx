@@ -18,11 +18,11 @@ export default function BlogArticleContent({
     <article className="relative w-full">
       <PageContentHeader>
         <img
-          className="pointer-events-none absolute top-0 right-0 z-0 aspect-1200/630 h-full object-contain opacity-40 select-none"
+          className="pointer-events-none absolute top-0 right-0 z-0 hidden aspect-1200/630 h-full object-contain opacity-40 select-none xl:block"
           src={`/blogs/${article.slug}/og-image`}
           alt={article.title}
         />
-        <div className="absolute top-0 right-0 z-1 aspect-1200/630 h-full bg-linear-to-r from-[#ecf3fa] to-transparent" />
+        <div className="absolute top-0 right-0 z-1 hidden aspect-1200/630 h-full bg-linear-to-r from-[#ecf3fa] to-transparent xl:block" />
         <div className="relative z-2 flex size-full flex-col gap-2.5">
           {article.status === "draft" && (
             <span className="mr-1 w-fit rounded bg-[#53ceff] px-1 py-0.5 font-bold text-[#0b303f]">
