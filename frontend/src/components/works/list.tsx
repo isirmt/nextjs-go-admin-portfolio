@@ -35,6 +35,7 @@ export default function WorksList({ latestArticles }: WorksListProps) {
   const { clickedCubeId, clickNonce } = useSelectingCubeContext();
   const [selectingWorkId, setSelectingWorkId] = useState<string>();
   const [lastSelectedWorkId, setLastSelectedWorkId] = useState<string>();
+  const shouldMountDetail = Boolean(selectingWorkId || lastSelectedWorkId);
   const [isOpeningFilter, setIsOpeningFilter] = useState(false);
   const clickLimiterRef = useRef<Map<string, number>>(new Map());
   const lastHandledCubeClickRef = useRef(0);
@@ -225,11 +226,13 @@ export default function WorksList({ latestArticles }: WorksListProps) {
           )}
         </div>
       </div>
-      <SelectedDetailScreen
-        selectingWorkId={selectingWorkId}
-        lastSelectedWorkId={lastSelectedWorkId}
-        setSelectingWorkId={setSelectingWorkId}
-      />
+      {shouldMountDetail ? (
+        <SelectedDetailScreen
+          selectingWorkId={selectingWorkId}
+          lastSelectedWorkId={lastSelectedWorkId}
+          setSelectingWorkId={setSelectingWorkId}
+        />
+      ) : null}
     </React.Fragment>
   );
 }
