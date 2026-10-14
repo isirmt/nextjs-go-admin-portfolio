@@ -5,6 +5,7 @@ import BlogMarkdownPreview from "./blogMarkdownPreview";
 import { lineSeedJp } from "@/lib/fonts";
 import DateCard from "./dateCard";
 import PageContentHeader from "../public/pageContentHeader";
+import Link from "next/link";
 
 type BlogArticleContentProps = {
   article: BlogArticle;
@@ -37,6 +38,12 @@ export default function BlogArticleContent({
         </div>
       </PageContentHeader>
       <div className="mx-auto w-full max-w-[960px] px-4">
+        <Link
+          href="/blogs"
+          className="mb-8 block w-fit bg-blue-50 font-mono text-blue-700 underline transition-colors hover:no-underline"
+        >
+          一覧に戻る
+        </Link>
         <BlogMarkdownPreview content={article.body_markdown} />
       </div>
     </article>
