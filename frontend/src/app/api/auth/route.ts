@@ -4,7 +4,13 @@ import { auth } from "@/lib/auth/options";
 const ADMIN_HEADER = "X-Admin-Secret";
 const ADMIN_SECRET = process.env.ADMIN_SECRET;
 const BACKEND_BASE_URL = process.env.BACKEND_BASE_URL;
-const ADMIN_API_PATH_PREFIXES = ["/images", "/works", "/tech-stacks", "/blogs"];
+const ADMIN_API_PATH_PREFIXES = [
+  "/images",
+  "/works",
+  "/tech-stacks",
+  "/blog-tags",
+  "/blogs",
+];
 
 function isAllowedAdminApiPath(apiUrl: string) {
   return ADMIN_API_PATH_PREFIXES.some(

@@ -1,5 +1,11 @@
 export type BlogArticleStatus = "draft" | "published";
 
+export type BlogTag = {
+  id: string;
+  name: string;
+  slug: string;
+};
+
 export type BlogArticleSummary = {
   id: string;
   status: BlogArticleStatus;
@@ -9,6 +15,7 @@ export type BlogArticleSummary = {
   created_at: string;
   published_at: string | null;
   updated_at: string;
+  tags: BlogTag[];
 };
 
 export type BlogArticle = BlogArticleSummary & {
