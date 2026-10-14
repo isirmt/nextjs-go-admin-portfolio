@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import BlogArticleContent from "@/components/blogs/blogArticleContent";
+import BlogArticleCardSection from "@/components/blogs/blogArticleCardSection";
 import BlogTableOfContents from "@/components/blogs/blogTableOfContents";
-import { getPublicBlogArticle } from "@/lib/blogs/publicApi";
+import {
+  getPublicBlogArticle,
+  getPublicRelatedBlogArticles,
+} from "@/lib/blogs/publicApi";
 
 type BlogArticlePageProps = {
   params: Promise<{ slug: string }>;
@@ -34,7 +38,10 @@ export default async function BlogArticlePage({
   params,
 }: BlogArticlePageProps) {
   const { slug } = await params;
-  const article = await getPublicBlogArticle(slug);
+  const [article, relatedArticles] = await Promise.all([
+    getPublicBlogArticle(slug),
+    getPublicRelatedBlogArticles(slug),
+  ]);
   if (!article) notFound();
 
   return (
@@ -52,7 +59,7 @@ export default async function BlogArticlePage({
           </div>
         </aside>
       </section>
-      <section />
+      <BlogArticleCardSection articles={relatedArticles} title="関連記事" />
     </main>
   );
 }
