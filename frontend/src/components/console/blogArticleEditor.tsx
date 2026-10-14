@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { ImagesProvider } from "@/contexts/imagesContext";
+import { BlogTagsProvider } from "@/contexts/blogTagsContext";
 import backendApi from "@/lib/auth/backendFetch";
 import type { BlogArticle } from "@/types/blogs/common";
 import ConsoleButton from "./consoleButton";
@@ -14,6 +15,7 @@ import { LabelBox, LabelText } from "./labelBlock";
 import ConsoleSegmentedControl from "./consoleSegmentedControl";
 import useConsoleTextField from "@/hooks/useConsoleTextField";
 import BlogMarkdownPreview from "@/components/blogs/blogMarkdownPreview";
+import BlogTagSelectingBox from "./blogTagSelectingBox";
 
 type BlogArticleEditorProps = { articleId?: string };
 
@@ -45,6 +47,7 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
   const slug = useConsoleTextField();
   const publishedAt = useConsoleTextField();
   const [thumbnailImageIds, setThumbnailImageIds] = useState<string[]>([]);
+  const [tagIds, setTagIds] = useState<string[]>([]);
   const bodyMarkdown = useConsoleTextField();
   const { reset: resetTitle } = title;
   const { reset: resetSlug } = slug;
@@ -79,6 +82,7 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
         setThumbnailImageIds(
           article.thumbnail_image_id ? [article.thumbnail_image_id] : [],
         );
+        setTagIds(article.tags.map((tag) => tag.id));
         if (article.published_at) {
           const date = new Date(article.published_at);
           resetPublishedAt(
@@ -143,6 +147,7 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
             slug: slug.value.trim(),
             body_markdown: bodyMarkdown.value.trim(),
             thumbnail_image_id: thumbnailImageIds[0] ?? null,
+            tag_ids: tagIds,
             published_at: publishedAt.value
               ? new Date(publishedAt.value).toISOString()
               : null,
@@ -224,6 +229,10 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
           <LabelBox isLong>
             <LabelText required>SLUG</LabelText>
             <ConsoleTextField required {...slug.inputProps} />
+          </LabelBox>
+          <LabelBox isLong>
+            <LabelText>タグ</LabelText>
+            <BlogTagSelectingBox selectedIds={tagIds} onChange={setTagIds} />
           </LabelBox>
           <LabelBox>
             <LabelText>サムネイル画像</LabelText>
@@ -312,7 +321,9 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
 export default function BlogArticleEditor(props: BlogArticleEditorProps) {
   return (
     <ImagesProvider access="admin">
-      <BlogArticleEditorForm {...props} />
+      <BlogTagsProvider>
+        <BlogArticleEditorForm {...props} />
+      </BlogTagsProvider>
     </ImagesProvider>
   );
 }

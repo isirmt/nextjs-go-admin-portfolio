@@ -99,10 +99,16 @@ func main() {
 	epWorks.PUT("/:id", pSrv.requireAdmin(pSrv.handleUpdateWork))
 	epWorks.DELETE("/:id", pSrv.requireAdmin(pSrv.handleDeleteWork))
 
+	epBlogTags := router.Group("/blog-tags")
+	epBlogTags.GET("", pSrv.handleGetBlogTags)
+	epBlogTags.GET("/:id", pSrv.handleGetBlogTag)
+	epBlogTags.POST("", pSrv.requireAdmin(pSrv.handleCreateBlogTag))
+
 	epBlogs := router.Group("/blogs")
 	epBlogs.GET("", pSrv.handleGetBlogArticles)
 	epBlogs.POST("", pSrv.requireAdmin(pSrv.handleCreateBlogArticle))
 	epBlogs.GET("/previews/:token", pSrv.handleGetBlogPreview)
+	epBlogs.GET("/:identifier/related", pSrv.handleGetRelatedBlogArticles)
 	epBlogs.GET("/:id/preview-links", pSrv.requireAdmin(pSrv.handleGetBlogPreviewLinks))
 	epBlogs.POST("/:id/preview-links", pSrv.requireAdmin(pSrv.handleCreateBlogPreviewLink))
 	epBlogs.DELETE("/:id/preview-links/:linkId", pSrv.requireAdmin(pSrv.handleRevokeBlogPreviewLink))

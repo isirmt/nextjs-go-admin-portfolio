@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getPublicBlogArticles } from "@/lib/blogs/publicApi";
 import PageContentHeader from "@/components/public/pageContentHeader";
 import BlogArticleCard from "@/components/blogs/blogArticleCard";
+import BlogArticleTagList from "@/components/blogs/blogArticleTagList";
 import { delaGothicOne } from "@/lib/fonts";
 
 export const metadata: Metadata = {
@@ -23,9 +24,12 @@ export default async function BlogsPage() {
         </h1>
       </PageContentHeader>
       {articles.length ? (
-        <div className="mx-auto flex flex-col items-center gap-8 lg:flex-row lg:flex-wrap lg:items-start lg:px-8">
+        <div className="mx-auto flex w-full flex-wrap justify-center gap-8 px-4 select-none">
           {articles.map((article) => (
-            <BlogArticleCard key={article.id} article={article} />
+            <div className="flex shrink-0 flex-col gap-2.5" key={article.id}>
+              <BlogArticleCard article={article} />
+              <BlogArticleTagList tags={article.tags} />
+            </div>
           ))}
         </div>
       ) : (

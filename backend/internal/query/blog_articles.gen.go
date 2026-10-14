@@ -43,6 +43,12 @@ func newBlogArticle(db *gorm.DB, opts ...gen.DOOption) blogArticle {
 		RelationField: field.NewRelation("PreviewLinks", "model.BlogArticlePreviewLink"),
 	}
 
+	_blogArticle.Tags = blogArticleManyToManyTags{
+		db: db.Session(&gorm.Session{}),
+
+		RelationField: field.NewRelation("Tags", "model.BlogTag"),
+	}
+
 	_blogArticle.BodyImages = blogArticleHasManyBodyImages{
 		db: db.Session(&gorm.Session{}),
 
@@ -79,6 +85,8 @@ type blogArticle struct {
 	PublishedAt      field.Time
 	UpdatedAt        field.Time
 	PreviewLinks     blogArticleHasManyPreviewLinks
+
+	Tags blogArticleManyToManyTags
 
 	BodyImages blogArticleHasManyBodyImages
 
@@ -134,7 +142,7 @@ func (b *blogArticle) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (b *blogArticle) fillFieldMap() {
-	b.fieldMap = make(map[string]field.Expr, 12)
+	b.fieldMap = make(map[string]field.Expr, 13)
 	b.fieldMap["id"] = b.ID
 	b.fieldMap["status"] = b.Status
 	b.fieldMap["title"] = b.Title
@@ -151,6 +159,8 @@ func (b blogArticle) clone(db *gorm.DB) blogArticle {
 	b.blogArticleDo.ReplaceConnPool(db.Statement.ConnPool)
 	b.PreviewLinks.db = db.Session(&gorm.Session{Initialized: true})
 	b.PreviewLinks.db.Statement.ConnPool = db.Statement.ConnPool
+	b.Tags.db = db.Session(&gorm.Session{Initialized: true})
+	b.Tags.db.Statement.ConnPool = db.Statement.ConnPool
 	b.BodyImages.db = db.Session(&gorm.Session{Initialized: true})
 	b.BodyImages.db.Statement.ConnPool = db.Statement.ConnPool
 	b.ThumbnailImage.db = db.Session(&gorm.Session{Initialized: true})
@@ -161,6 +171,7 @@ func (b blogArticle) clone(db *gorm.DB) blogArticle {
 func (b blogArticle) replaceDB(db *gorm.DB) blogArticle {
 	b.blogArticleDo.ReplaceDB(db)
 	b.PreviewLinks.db = db.Session(&gorm.Session{})
+	b.Tags.db = db.Session(&gorm.Session{})
 	b.BodyImages.db = db.Session(&gorm.Session{})
 	b.ThumbnailImage.db = db.Session(&gorm.Session{})
 	return b
@@ -243,6 +254,87 @@ func (a blogArticleHasManyPreviewLinksTx) Count() int64 {
 }
 
 func (a blogArticleHasManyPreviewLinksTx) Unscoped() *blogArticleHasManyPreviewLinksTx {
+	a.tx = a.tx.Unscoped()
+	return &a
+}
+
+type blogArticleManyToManyTags struct {
+	db *gorm.DB
+
+	field.RelationField
+}
+
+func (a blogArticleManyToManyTags) Where(conds ...field.Expr) *blogArticleManyToManyTags {
+	if len(conds) == 0 {
+		return &a
+	}
+
+	exprs := make([]clause.Expression, 0, len(conds))
+	for _, cond := range conds {
+		exprs = append(exprs, cond.BeCond().(clause.Expression))
+	}
+	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
+	return &a
+}
+
+func (a blogArticleManyToManyTags) WithContext(ctx context.Context) *blogArticleManyToManyTags {
+	a.db = a.db.WithContext(ctx)
+	return &a
+}
+
+func (a blogArticleManyToManyTags) Session(session *gorm.Session) *blogArticleManyToManyTags {
+	a.db = a.db.Session(session)
+	return &a
+}
+
+func (a blogArticleManyToManyTags) Model(m *model.BlogArticle) *blogArticleManyToManyTagsTx {
+	return &blogArticleManyToManyTagsTx{a.db.Model(m).Association(a.Name())}
+}
+
+func (a blogArticleManyToManyTags) Unscoped() *blogArticleManyToManyTags {
+	a.db = a.db.Unscoped()
+	return &a
+}
+
+type blogArticleManyToManyTagsTx struct{ tx *gorm.Association }
+
+func (a blogArticleManyToManyTagsTx) Find() (result []*model.BlogTag, err error) {
+	return result, a.tx.Find(&result)
+}
+
+func (a blogArticleManyToManyTagsTx) Append(values ...*model.BlogTag) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Append(targetValues...)
+}
+
+func (a blogArticleManyToManyTagsTx) Replace(values ...*model.BlogTag) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Replace(targetValues...)
+}
+
+func (a blogArticleManyToManyTagsTx) Delete(values ...*model.BlogTag) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Delete(targetValues...)
+}
+
+func (a blogArticleManyToManyTagsTx) Clear() error {
+	return a.tx.Clear()
+}
+
+func (a blogArticleManyToManyTagsTx) Count() int64 {
+	return a.tx.Count()
+}
+
+func (a blogArticleManyToManyTagsTx) Unscoped() *blogArticleManyToManyTagsTx {
 	a.tx = a.tx.Unscoped()
 	return &a
 }

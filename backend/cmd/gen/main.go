@@ -35,6 +35,7 @@ func main() {
 
 	commonImage := g.GenerateModel("common_images")
 	commonTechStack := g.GenerateModel("common_tech_stacks")
+	blogTag := g.GenerateModel("blog_tags")
 
 	blogArticlePreviewLink := g.GenerateModel(
 		"blog_article_preview_links",
@@ -60,6 +61,12 @@ func main() {
 			},
 		),
 	)
+	blogArticleTag := g.GenerateModel(
+		"blog_article_tags",
+
+		gen.FieldJSONTag("article_id", "-"),
+		gen.FieldJSONTag("tag_id", "-"),
+	)
 	blogArticle := g.GenerateModel(
 		"blog_articles",
 
@@ -73,6 +80,20 @@ func main() {
 				GORMTag: field.GormTag{
 					"foreignKey": []string{"ArticleID"},
 					"references": []string{"ID"},
+				},
+			},
+		),
+
+		gen.FieldRelate(
+			field.Many2Many,
+			"Tags",
+			blogTag,
+			&field.RelateConfig{
+				RelateSlicePointer: true,
+				GORMTag: field.GormTag{
+					"many2many":      []string{"blog_article_tags"},
+					"joinForeignKey": []string{"ArticleID"},
+					"joinReferences": []string{"TagID"},
 				},
 			},
 		),
@@ -196,7 +217,9 @@ func main() {
 		commonTechStack,
 		blogArticle,
 		blogArticleImage,
+		blogArticleTag,
 		blogArticlePreviewLink,
+		blogTag,
 		work,
 		workImage,
 		workURL,

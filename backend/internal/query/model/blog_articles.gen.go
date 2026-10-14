@@ -22,6 +22,7 @@ type BlogArticle struct {
 	PublishedAt      *time.Time                `gorm:"column:published_at;type:timestamp with time zone;index:idx_blog_articles_published_at,priority:1" json:"published_at"`
 	UpdatedAt        *time.Time                `gorm:"column:updated_at;type:timestamp with time zone;not null;default:now()" json:"updated_at"`
 	PreviewLinks     []*BlogArticlePreviewLink `gorm:"foreignKey:ArticleID;references:ID" json:"-"`
+	Tags             []*BlogTag                `gorm:"joinForeignKey:ArticleID;joinReferences:TagID;many2many:blog_article_tags" json:"tags"`
 	BodyImages       []*BlogArticleImage       `gorm:"foreignKey:ArticleID;references:ID" json:"-"`
 	ThumbnailImage   *CommonImage              `gorm:"foreignKey:ThumbnailImageID;references:ID" json:"thumbnail_image"`
 }

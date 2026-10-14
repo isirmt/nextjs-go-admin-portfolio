@@ -20,6 +20,8 @@ var (
 	BlogArticle            *blogArticle
 	BlogArticleImage       *blogArticleImage
 	BlogArticlePreviewLink *blogArticlePreviewLink
+	BlogArticleTag         *blogArticleTag
+	BlogTag                *blogTag
 	CommonImage            *commonImage
 	CommonTechStack        *commonTechStack
 	IsirmtWork             *isirmtWork
@@ -34,6 +36,8 @@ func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	BlogArticle = &Q.BlogArticle
 	BlogArticleImage = &Q.BlogArticleImage
 	BlogArticlePreviewLink = &Q.BlogArticlePreviewLink
+	BlogArticleTag = &Q.BlogArticleTag
+	BlogTag = &Q.BlogTag
 	CommonImage = &Q.CommonImage
 	CommonTechStack = &Q.CommonTechStack
 	IsirmtWork = &Q.IsirmtWork
@@ -49,6 +53,8 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 		BlogArticle:            newBlogArticle(db, opts...),
 		BlogArticleImage:       newBlogArticleImage(db, opts...),
 		BlogArticlePreviewLink: newBlogArticlePreviewLink(db, opts...),
+		BlogArticleTag:         newBlogArticleTag(db, opts...),
+		BlogTag:                newBlogTag(db, opts...),
 		CommonImage:            newCommonImage(db, opts...),
 		CommonTechStack:        newCommonTechStack(db, opts...),
 		IsirmtWork:             newIsirmtWork(db, opts...),
@@ -65,6 +71,8 @@ type Query struct {
 	BlogArticle            blogArticle
 	BlogArticleImage       blogArticleImage
 	BlogArticlePreviewLink blogArticlePreviewLink
+	BlogArticleTag         blogArticleTag
+	BlogTag                blogTag
 	CommonImage            commonImage
 	CommonTechStack        commonTechStack
 	IsirmtWork             isirmtWork
@@ -82,6 +90,8 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		BlogArticle:            q.BlogArticle.clone(db),
 		BlogArticleImage:       q.BlogArticleImage.clone(db),
 		BlogArticlePreviewLink: q.BlogArticlePreviewLink.clone(db),
+		BlogArticleTag:         q.BlogArticleTag.clone(db),
+		BlogTag:                q.BlogTag.clone(db),
 		CommonImage:            q.CommonImage.clone(db),
 		CommonTechStack:        q.CommonTechStack.clone(db),
 		IsirmtWork:             q.IsirmtWork.clone(db),
@@ -106,6 +116,8 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 		BlogArticle:            q.BlogArticle.replaceDB(db),
 		BlogArticleImage:       q.BlogArticleImage.replaceDB(db),
 		BlogArticlePreviewLink: q.BlogArticlePreviewLink.replaceDB(db),
+		BlogArticleTag:         q.BlogArticleTag.replaceDB(db),
+		BlogTag:                q.BlogTag.replaceDB(db),
 		CommonImage:            q.CommonImage.replaceDB(db),
 		CommonTechStack:        q.CommonTechStack.replaceDB(db),
 		IsirmtWork:             q.IsirmtWork.replaceDB(db),
@@ -120,6 +132,8 @@ type queryCtx struct {
 	BlogArticle            IBlogArticleDo
 	BlogArticleImage       IBlogArticleImageDo
 	BlogArticlePreviewLink IBlogArticlePreviewLinkDo
+	BlogArticleTag         IBlogArticleTagDo
+	BlogTag                IBlogTagDo
 	CommonImage            ICommonImageDo
 	CommonTechStack        ICommonTechStackDo
 	IsirmtWork             IIsirmtWorkDo
@@ -134,6 +148,8 @@ func (q *Query) WithContext(ctx context.Context) *queryCtx {
 		BlogArticle:            q.BlogArticle.WithContext(ctx),
 		BlogArticleImage:       q.BlogArticleImage.WithContext(ctx),
 		BlogArticlePreviewLink: q.BlogArticlePreviewLink.WithContext(ctx),
+		BlogArticleTag:         q.BlogArticleTag.WithContext(ctx),
+		BlogTag:                q.BlogTag.WithContext(ctx),
 		CommonImage:            q.CommonImage.WithContext(ctx),
 		CommonTechStack:        q.CommonTechStack.WithContext(ctx),
 		IsirmtWork:             q.IsirmtWork.WithContext(ctx),

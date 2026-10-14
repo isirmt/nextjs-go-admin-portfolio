@@ -3,6 +3,7 @@
 import backendApi from "@/lib/auth/backendFetch";
 import { useCallback, useState } from "react";
 import ConsoleButton from "./consoleButton";
+import ConsoleSelectableTagButton from "./consoleSelectableTagButton";
 import { ConsoleTextField } from "./consoleField";
 import { LabelText } from "./labelBlock";
 import { useTechsContext } from "@/contexts/techsContext";
@@ -80,19 +81,13 @@ export default function StackSelectingBox({
         {techs.map((stack) => {
           const isSelected = selectedIds.includes(stack.id);
           return (
-            <button
-              type="button"
+            <ConsoleSelectableTagButton
               key={stack.id}
-              onClick={() => handleToggleSelect(stack.id)}
-              className={`relative flex cursor-pointer items-center gap-3 overflow-hidden rounded border-2 bg-white px-3 py-2 shadow-[.25rem_.25rem_0_0_#67c8e6] ${isSelected ? "border-[#65a6df]" : "border-[#67c8e6]"}`}
+              isSelected={isSelected}
+              onToggled={() => handleToggleSelect(stack.id)}
             >
-              <div
-                className={`absolute top-0 left-0 z-1 flex size-full items-center justify-center transition-all duration-200 ${isSelected ? "bg-[#65a6df]/75" : "bg-transparent hover:bg-[#65a6df]/75"}`}
-              />
-              <span className="text-sm font-semibold text-[#3a3a3a]">
-                {stack.name}
-              </span>
-            </button>
+              {stack.name}
+            </ConsoleSelectableTagButton>
           );
         })}
       </div>
