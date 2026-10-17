@@ -22,3 +22,13 @@ export type BlogArticle = BlogArticleSummary & {
   body_markdown: string;
   body_image_ids: string[];
 };
+
+export type BlogSeries = {
+  id: string;
+  title: string;
+  slug: string;
+  description: string | null;
+  created_at: string;
+  updated_at: string;
+  articles: BlogArticleSummary[];
+};
