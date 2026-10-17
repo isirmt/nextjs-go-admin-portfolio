@@ -7,6 +7,7 @@ import DateCard from "./dateCard";
 import PageContentHeader from "../public/pageContentHeader";
 import Link from "next/link";
 import Arrow from "../shapes/arrow";
+import BlogArticleTagList from "./blogArticleTagList";
 
 type BlogArticleContentProps = {
   article: BlogArticle;
@@ -36,6 +37,9 @@ export default function BlogArticleContent({
           >
             {article.title}
           </h1>
+          {article.tags.length ? (
+            <BlogArticleTagList tags={article.tags} />
+          ) : null}
         </div>
       </PageContentHeader>
       <div className="mx-auto w-full max-w-[960px] px-4">
