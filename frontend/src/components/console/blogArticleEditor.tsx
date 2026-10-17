@@ -2,8 +2,11 @@
 "use client";
 
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import type { OnMount } from "@monaco-editor/react";
+import type { editor } from "monaco-editor";
 import { ImagesProvider } from "@/contexts/imagesContext";
 import { useBlogArticlesContext } from "@/contexts/blogArticlesContext";
 import { BlogTagsProvider } from "@/contexts/blogTagsContext";
@@ -13,13 +16,17 @@ import type { BlogArticle } from "@/types/blogs/common";
 import ConsoleButton from "./consoleButton";
 import ConsoleConfirmDialog from "./consoleConfirmDialog";
 import ConsoleFormFeedback from "./consoleFormFeedback";
-import { ConsoleTextArea, ConsoleTextField } from "./consoleField";
+import { ConsoleTextField } from "./consoleField";
 import ImageSelectingDialog from "./imageSelectingDialog";
 import { LabelBox, LabelText } from "./labelBlock";
 import ConsoleSegmentedControl from "./consoleSegmentedControl";
 import useConsoleTextField from "@/hooks/useConsoleTextField";
 import BlogMarkdownPreview from "@/components/blogs/blogMarkdownPreview";
 import BlogTagSelectingBox from "./blogTagSelectingBox";
+
+const MonacoEditor = dynamic(() => import("@monaco-editor/react"), {
+  ssr: false,
+});
 
 type BlogArticleEditorProps = { articleId?: string };
 
@@ -74,7 +81,7 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
-  const bodyRef = useRef<HTMLTextAreaElement>(null);
+  const bodyEditorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const bodySelectionRef = useRef({ start: 0, end: 0 });
 
   useEffect(() => {
@@ -122,12 +129,24 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
   }, [articleId, resetBodyMarkdown, resetPublishedAt, resetSlug, resetTitle]);
 
   const openBodyImageDialog = () => {
-    const textarea = bodyRef.current;
+    const editor = bodyEditorRef.current;
+    const model = editor?.getModel();
+    const selection = editor?.getSelection();
     bodySelectionRef.current = {
-      start: textarea?.selectionStart ?? bodyMarkdown.value.length,
-      end: textarea?.selectionEnd ?? bodyMarkdown.value.length,
+      start:
+        model && selection
+          ? model.getOffsetAt(selection.getStartPosition())
+          : bodyMarkdown.value.length,
+      end:
+        model && selection
+          ? model.getOffsetAt(selection.getEndPosition())
+          : bodyMarkdown.value.length,
     };
     setIsBodyImageDialogOpen(true);
+  };
+
+  const handleBodyEditorMount: OnMount = (editor) => {
+    bodyEditorRef.current = editor;
   };
 
   const insertBodyImage = ([imageId]: string[]) => {
@@ -139,8 +158,11 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
     );
     requestAnimationFrame(() => {
       const cursor = start + markdown.length;
-      bodyRef.current?.focus();
-      bodyRef.current?.setSelectionRange(cursor, cursor);
+      const editor = bodyEditorRef.current;
+      const model = editor?.getModel();
+      if (!editor || !model) return;
+      editor.focus();
+      editor.setPosition(model.getPositionAt(cursor));
     });
   };
 
@@ -268,10 +290,20 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
               ]}
             />
             {bodyView === "edit" ? (
-              <ConsoleTextArea
-                ref={bodyRef}
-                required
-                {...bodyMarkdown.inputProps}
+              <MonacoEditor
+                height="36rem"
+                defaultLanguage="markdown"
+                value={bodyMarkdown.value}
+                onChange={(value) => bodyMarkdown.setValue(value ?? "")}
+                onMount={handleBodyEditorMount}
+                options={{
+                  automaticLayout: true,
+                  fontSize: 16,
+                  minimap: { enabled: false },
+                  padding: { top: 12, bottom: 12 },
+                  scrollBeyondLastLine: false,
+                  wordWrap: "on",
+                }}
               />
             ) : (
               <div className="min-h-64 border border-[#c68ef0] bg-white px-4 py-3 text-[#222]">
