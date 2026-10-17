@@ -6,18 +6,17 @@ import backendApi from "@/lib/auth/backendFetch";
 import Link from "next/link";
 import { useCallback, useState } from "react";
 import ConsoleButton from "./consoleButton";
+import ConsoleConfirmDialog from "./consoleConfirmDialog";
 
 export default function ImagesViewer() {
   const { images, error, refreshImages } = useImagesContext();
   const [deletingImageId, setDeletingImageId] = useState<string | null>(null);
+  const [deleteTargetImageId, setDeleteTargetImageId] = useState<string | null>(
+    null,
+  );
 
   const handleDelete = useCallback(
     async (imageId: string) => {
-      const shouldDelete = window.confirm("削除しますか？");
-      if (!shouldDelete) {
-        return;
-      }
-
       setDeletingImageId(imageId);
       try {
         const response = await backendApi(`/images/${imageId}`, {
@@ -30,6 +29,7 @@ export default function ImagesViewer() {
         }
 
         await refreshImages();
+        setDeleteTargetImageId(null);
       } finally {
         setDeletingImageId(null);
       }
@@ -53,7 +53,7 @@ export default function ImagesViewer() {
             >
               <ConsoleButton
                 disabled={isDeleting}
-                onClick={() => handleDelete(image.id)}
+                onClick={() => setDeleteTargetImageId(image.id)}
                 variant="danger"
               >
                 {isDeleting ? "削除中" : "削除"}
@@ -74,6 +74,20 @@ export default function ImagesViewer() {
           );
         })}
       </div>
+      <ConsoleConfirmDialog
+        open={deleteTargetImageId !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTargetImageId(null);
+        }}
+        title="画像を削除"
+        description="この画像を削除します。元に戻すことはできません。"
+        confirmLabel="削除する"
+        confirmingLabel="削除中"
+        isConfirming={deletingImageId !== null}
+        onConfirm={() => {
+          if (deleteTargetImageId) return handleDelete(deleteTargetImageId);
+        }}
+      />
     </section>
   );
 }

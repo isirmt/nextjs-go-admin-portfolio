@@ -10,6 +10,7 @@ import { BlogTagsProvider } from "@/contexts/blogTagsContext";
 import backendApi from "@/lib/auth/backendFetch";
 import type { BlogArticle } from "@/types/blogs/common";
 import ConsoleButton from "./consoleButton";
+import ConsoleConfirmDialog from "./consoleConfirmDialog";
 import { ConsoleTextArea, ConsoleTextField } from "./consoleField";
 import ImageSelectingDialog from "./imageSelectingDialog";
 import { LabelBox, LabelText } from "./labelBlock";
@@ -60,6 +61,7 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
   const [isBodyImageDialogOpen, setIsBodyImageDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
   const bodyRef = useRef<HTMLTextAreaElement>(null);
@@ -172,7 +174,7 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
   };
 
   const handleDelete = async () => {
-    if (!articleId || !window.confirm("この記事を削除しますか？")) return;
+    if (!articleId) return;
     setIsDeleting(true);
     setSubmitError(null);
     try {
@@ -296,7 +298,7 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
             <ConsoleButton
               className="mt-20"
               disabled={isSubmitting || isDeleting}
-              onClick={handleDelete}
+              onClick={() => setIsDeleteDialogOpen(true)}
               variant="danger"
             >
               {isDeleting ? "削除中" : "削除"}
@@ -304,6 +306,16 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
           ) : null}
         </footer>
       </form>
+      <ConsoleConfirmDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        title="記事を削除"
+        description="この記事を削除します。元に戻すことはできません。"
+        confirmLabel="削除する"
+        confirmingLabel="削除中"
+        isConfirming={isDeleting}
+        onConfirm={handleDelete}
+      />
       <ImageSelectingDialog
         open={isThumbnailDialogOpen}
         onOpenChange={setIsThumbnailDialogOpen}
