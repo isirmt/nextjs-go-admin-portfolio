@@ -260,15 +260,6 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
           </LabelBox>
           <LabelBox isLong>
             <LabelText required>本文（Markdown）</LabelText>
-            <ConsoleSegmentedControl
-              name="body-view"
-              value={bodyView}
-              onChange={setBodyView}
-              options={[
-                { value: "edit", label: "編集" },
-                { value: "preview", label: "プレビュー" },
-              ]}
-            />
             {bodyView === "edit" ? (
               <BlogMarkdownEditor
                 ref={blogMarkdownEditorRef}
@@ -286,7 +277,16 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
             )}
           </LabelBox>
         </div>
-        <footer className="mt-8">
+        <div className="sticky bottom-0 mt-8 flex flex-col items-center gap-2 bg-white py-2.5">
+          <ConsoleSegmentedControl
+            name="body-view"
+            value={bodyView}
+            onChange={setBodyView}
+            options={[
+              { value: "edit", label: "編集" },
+              { value: "preview", label: "プレビュー" },
+            ]}
+          />
           <ConsoleFormFeedback
             className="mb-2"
             error={loadError ?? submitError ?? deleteError}
@@ -295,6 +295,8 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
           <ConsoleButton type="submit" disabled={isSubmitting}>
             {isSubmitting ? "保存中" : "保存"}
           </ConsoleButton>
+        </div>
+        <div>
           {articleId ? (
             <ConsoleButton
               className="mt-20"
@@ -305,7 +307,7 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
               {isDeleting ? "削除中" : "削除"}
             </ConsoleButton>
           ) : null}
-        </footer>
+        </div>
       </form>
       <ConsoleConfirmDialog
         open={isDeleteDialogOpen}
