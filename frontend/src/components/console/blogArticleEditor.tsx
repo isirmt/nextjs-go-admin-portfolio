@@ -12,6 +12,7 @@ import backendApi from "@/lib/auth/backendFetch";
 import type { BlogArticle } from "@/types/blogs/common";
 import ConsoleButton from "./consoleButton";
 import ConsoleConfirmDialog from "./consoleConfirmDialog";
+import ConsoleFormFeedback from "./consoleFormFeedback";
 import { ConsoleTextArea, ConsoleTextField } from "./consoleField";
 import ImageSelectingDialog from "./imageSelectingDialog";
 import { LabelBox, LabelText } from "./labelBlock";
@@ -284,14 +285,11 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
           </LabelBox>
         </div>
         <footer className="mt-8">
-          {(loadError ?? submitError ?? deleteError) ? (
-            <p className="mb-2 text-sm text-[#e04787]">
-              {loadError ?? submitError ?? deleteError}
-            </p>
-          ) : null}
-          {submitSuccess ? (
-            <p className="mb-2 text-sm text-[#0c8d62]">{submitSuccess}</p>
-          ) : null}
+          <ConsoleFormFeedback
+            className="mb-2"
+            error={loadError ?? submitError ?? deleteError}
+            success={submitSuccess}
+          />
           <ConsoleButton type="submit" disabled={isSubmitting}>
             {isSubmitting ? "保存中" : "保存"}
           </ConsoleButton>

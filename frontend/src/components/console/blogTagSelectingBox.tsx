@@ -6,6 +6,7 @@ import backendApi from "@/lib/auth/backendFetch";
 import useConsoleMutation from "@/hooks/useConsoleMutation";
 import useConsoleTextField from "@/hooks/useConsoleTextField";
 import ConsoleButton from "./consoleButton";
+import ConsoleFormFeedback from "./consoleFormFeedback";
 import ConsoleSelectableTagButton from "./consoleSelectableTagButton";
 import { ConsoleTextField } from "./consoleField";
 import { LabelText } from "./labelBlock";
@@ -84,9 +85,7 @@ export default function BlogTagSelectingBox({
           <LabelText required>SLUG</LabelText>
           <ConsoleTextField {...slug.inputProps} placeholder="nextjs" />
         </label>
-        {submitError ? (
-          <p className="text-sm text-[#e04787]">{submitError}</p>
-        ) : null}
+        <ConsoleFormFeedback error={submitError} />
         <ConsoleButton
           type="button"
           onClick={handleCreateBlogTag}

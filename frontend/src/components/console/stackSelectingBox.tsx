@@ -3,6 +3,7 @@
 import backendApi from "@/lib/auth/backendFetch";
 import { useCallback } from "react";
 import ConsoleButton from "./consoleButton";
+import ConsoleFormFeedback from "./consoleFormFeedback";
 import ConsoleSelectableTagButton from "./consoleSelectableTagButton";
 import { ConsoleTextField } from "./consoleField";
 import { LabelText } from "./labelBlock";
@@ -88,7 +89,7 @@ export default function StackSelectingBox({
           <LabelText required>スタック名</LabelText>
           <ConsoleTextField {...stackName.inputProps} placeholder="Next.js" />
         </label>
-        {submitError && <p className="text-sm text-[#e04787]">{submitError}</p>}
+        <ConsoleFormFeedback error={submitError} />
         <ConsoleButton
           onClick={() => handleCreateTechStack()}
           disabled={isSubmitting}

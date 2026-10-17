@@ -7,6 +7,7 @@ import ImageSelectingDialog from "./imageSelectingDialog";
 import StackSelectingBox from "./stackSelectingBox";
 import ConsoleButton from "./consoleButton";
 import { ConsoleTextArea, ConsoleTextField } from "./consoleField";
+import ConsoleFormFeedback from "./consoleFormFeedback";
 import { LabelBox, LabelText } from "./labelBlock";
 import WorkUrlsInput, {
   WorkUrlItem,
@@ -329,12 +330,7 @@ export default function WorkRegisterForm({
             />
           </LabelBox>
           <LabelBox isLong>
-            {submitError && (
-              <p className="text-sm text-[#e04787]">{submitError}</p>
-            )}
-            {submitSuccess && (
-              <p className="text-sm text-[#0c8d62]">{submitSuccess}</p>
-            )}
+            <ConsoleFormFeedback error={submitError} success={submitSuccess} />
             <ConsoleButton type="submit" disabled={isSubmitting}>
               {isSubmitting ? "送信中" : "登録"}
             </ConsoleButton>
