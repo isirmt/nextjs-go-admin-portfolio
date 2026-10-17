@@ -9,6 +9,7 @@ const ADMIN_API_PATH_PREFIXES = [
   "/works",
   "/tech-stacks",
   "/blog-tags",
+	"/blog-series",
   "/blogs",
 ];
 
