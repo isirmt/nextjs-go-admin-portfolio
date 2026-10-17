@@ -74,10 +74,17 @@ type blogArticleSummaryResponse struct {
 	Tags             []blogTagResponse `json:"tags"`
 }
 
+type blogSeriesLinkResponse struct {
+	ID    string `json:"id"`
+	Title string `json:"title"`
+	Slug  string `json:"slug"`
+}
+
 type blogArticleResponse struct {
 	blogArticleSummaryResponse
-	BodyMarkdown string   `json:"body_markdown"`
-	BodyImageIDs []string `json:"body_image_ids"`
+	BodyMarkdown string                   `json:"body_markdown"`
+	BodyImageIDs []string                 `json:"body_image_ids"`
+	Series       []blogSeriesLinkResponse `json:"series"`
 }
 
 func formatBlogTime(value *time.Time) string {
@@ -127,15 +134,35 @@ func blogArticleDetail(article *model.BlogArticle, includeStatus bool) blogArtic
 	for _, image := range article.BodyImages {
 		bodyImageIDs = append(bodyImageIDs, image.ImageID)
 	}
-	return blogArticleResponse{
+	series := make([]blogSeriesLinkResponse, 0, len(article.SeriesEntries))
+	for _, entry := range article.SeriesEntries {
+		if entry.Series == nil || entry.Series.ID == nil {
+			continue
+		}
+		series = append(series, blogSeriesLinkResponse{
+			ID:    *entry.Series.ID,
+			Title: entry.Series.Title,
+			Slug:  entry.Series.Slug,
+		})
+	}
+	response := blogArticleResponse{
 		blogArticleSummaryResponse: blogArticleSummary(article, includeStatus),
 		BodyMarkdown:               article.BodyMarkdown,
 		BodyImageIDs:               bodyImageIDs,
+		Series:                     series,
 	}
+	return response
+}
+
+func (pSrv *server) respondBlogArticle(c echo.Context, statusCode int, article *model.BlogArticle, includeStatus bool) error {
+	return c.JSON(statusCode, blogArticleDetail(article, includeStatus))
 }
 
 func (pSrv *server) withBlogArticleRelations(articleQuery query.IBlogArticleDo) query.IBlogArticleDo {
-	return pSrv.withBlogArticleTags(articleQuery).Preload(pSrv.q.BlogArticle.BodyImages)
+	return pSrv.withBlogArticleTags(articleQuery).
+		Preload(pSrv.q.BlogArticle.BodyImages).
+		Preload(pSrv.q.BlogArticle.SeriesEntries).
+		Preload(pSrv.q.BlogArticle.SeriesEntries.Series)
 }
 
 func (pSrv *server) withBlogArticleTags(articleQuery query.IBlogArticleDo) query.IBlogArticleDo {
@@ -372,7 +399,7 @@ func (pSrv *server) handleGetBlogArticle(c echo.Context) error {
 		}
 		return c.String(http.StatusInternalServerError, "failed to fetch blog article")
 	}
-	return c.JSON(http.StatusOK, blogArticleDetail(article, isAdmin))
+	return pSrv.respondBlogArticle(c, http.StatusOK, article, isAdmin)
 }
 
 type relatedBlogArticleRow struct {
@@ -502,7 +529,7 @@ func (pSrv *server) handleCreateBlogArticle(c echo.Context) error {
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "failed to fetch created blog article")
 	}
-	return c.JSON(http.StatusCreated, blogArticleDetail(createdArticle, true))
+	return pSrv.respondBlogArticle(c, http.StatusCreated, createdArticle, true)
 }
 
 func (pSrv *server) handleUpdateBlogArticle(c echo.Context) error {
@@ -561,7 +588,7 @@ func (pSrv *server) handleUpdateBlogArticle(c echo.Context) error {
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "failed to fetch updated blog article")
 	}
-	return c.JSON(http.StatusOK, blogArticleDetail(updatedArticle, true))
+	return pSrv.respondBlogArticle(c, http.StatusOK, updatedArticle, true)
 }
 
 func (pSrv *server) handleDeleteBlogArticle(c echo.Context) error {
@@ -736,5 +763,5 @@ func (pSrv *server) handleGetBlogPreview(c echo.Context) error {
 	}
 	c.Response().Header().Set(echo.HeaderCacheControl, "private, no-store")
 	c.Response().Header().Set("X-Robots-Tag", "noindex, nofollow")
-	return c.JSON(http.StatusOK, blogArticleDetail(article, true))
+	return pSrv.respondBlogArticle(c, http.StatusOK, article, true)
 }
