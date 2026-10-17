@@ -104,6 +104,13 @@ func main() {
 	epBlogTags.GET("/:id", pSrv.handleGetBlogTag)
 	epBlogTags.POST("", pSrv.requireAdmin(pSrv.handleCreateBlogTag))
 
+	epBlogSeries := router.Group("/blog-series")
+	epBlogSeries.GET("", pSrv.handleGetBlogSeries)
+	epBlogSeries.POST("", pSrv.requireAdmin(pSrv.handleCreateBlogSeries))
+	epBlogSeries.PUT("/:id", pSrv.requireAdmin(pSrv.handleUpdateBlogSeries))
+	epBlogSeries.DELETE("/:id", pSrv.requireAdmin(pSrv.handleDeleteBlogSeries))
+	epBlogSeries.GET("/:identifier", pSrv.handleGetBlogSeries)
+
 	epBlogs := router.Group("/blogs")
 	epBlogs.GET("", pSrv.handleGetBlogArticles)
 	epBlogs.POST("", pSrv.requireAdmin(pSrv.handleCreateBlogArticle))
