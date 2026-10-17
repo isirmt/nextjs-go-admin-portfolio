@@ -1,6 +1,6 @@
 "use client";
 
-import backendApi from "@/lib/auth/backendFetch";
+import { fetchAdminOrPublic } from "@/lib/auth/backendFetch";
 import type { BlogArticleSummary } from "@/types/blogs/common";
 import {
   createContext,
@@ -35,10 +35,7 @@ export function BlogArticlesProvider({
     setIsLoading(true);
     setError(null);
     try {
-      let response = await backendApi("/blogs");
-      if (response.status === 401 || response.status === 403) {
-        response = await fetch("/api/blogs");
-      }
+      const response = await fetchAdminOrPublic("/blogs", "/api/blogs");
       if (!response.ok) {
         throw new Error(
           (await response.text()) || "記事一覧の取得に失敗しました",

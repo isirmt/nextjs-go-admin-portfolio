@@ -1,7 +1,7 @@
 "use client";
 
 import { CommonImage } from "@/types/images/common";
-import backendApi from "@/lib/auth/backendFetch";
+import { fetchAdminOrPublic } from "@/lib/auth/backendFetch";
 import React, {
   createContext,
   useCallback,
@@ -39,9 +39,7 @@ export function ImagesProvider({
     try {
       let response: Response;
       if (access === "admin") {
-        response = await backendApi("/images");
-        if (response.status === 401 || response.status === 403)
-          response = await fetch("/api/images");
+        response = await fetchAdminOrPublic("/images", "/api/images");
       } else {
         response = await fetch("/api/images");
       }
