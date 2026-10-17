@@ -36,13 +36,6 @@ func main() {
 	commonImage := g.GenerateModel("common_images")
 	commonTechStack := g.GenerateModel("common_tech_stacks")
 	blogTag := g.GenerateModel("blog_tags")
-	blogSeries := g.GenerateModel("blog_series")
-	blogSeriesArticle := g.GenerateModel(
-		"blog_series_articles",
-
-		gen.FieldJSONTag("series_id", "-"),
-		gen.FieldJSONTag("article_id", "-"),
-	)
 
 	blogArticlePreviewLink := g.GenerateModel(
 		"blog_article_preview_links",
@@ -127,6 +120,43 @@ func main() {
 				RelatePointer: true,
 				GORMTag: field.GormTag{
 					"foreignKey": []string{"ThumbnailImageID"},
+					"references": []string{"ID"},
+				},
+			},
+		),
+	)
+	blogSeriesArticle := g.GenerateModel(
+		"blog_series_articles",
+
+		gen.FieldJSONTag("series_id", "-"),
+		gen.FieldJSONTag("article_id", "-"),
+
+		gen.FieldRelate(
+			field.BelongsTo,
+			"Article",
+			blogArticle,
+			&field.RelateConfig{
+				RelatePointer: true,
+				JSONTag:       "-",
+				GORMTag: field.GormTag{
+					"foreignKey": []string{"ArticleID"},
+					"references": []string{"ID"},
+				},
+			},
+		),
+	)
+	blogSeries := g.GenerateModel(
+		"blog_series",
+
+		gen.FieldRelate(
+			field.HasMany,
+			"ArticleEntries",
+			blogSeriesArticle,
+			&field.RelateConfig{
+				RelateSlicePointer: true,
+				JSONTag:            "-",
+				GORMTag: field.GormTag{
+					"foreignKey": []string{"SeriesID"},
 					"references": []string{"ID"},
 				},
 			},

@@ -34,6 +34,59 @@ func newBlogSeries(db *gorm.DB, opts ...gen.DOOption) blogSeries {
 	_blogSeries.Description = field.NewString(tableName, "description")
 	_blogSeries.CreatedAt = field.NewTime(tableName, "created_at")
 	_blogSeries.UpdatedAt = field.NewTime(tableName, "updated_at")
+	_blogSeries.ArticleEntries = blogSeriesHasManyArticleEntries{
+		db: db.Session(&gorm.Session{}),
+
+		RelationField: field.NewRelation("ArticleEntries", "model.BlogSeriesArticle"),
+		Article: struct {
+			field.RelationField
+			PreviewLinks struct {
+				field.RelationField
+			}
+			Tags struct {
+				field.RelationField
+			}
+			BodyImages struct {
+				field.RelationField
+				Image struct {
+					field.RelationField
+				}
+			}
+			ThumbnailImage struct {
+				field.RelationField
+			}
+		}{
+			RelationField: field.NewRelation("ArticleEntries.Article", "model.BlogArticle"),
+			PreviewLinks: struct {
+				field.RelationField
+			}{
+				RelationField: field.NewRelation("ArticleEntries.Article.PreviewLinks", "model.BlogArticlePreviewLink"),
+			},
+			Tags: struct {
+				field.RelationField
+			}{
+				RelationField: field.NewRelation("ArticleEntries.Article.Tags", "model.BlogTag"),
+			},
+			BodyImages: struct {
+				field.RelationField
+				Image struct {
+					field.RelationField
+				}
+			}{
+				RelationField: field.NewRelation("ArticleEntries.Article.BodyImages", "model.BlogArticleImage"),
+				Image: struct {
+					field.RelationField
+				}{
+					RelationField: field.NewRelation("ArticleEntries.Article.BodyImages.Image", "model.CommonImage"),
+				},
+			},
+			ThumbnailImage: struct {
+				field.RelationField
+			}{
+				RelationField: field.NewRelation("ArticleEntries.Article.ThumbnailImage", "model.CommonImage"),
+			},
+		},
+	}
 
 	_blogSeries.fillFieldMap()
 
@@ -43,13 +96,14 @@ func newBlogSeries(db *gorm.DB, opts ...gen.DOOption) blogSeries {
 type blogSeries struct {
 	blogSeriesDo blogSeriesDo
 
-	ALL         field.Asterisk
-	ID          field.String
-	Title       field.String
-	Slug        field.String
-	Description field.String
-	CreatedAt   field.Time
-	UpdatedAt   field.Time
+	ALL            field.Asterisk
+	ID             field.String
+	Title          field.String
+	Slug           field.String
+	Description    field.String
+	CreatedAt      field.Time
+	UpdatedAt      field.Time
+	ArticleEntries blogSeriesHasManyArticleEntries
 
 	fieldMap map[string]field.Expr
 }
@@ -98,23 +152,127 @@ func (b *blogSeries) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (b *blogSeries) fillFieldMap() {
-	b.fieldMap = make(map[string]field.Expr, 6)
+	b.fieldMap = make(map[string]field.Expr, 7)
 	b.fieldMap["id"] = b.ID
 	b.fieldMap["title"] = b.Title
 	b.fieldMap["slug"] = b.Slug
 	b.fieldMap["description"] = b.Description
 	b.fieldMap["created_at"] = b.CreatedAt
 	b.fieldMap["updated_at"] = b.UpdatedAt
+
 }
 
 func (b blogSeries) clone(db *gorm.DB) blogSeries {
 	b.blogSeriesDo.ReplaceConnPool(db.Statement.ConnPool)
+	b.ArticleEntries.db = db.Session(&gorm.Session{Initialized: true})
+	b.ArticleEntries.db.Statement.ConnPool = db.Statement.ConnPool
 	return b
 }
 
 func (b blogSeries) replaceDB(db *gorm.DB) blogSeries {
 	b.blogSeriesDo.ReplaceDB(db)
+	b.ArticleEntries.db = db.Session(&gorm.Session{})
 	return b
+}
+
+type blogSeriesHasManyArticleEntries struct {
+	db *gorm.DB
+
+	field.RelationField
+
+	Article struct {
+		field.RelationField
+		PreviewLinks struct {
+			field.RelationField
+		}
+		Tags struct {
+			field.RelationField
+		}
+		BodyImages struct {
+			field.RelationField
+			Image struct {
+				field.RelationField
+			}
+		}
+		ThumbnailImage struct {
+			field.RelationField
+		}
+	}
+}
+
+func (a blogSeriesHasManyArticleEntries) Where(conds ...field.Expr) *blogSeriesHasManyArticleEntries {
+	if len(conds) == 0 {
+		return &a
+	}
+
+	exprs := make([]clause.Expression, 0, len(conds))
+	for _, cond := range conds {
+		exprs = append(exprs, cond.BeCond().(clause.Expression))
+	}
+	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
+	return &a
+}
+
+func (a blogSeriesHasManyArticleEntries) WithContext(ctx context.Context) *blogSeriesHasManyArticleEntries {
+	a.db = a.db.WithContext(ctx)
+	return &a
+}
+
+func (a blogSeriesHasManyArticleEntries) Session(session *gorm.Session) *blogSeriesHasManyArticleEntries {
+	a.db = a.db.Session(session)
+	return &a
+}
+
+func (a blogSeriesHasManyArticleEntries) Model(m *model.BlogSeries) *blogSeriesHasManyArticleEntriesTx {
+	return &blogSeriesHasManyArticleEntriesTx{a.db.Model(m).Association(a.Name())}
+}
+
+func (a blogSeriesHasManyArticleEntries) Unscoped() *blogSeriesHasManyArticleEntries {
+	a.db = a.db.Unscoped()
+	return &a
+}
+
+type blogSeriesHasManyArticleEntriesTx struct{ tx *gorm.Association }
+
+func (a blogSeriesHasManyArticleEntriesTx) Find() (result []*model.BlogSeriesArticle, err error) {
+	return result, a.tx.Find(&result)
+}
+
+func (a blogSeriesHasManyArticleEntriesTx) Append(values ...*model.BlogSeriesArticle) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Append(targetValues...)
+}
+
+func (a blogSeriesHasManyArticleEntriesTx) Replace(values ...*model.BlogSeriesArticle) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Replace(targetValues...)
+}
+
+func (a blogSeriesHasManyArticleEntriesTx) Delete(values ...*model.BlogSeriesArticle) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Delete(targetValues...)
+}
+
+func (a blogSeriesHasManyArticleEntriesTx) Clear() error {
+	return a.tx.Clear()
+}
+
+func (a blogSeriesHasManyArticleEntriesTx) Count() int64 {
+	return a.tx.Count()
+}
+
+func (a blogSeriesHasManyArticleEntriesTx) Unscoped() *blogSeriesHasManyArticleEntriesTx {
+	a.tx = a.tx.Unscoped()
+	return &a
 }
 
 type blogSeriesDo struct{ gen.DO }

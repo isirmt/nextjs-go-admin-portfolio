@@ -12,10 +12,11 @@ const TableNameBlogSeriesArticle = "blog_series_articles"
 
 // BlogSeriesArticle mapped from table <blog_series_articles>
 type BlogSeriesArticle struct {
-	SeriesID     string     `gorm:"column:series_id;type:uuid;primaryKey" json:"-"`
-	ArticleID    string     `gorm:"column:article_id;type:uuid;primaryKey;index:idx_blog_series_articles_article_id,priority:1" json:"-"`
-	DisplayOrder int32      `gorm:"column:display_order;type:integer;not null" json:"display_order"`
-	CreatedAt    *time.Time `gorm:"column:created_at;type:timestamp with time zone;not null;default:now()" json:"created_at"`
+	SeriesID     string       `gorm:"column:series_id;type:uuid;primaryKey" json:"-"`
+	ArticleID    string       `gorm:"column:article_id;type:uuid;primaryKey;index:idx_blog_series_articles_article_id,priority:1" json:"-"`
+	DisplayOrder int32        `gorm:"column:display_order;type:integer;not null" json:"display_order"`
+	CreatedAt    *time.Time   `gorm:"column:created_at;type:timestamp with time zone;not null;default:now()" json:"created_at"`
+	Article      *BlogArticle `gorm:"foreignKey:ArticleID;references:ID" json:"-"`
 }
 
 // TableName BlogSeriesArticle's table name

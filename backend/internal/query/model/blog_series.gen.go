@@ -12,12 +12,13 @@ const TableNameBlogSeries = "blog_series"
 
 // BlogSeries mapped from table <blog_series>
 type BlogSeries struct {
-	ID          *string    `gorm:"column:id;type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
-	Title       string     `gorm:"column:title;type:text;not null" json:"title"`
-	Slug        string     `gorm:"column:slug;type:text;not null" json:"slug"`
-	Description *string    `gorm:"column:description;type:text" json:"description"`
-	CreatedAt   *time.Time `gorm:"column:created_at;type:timestamp with time zone;not null;default:now()" json:"created_at"`
-	UpdatedAt   *time.Time `gorm:"column:updated_at;type:timestamp with time zone;not null;default:now()" json:"updated_at"`
+	ID             *string              `gorm:"column:id;type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
+	Title          string               `gorm:"column:title;type:text;not null" json:"title"`
+	Slug           string               `gorm:"column:slug;type:text;not null" json:"slug"`
+	Description    *string              `gorm:"column:description;type:text" json:"description"`
+	CreatedAt      *time.Time           `gorm:"column:created_at;type:timestamp with time zone;not null;default:now()" json:"created_at"`
+	UpdatedAt      *time.Time           `gorm:"column:updated_at;type:timestamp with time zone;not null;default:now()" json:"updated_at"`
+	ArticleEntries []*BlogSeriesArticle `gorm:"foreignKey:SeriesID;references:ID" json:"-"`
 }
 
 // TableName BlogSeries's table name
