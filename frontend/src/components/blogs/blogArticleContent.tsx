@@ -6,6 +6,7 @@ import { lineSeedJp } from "@/lib/fonts";
 import DateCard from "./dateCard";
 import PageContentHeader from "../public/pageContentHeader";
 import Link from "next/link";
+import Arrow from "../shapes/arrow";
 
 type BlogArticleContentProps = {
   article: BlogArticle;
@@ -40,9 +41,12 @@ export default function BlogArticleContent({
       <div className="mx-auto w-full max-w-[960px] px-4">
         <Link
           href="/blogs"
-          className="mb-8 block w-fit bg-blue-50 font-mono text-blue-700 underline transition-colors hover:no-underline"
+          className="inline-flex items-center gap-2 border-b border-transparent pt-1.5 hover:border-[#555]"
         >
-          一覧に戻る
+          <Arrow className="size-8 rotate-180 stroke-[#555]" />
+          <span className="font-mono text-lg leading-none font-semibold text-[#555]">
+            投稿一覧に戻る
+          </span>
         </Link>
         <BlogMarkdownPreview content={article.body_markdown} />
       </div>
