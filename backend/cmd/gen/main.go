@@ -36,6 +36,13 @@ func main() {
 	commonImage := g.GenerateModel("common_images")
 	commonTechStack := g.GenerateModel("common_tech_stacks")
 	blogTag := g.GenerateModel("blog_tags")
+	blogSeries := g.GenerateModel("blog_series")
+	blogSeriesArticle := g.GenerateModel(
+		"blog_series_articles",
+
+		gen.FieldJSONTag("series_id", "-"),
+		gen.FieldJSONTag("article_id", "-"),
+	)
 
 	blogArticlePreviewLink := g.GenerateModel(
 		"blog_article_preview_links",
@@ -220,6 +227,8 @@ func main() {
 		blogArticleTag,
 		blogArticlePreviewLink,
 		blogTag,
+		blogSeries,
+		blogSeriesArticle,
 		work,
 		workImage,
 		workURL,
