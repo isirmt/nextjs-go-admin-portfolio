@@ -96,7 +96,7 @@ func formatOptionalBlogTime(value *time.Time) *string {
 }
 
 func blogArticleSummary(article *model.BlogArticle, includeStatus bool) blogArticleSummaryResponse {
-	status := ""
+	status := blogArticleStatusPublished
 	if includeStatus && article.Status != nil {
 		status = *article.Status
 	}
