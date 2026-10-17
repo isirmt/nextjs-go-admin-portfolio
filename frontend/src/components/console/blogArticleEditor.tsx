@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { ImagesProvider } from "@/contexts/imagesContext";
+import { useBlogArticlesContext } from "@/contexts/blogArticlesContext";
 import { BlogTagsProvider } from "@/contexts/blogTagsContext";
 import backendApi from "@/lib/auth/backendFetch";
 import type { BlogArticle } from "@/types/blogs/common";
@@ -42,6 +43,7 @@ function SelectedImageTiles({ imageIds }: { imageIds: string[] }) {
 
 function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
   const router = useRouter();
+  const { refreshBlogArticles } = useBlogArticlesContext();
   const [status, setStatus] = useState<"draft" | "published">("draft");
   const title = useConsoleTextField();
   const slug = useConsoleTextField();
@@ -157,6 +159,7 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
       if (!response.ok)
         throw new Error((await response.text()) || "記事の保存に失敗しました");
       const saved = (await response.json()) as BlogArticle;
+      await refreshBlogArticles();
       setSubmitSuccess(articleId ? "更新しました" : "作成しました");
       if (!articleId) router.replace(`/console/blogs/${saved.id}`);
     } catch (reason) {
@@ -178,6 +181,7 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
       });
       if (!response.ok)
         throw new Error((await response.text()) || "記事の削除に失敗しました");
+      await refreshBlogArticles();
       router.replace("/console/blogs");
     } catch (reason) {
       setSubmitError(

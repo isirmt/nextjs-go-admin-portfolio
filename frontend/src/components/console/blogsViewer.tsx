@@ -2,46 +2,13 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
-import backendApi from "@/lib/auth/backendFetch";
+import { useBlogArticlesContext } from "@/contexts/blogArticlesContext";
 import { formatJapaneseDateTime } from "@/lib/date";
-import type { BlogArticleSummary } from "@/types/blogs/common";
 import ConsoleButton from "./consoleButton";
 
 export default function BlogsViewer() {
   const router = useRouter();
-  const [articles, setArticles] = useState<BlogArticleSummary[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const refreshArticles = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      let response = await backendApi("/blogs");
-      if (response.status === 401 || response.status === 403) {
-        response = await fetch("/api/blogs");
-      }
-      if (!response.ok)
-        throw new Error(
-          (await response.text()) || "記事一覧の取得に失敗しました",
-        );
-      const data = (await response.json()) as BlogArticleSummary[];
-      setArticles(Array.isArray(data) ? data : []);
-    } catch (reason) {
-      setError(
-        reason instanceof Error
-          ? reason.message
-          : "記事一覧の取得に失敗しました",
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    refreshArticles();
-  }, [refreshArticles]);
+  const { articles, error, isLoading } = useBlogArticlesContext();
 
   return (
     <main className="relative w-full space-y-8 px-2.5 py-8 lg:px-16">
