@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { ImagesProvider } from "@/contexts/imagesContext";
 import { useBlogArticlesContext } from "@/contexts/blogArticlesContext";
 import { BlogTagsProvider } from "@/contexts/blogTagsContext";
+import useConsoleMutation from "@/hooks/useConsoleMutation";
 import backendApi from "@/lib/auth/backendFetch";
 import type { BlogArticle } from "@/types/blogs/common";
 import ConsoleButton from "./consoleButton";
@@ -59,10 +60,18 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
   const [bodyView, setBodyView] = useState<"edit" | "preview">("edit");
   const [isThumbnailDialogOpen, setIsThumbnailDialogOpen] = useState(false);
   const [isBodyImageDialogOpen, setIsBodyImageDialogOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const {
+    isPending: isSubmitting,
+    error: submitError,
+    run: runSubmit,
+  } = useConsoleMutation();
+  const {
+    isPending: isDeleting,
+    error: deleteError,
+    run: runDelete,
+  } = useConsoleMutation();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
   const bodyRef = useRef<HTMLTextAreaElement>(null);
   const bodySelectionRef = useRef({ start: 0, end: 0 });
@@ -99,7 +108,7 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
         }
       } catch (reason) {
         if (isCurrent)
-          setSubmitError(
+          setLoadError(
             reason instanceof Error
               ? reason.message
               : "記事の取得に失敗しました",
@@ -136,10 +145,9 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
 
   const handleSubmit = async (event: React.SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setIsSubmitting(true);
-    setSubmitError(null);
+    setLoadError(null);
     setSubmitSuccess(null);
-    try {
+    const result = await runSubmit(async () => {
       const response = await backendApi(
         articleId ? `/blogs/${articleId}` : "/blogs",
         {
@@ -162,22 +170,19 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
         throw new Error((await response.text()) || "記事の保存に失敗しました");
       const saved = (await response.json()) as BlogArticle;
       await refreshBlogArticles();
+      return saved;
+    }, "記事の保存に失敗しました");
+
+    if (result.ok) {
       setSubmitSuccess(articleId ? "更新しました" : "作成しました");
-      if (!articleId) router.replace(`/console/blogs/${saved.id}`);
-    } catch (reason) {
-      setSubmitError(
-        reason instanceof Error ? reason.message : "記事の保存に失敗しました",
-      );
-    } finally {
-      setIsSubmitting(false);
+      if (!articleId) router.replace(`/console/blogs/${result.data.id}`);
     }
   };
 
   const handleDelete = async () => {
     if (!articleId) return;
-    setIsDeleting(true);
-    setSubmitError(null);
-    try {
+    setLoadError(null);
+    await runDelete(async () => {
       const response = await backendApi(`/blogs/${articleId}`, {
         method: "DELETE",
       });
@@ -185,13 +190,7 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
         throw new Error((await response.text()) || "記事の削除に失敗しました");
       await refreshBlogArticles();
       router.replace("/console/blogs");
-    } catch (reason) {
-      setSubmitError(
-        reason instanceof Error ? reason.message : "記事の削除に失敗しました",
-      );
-    } finally {
-      setIsDeleting(false);
-    }
+    }, "記事の削除に失敗しました");
   };
 
   return (
@@ -285,8 +284,10 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
           </LabelBox>
         </div>
         <footer className="mt-8">
-          {submitError ? (
-            <p className="mb-2 text-sm text-[#e04787]">{submitError}</p>
+          {(loadError ?? submitError ?? deleteError) ? (
+            <p className="mb-2 text-sm text-[#e04787]">
+              {loadError ?? submitError ?? deleteError}
+            </p>
           ) : null}
           {submitSuccess ? (
             <p className="mb-2 text-sm text-[#0c8d62]">{submitSuccess}</p>
