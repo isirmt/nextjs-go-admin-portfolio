@@ -92,10 +92,7 @@ export async function createBlogOpenGraphImageResponseFromArticle(
       ],
     },
   );
-  response.headers.set(
-    "Cache-Control",
-    cacheControl,
-  );
+  response.headers.set("Cache-Control", cacheControl);
   return response;
 }
 

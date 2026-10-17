@@ -20,7 +20,11 @@ type BlogSeriesContextValue = {
 
 const BlogSeriesContext = createContext<BlogSeriesContextValue | null>(null);
 
-export function BlogSeriesProvider({ children }: { children: React.ReactNode }) {
+export function BlogSeriesProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [series, setSeries] = useState<BlogSeries[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
