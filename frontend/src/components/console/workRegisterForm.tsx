@@ -2,13 +2,7 @@
 "use client";
 
 import backendApi from "@/lib/auth/backendFetch";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useState } from "react";
 import ImageSelectingDialog from "./imageSelectingDialog";
 import StackSelectingBox from "./stackSelectingBox";
 import ConsoleButton from "./consoleButton";
@@ -19,6 +13,7 @@ import WorkUrlsInput, {
   createEmptyWorkUrlItem,
 } from "./workUrlsInput";
 import { useWorksContext } from "@/contexts/worksContext";
+import useConsoleMutation from "@/hooks/useConsoleMutation";
 import useConsoleTextField from "@/hooks/useConsoleTextField";
 
 type WorkRegisterFormMode = "post" | "put";
@@ -61,6 +56,8 @@ const initializeUrlItems = (
   }));
 };
 
+const currentDateInputValue = () => new Date().toISOString().split("T")[0];
+
 function SelectedImageTiles({ imageIds }: { imageIds: string[] }) {
   if (imageIds.length === 0) {
     return <p className="text-sm text-[#7e11d1]">画像未選択</p>;
@@ -93,7 +90,7 @@ export default function WorkRegisterForm({
   const title = useConsoleTextField(initialValues?.title ?? "");
   const comment = useConsoleTextField(initialValues?.comment ?? "");
   const publishedDate = useConsoleTextField(
-    initialValues?.publishedDate || new Date().toISOString().split("T")[0],
+    initialValues?.publishedDate || currentDateInputValue(),
   );
   const accentColor = useConsoleTextField(
     initialValues?.accentColor ?? "#000000",
@@ -113,43 +110,37 @@ export default function WorkRegisterForm({
   );
   const [isThumbnailDialogOpen, setIsThumbnailDialogOpen] = useState(false);
   const [isWorkImagesDialogOpen, setIsWorkImagesDialogOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
+  const {
+    isPending: isSubmitting,
+    error: submitError,
+    setError: setSubmitError,
+    run,
+  } = useConsoleMutation();
   const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
   const { refreshWorks } = useWorksContext();
-  const initialKey = useMemo(
-    () => JSON.stringify(initialValues ?? {}) ?? "",
-    [initialValues],
-  );
-  const lastInitialKeyRef = useRef<string | null>(null);
   const isEditingMode = mode === "put";
+  const { reset: resetTitle } = title;
+  const { reset: resetComment } = comment;
+  const { reset: resetPublishedDate } = publishedDate;
+  const { reset: resetAccentColor } = accentColor;
+  const { reset: resetDescription } = description;
 
-  useEffect(() => {
-    if (lastInitialKeyRef.current === initialKey) {
-      return;
-    }
-    lastInitialKeyRef.current = initialKey;
-    title.reset(initialValues?.title ?? "");
-    comment.reset(initialValues?.comment ?? "");
-    publishedDate.reset(
-      initialValues?.publishedDate || new Date().toISOString().split("T")[0],
-    );
-    accentColor.reset(initialValues?.accentColor ?? "#000000");
-    setInputThumbnailImage(initialValues?.thumbnailImageId ?? "");
-    setInputWorkImages(initialValues?.workImageIds ?? []);
-    setInputTechStacks(initialValues?.techStackIds ?? []);
-    description.reset(initialValues?.description ?? "");
-    setInputUrls(initializeUrlItems(initialValues?.urls));
-    setSubmitError(null);
-    setSubmitSuccess(null);
+  const resetNewWorkForm = useCallback(() => {
+    resetTitle();
+    resetComment();
+    resetPublishedDate(currentDateInputValue());
+    resetAccentColor("#000000");
+    setInputThumbnailImage("");
+    setInputWorkImages([]);
+    setInputTechStacks([]);
+    resetDescription();
+    setInputUrls([createEmptyWorkUrlItem()]);
   }, [
-    initialKey,
-    initialValues,
-    accentColor,
-    comment,
-    description,
-    publishedDate,
-    title,
+    resetAccentColor,
+    resetComment,
+    resetDescription,
+    resetPublishedDate,
+    resetTitle,
   ]);
 
   const handleSubmit = useCallback(
@@ -173,61 +164,55 @@ export default function WorkRegisterForm({
         return;
       }
 
-      setIsSubmitting(true);
+      await run(
+        async () => {
+          const payload = {
+            title: title.value.trim(),
+            comment: comment.value.trim(),
+            published_date: publishedDate.value || undefined,
+            accent_color: accentColor.value,
+            description: description.value.trim(),
+            thumbnail_image_id: inputThumbnailImage,
+            work_image_ids: inputWorkImages,
+            tech_stack_ids: inputTechStacks,
+            urls: inputUrls
+              .map((item) => ({
+                label: item.label.trim(),
+                url: item.url.trim(),
+              }))
+              .filter((item) => item.label || item.url),
+          };
 
-      try {
-        const payload = {
-          title: title.value.trim(),
-          comment: comment.value.trim(),
-          published_date: publishedDate.value || undefined,
-          accent_color: accentColor.value,
-          description: description.value.trim(),
-          thumbnail_image_id: inputThumbnailImage,
-          work_image_ids: inputWorkImages,
-          tech_stack_ids: inputTechStacks,
-          urls: inputUrls
-            .map((item) => ({
-              label: item.label.trim(),
-              url: item.url.trim(),
-            }))
-            .filter((item) => item.label || item.url),
-        };
-
-        const response = await backendApi(
-          isEditingMode ? `/works/${workId}` : "/works",
-          {
-            method: isEditingMode ? "PUT" : "POST",
-            headers: {
-              "Content-Type": "application/json",
+          const response = await backendApi(
+            isEditingMode ? `/works/${workId}` : "/works",
+            {
+              method: isEditingMode ? "PUT" : "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(payload),
             },
-            body: JSON.stringify(payload),
-          },
-        );
-
-        if (!response.ok) {
-          const message = await response.text();
-          throw new Error(
-            message ||
-              (isEditingMode ? "更新に失敗しました" : "登録に失敗しました"),
           );
-        }
 
-        setSubmitSuccess(
-          isEditingMode ? "更新が完了しました" : "登録が完了しました",
-        );
-        await refreshWorks();
-        onSubmitted?.();
-      } catch (error) {
-        setSubmitError(
-          error instanceof Error
-            ? error.message
-            : isEditingMode
-              ? "更新に失敗しました"
-              : "登録に失敗しました",
-        );
-      } finally {
-        setIsSubmitting(false);
-      }
+          if (!response.ok) {
+            const message = await response.text();
+            throw new Error(
+              message ||
+                (isEditingMode ? "更新に失敗しました" : "登録に失敗しました"),
+            );
+          }
+
+          await refreshWorks();
+          if (!isEditingMode) {
+            resetNewWorkForm();
+          }
+          setSubmitSuccess(
+            isEditingMode ? "更新が完了しました" : "登録が完了しました",
+          );
+          onSubmitted?.();
+        },
+        isEditingMode ? "更新に失敗しました" : "登録に失敗しました",
+      );
     },
     [
       inputTechStacks,
@@ -237,6 +222,9 @@ export default function WorkRegisterForm({
       isEditingMode,
       onSubmitted,
       refreshWorks,
+      resetNewWorkForm,
+      run,
+      setSubmitError,
       accentColor.value,
       comment.value,
       description.value,
@@ -284,7 +272,7 @@ export default function WorkRegisterForm({
             <LabelText required>技術構成</LabelText>
             <StackSelectingBox
               onChange={handleTechStacksSelected}
-              initialSelectedIds={inputTechStacks}
+              selectedIds={inputTechStacks}
             />
           </LabelBox>
           <LabelBox isLong>
