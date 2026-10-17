@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { useBlogTagsContext } from "@/contexts/blogTagsContext";
 import backendApi from "@/lib/auth/backendFetch";
+import useConsoleMutation from "@/hooks/useConsoleMutation";
 import useConsoleTextField from "@/hooks/useConsoleTextField";
 import ConsoleButton from "./consoleButton";
 import ConsoleSelectableTagButton from "./consoleSelectableTagButton";
@@ -21,8 +22,12 @@ export default function BlogTagSelectingBox({
   const { blogTags, refreshBlogTags } = useBlogTagsContext();
   const name = useConsoleTextField();
   const slug = useConsoleTextField();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
+  const {
+    isPending: isSubmitting,
+    error: submitError,
+    setError: setSubmitError,
+    run,
+  } = useConsoleMutation();
 
   const handleToggle = useCallback(
     (id: string) => {
@@ -42,9 +47,7 @@ export default function BlogTagSelectingBox({
       return;
     }
 
-    setIsSubmitting(true);
-    setSubmitError(null);
-    try {
+    await run(async () => {
       const response = await backendApi("/blog-tags", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -56,14 +59,8 @@ export default function BlogTagSelectingBox({
       await refreshBlogTags();
       name.reset();
       slug.reset();
-    } catch (reason) {
-      setSubmitError(
-        reason instanceof Error ? reason.message : "タグの登録に失敗しました",
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [name, refreshBlogTags, slug]);
+    }, "タグの登録に失敗しました");
+  }, [name, refreshBlogTags, run, setSubmitError, slug]);
 
   return (
     <div className="relative flex w-full flex-col gap-4 bg-[#f8f8f8] p-4">
