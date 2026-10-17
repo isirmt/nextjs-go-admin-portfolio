@@ -17,6 +17,7 @@ type BlogSeriesArticle struct {
 	DisplayOrder int32        `gorm:"column:display_order;type:integer;not null" json:"display_order"`
 	CreatedAt    *time.Time   `gorm:"column:created_at;type:timestamp with time zone;not null;default:now()" json:"created_at"`
 	Article      *BlogArticle `gorm:"foreignKey:ArticleID;references:ID" json:"-"`
+	Series       *BlogSeries  `gorm:"foreignKey:SeriesID;references:ID" json:"-"`
 }
 
 // TableName BlogSeriesArticle's table name

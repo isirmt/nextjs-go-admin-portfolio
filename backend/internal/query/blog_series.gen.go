@@ -40,51 +40,21 @@ func newBlogSeries(db *gorm.DB, opts ...gen.DOOption) blogSeries {
 		RelationField: field.NewRelation("ArticleEntries", "model.BlogSeriesArticle"),
 		Article: struct {
 			field.RelationField
-			PreviewLinks struct {
-				field.RelationField
-			}
 			Tags struct {
-				field.RelationField
-			}
-			BodyImages struct {
-				field.RelationField
-				Image struct {
-					field.RelationField
-				}
-			}
-			ThumbnailImage struct {
 				field.RelationField
 			}
 		}{
 			RelationField: field.NewRelation("ArticleEntries.Article", "model.BlogArticle"),
-			PreviewLinks: struct {
-				field.RelationField
-			}{
-				RelationField: field.NewRelation("ArticleEntries.Article.PreviewLinks", "model.BlogArticlePreviewLink"),
-			},
 			Tags: struct {
 				field.RelationField
 			}{
 				RelationField: field.NewRelation("ArticleEntries.Article.Tags", "model.BlogTag"),
 			},
-			BodyImages: struct {
-				field.RelationField
-				Image struct {
-					field.RelationField
-				}
-			}{
-				RelationField: field.NewRelation("ArticleEntries.Article.BodyImages", "model.BlogArticleImage"),
-				Image: struct {
-					field.RelationField
-				}{
-					RelationField: field.NewRelation("ArticleEntries.Article.BodyImages.Image", "model.CommonImage"),
-				},
-			},
-			ThumbnailImage: struct {
-				field.RelationField
-			}{
-				RelationField: field.NewRelation("ArticleEntries.Article.ThumbnailImage", "model.CommonImage"),
-			},
+		},
+		Series: struct {
+			field.RelationField
+		}{
+			RelationField: field.NewRelation("ArticleEntries.Series", "model.BlogSeries"),
 		},
 	}
 
@@ -182,21 +152,12 @@ type blogSeriesHasManyArticleEntries struct {
 
 	Article struct {
 		field.RelationField
-		PreviewLinks struct {
-			field.RelationField
-		}
 		Tags struct {
 			field.RelationField
 		}
-		BodyImages struct {
-			field.RelationField
-			Image struct {
-				field.RelationField
-			}
-		}
-		ThumbnailImage struct {
-			field.RelationField
-		}
+	}
+	Series struct {
+		field.RelationField
 	}
 }
 

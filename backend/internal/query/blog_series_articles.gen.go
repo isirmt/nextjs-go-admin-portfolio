@@ -36,34 +36,17 @@ func newBlogSeriesArticle(db *gorm.DB, opts ...gen.DOOption) blogSeriesArticle {
 		db: db.Session(&gorm.Session{}),
 
 		RelationField: field.NewRelation("Article", "model.BlogArticle"),
-		PreviewLinks: struct {
-			field.RelationField
-		}{
-			RelationField: field.NewRelation("Article.PreviewLinks", "model.BlogArticlePreviewLink"),
-		},
 		Tags: struct {
 			field.RelationField
 		}{
 			RelationField: field.NewRelation("Article.Tags", "model.BlogTag"),
 		},
-		BodyImages: struct {
-			field.RelationField
-			Image struct {
-				field.RelationField
-			}
-		}{
-			RelationField: field.NewRelation("Article.BodyImages", "model.BlogArticleImage"),
-			Image: struct {
-				field.RelationField
-			}{
-				RelationField: field.NewRelation("Article.BodyImages.Image", "model.CommonImage"),
-			},
-		},
-		ThumbnailImage: struct {
-			field.RelationField
-		}{
-			RelationField: field.NewRelation("Article.ThumbnailImage", "model.CommonImage"),
-		},
+	}
+
+	_blogSeriesArticle.Series = blogSeriesArticleBelongsToSeries{
+		db: db.Session(&gorm.Session{}),
+
+		RelationField: field.NewRelation("Series", "model.BlogSeries"),
 	}
 
 	_blogSeriesArticle.fillFieldMap()
@@ -80,6 +63,8 @@ type blogSeriesArticle struct {
 	DisplayOrder field.Int32
 	CreatedAt    field.Time
 	Article      blogSeriesArticleBelongsToArticle
+
+	Series blogSeriesArticleBelongsToSeries
 
 	fieldMap map[string]field.Expr
 }
@@ -128,7 +113,7 @@ func (b *blogSeriesArticle) GetFieldByName(fieldName string) (field.OrderExpr, b
 }
 
 func (b *blogSeriesArticle) fillFieldMap() {
-	b.fieldMap = make(map[string]field.Expr, 5)
+	b.fieldMap = make(map[string]field.Expr, 6)
 	b.fieldMap["series_id"] = b.SeriesID
 	b.fieldMap["article_id"] = b.ArticleID
 	b.fieldMap["display_order"] = b.DisplayOrder
@@ -140,12 +125,15 @@ func (b blogSeriesArticle) clone(db *gorm.DB) blogSeriesArticle {
 	b.blogSeriesArticleDo.ReplaceConnPool(db.Statement.ConnPool)
 	b.Article.db = db.Session(&gorm.Session{Initialized: true})
 	b.Article.db.Statement.ConnPool = db.Statement.ConnPool
+	b.Series.db = db.Session(&gorm.Session{Initialized: true})
+	b.Series.db.Statement.ConnPool = db.Statement.ConnPool
 	return b
 }
 
 func (b blogSeriesArticle) replaceDB(db *gorm.DB) blogSeriesArticle {
 	b.blogSeriesArticleDo.ReplaceDB(db)
 	b.Article.db = db.Session(&gorm.Session{})
+	b.Series.db = db.Session(&gorm.Session{})
 	return b
 }
 
@@ -154,19 +142,7 @@ type blogSeriesArticleBelongsToArticle struct {
 
 	field.RelationField
 
-	PreviewLinks struct {
-		field.RelationField
-	}
 	Tags struct {
-		field.RelationField
-	}
-	BodyImages struct {
-		field.RelationField
-		Image struct {
-			field.RelationField
-		}
-	}
-	ThumbnailImage struct {
 		field.RelationField
 	}
 }
@@ -242,6 +218,87 @@ func (a blogSeriesArticleBelongsToArticleTx) Count() int64 {
 }
 
 func (a blogSeriesArticleBelongsToArticleTx) Unscoped() *blogSeriesArticleBelongsToArticleTx {
+	a.tx = a.tx.Unscoped()
+	return &a
+}
+
+type blogSeriesArticleBelongsToSeries struct {
+	db *gorm.DB
+
+	field.RelationField
+}
+
+func (a blogSeriesArticleBelongsToSeries) Where(conds ...field.Expr) *blogSeriesArticleBelongsToSeries {
+	if len(conds) == 0 {
+		return &a
+	}
+
+	exprs := make([]clause.Expression, 0, len(conds))
+	for _, cond := range conds {
+		exprs = append(exprs, cond.BeCond().(clause.Expression))
+	}
+	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
+	return &a
+}
+
+func (a blogSeriesArticleBelongsToSeries) WithContext(ctx context.Context) *blogSeriesArticleBelongsToSeries {
+	a.db = a.db.WithContext(ctx)
+	return &a
+}
+
+func (a blogSeriesArticleBelongsToSeries) Session(session *gorm.Session) *blogSeriesArticleBelongsToSeries {
+	a.db = a.db.Session(session)
+	return &a
+}
+
+func (a blogSeriesArticleBelongsToSeries) Model(m *model.BlogSeriesArticle) *blogSeriesArticleBelongsToSeriesTx {
+	return &blogSeriesArticleBelongsToSeriesTx{a.db.Model(m).Association(a.Name())}
+}
+
+func (a blogSeriesArticleBelongsToSeries) Unscoped() *blogSeriesArticleBelongsToSeries {
+	a.db = a.db.Unscoped()
+	return &a
+}
+
+type blogSeriesArticleBelongsToSeriesTx struct{ tx *gorm.Association }
+
+func (a blogSeriesArticleBelongsToSeriesTx) Find() (result *model.BlogSeries, err error) {
+	return result, a.tx.Find(&result)
+}
+
+func (a blogSeriesArticleBelongsToSeriesTx) Append(values ...*model.BlogSeries) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Append(targetValues...)
+}
+
+func (a blogSeriesArticleBelongsToSeriesTx) Replace(values ...*model.BlogSeries) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Replace(targetValues...)
+}
+
+func (a blogSeriesArticleBelongsToSeriesTx) Delete(values ...*model.BlogSeries) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Delete(targetValues...)
+}
+
+func (a blogSeriesArticleBelongsToSeriesTx) Clear() error {
+	return a.tx.Clear()
+}
+
+func (a blogSeriesArticleBelongsToSeriesTx) Count() int64 {
+	return a.tx.Count()
+}
+
+func (a blogSeriesArticleBelongsToSeriesTx) Unscoped() *blogSeriesArticleBelongsToSeriesTx {
 	a.tx = a.tx.Unscoped()
 	return &a
 }
