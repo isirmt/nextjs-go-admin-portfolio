@@ -1,30 +1,33 @@
 "use client";
 
 import backendApi from "@/lib/auth/backendFetch";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import ConsoleButton from "./consoleButton";
+import ConsoleFormFeedback from "./consoleFormFeedback";
 import ConsoleSelectableTagButton from "./consoleSelectableTagButton";
 import { ConsoleTextField } from "./consoleField";
 import { LabelText } from "./labelBlock";
 import { useTechsContext } from "@/contexts/techsContext";
+import useConsoleMutation from "@/hooks/useConsoleMutation";
 import useConsoleTextField from "@/hooks/useConsoleTextField";
 
 type StackSelectingBoxProps = {
   onChange: (ids: string[]) => void;
-  initialSelectedIds?: string[];
+  selectedIds: string[];
 };
 
 export default function StackSelectingBox({
   onChange,
-  initialSelectedIds,
+  selectedIds,
 }: StackSelectingBoxProps) {
   const { techs, refreshTechs } = useTechsContext();
-  const [selectedIds, setSelectedIds] = useState<string[]>(
-    initialSelectedIds ?? [],
-  );
   const stackName = useConsoleTextField();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
+  const {
+    isPending: isSubmitting,
+    error: submitError,
+    setError: setSubmitError,
+    run,
+  } = useConsoleMutation();
 
   const handleToggleSelect = useCallback(
     (id: string) => {
@@ -33,7 +36,6 @@ export default function StackSelectingBox({
         ? selectedIds.filter((stackId) => stackId !== id)
         : [...selectedIds, id];
       onChange(nextSelectedIds);
-      setSelectedIds(nextSelectedIds);
     },
     [onChange, selectedIds],
   );
@@ -45,10 +47,7 @@ export default function StackSelectingBox({
       return;
     }
 
-    setIsSubmitting(true);
-    setSubmitError(null);
-
-    try {
+    await run(async () => {
       const response = await backendApi("/tech-stacks", {
         method: "POST",
         headers: {
@@ -64,16 +63,10 @@ export default function StackSelectingBox({
         throw new Error(message || "登録に失敗しました");
       }
 
-      refreshTechs();
+      await refreshTechs();
       stackName.reset();
-    } catch (error) {
-      setSubmitError(
-        error instanceof Error ? error.message : "登録に失敗しました",
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [refreshTechs, stackName]);
+    }, "登録に失敗しました");
+  }, [refreshTechs, run, setSubmitError, stackName]);
 
   return (
     <div className="relative flex w-full flex-col gap-4 bg-[#f8f8f8] p-4">
@@ -96,7 +89,7 @@ export default function StackSelectingBox({
           <LabelText required>スタック名</LabelText>
           <ConsoleTextField {...stackName.inputProps} placeholder="Next.js" />
         </label>
-        {submitError && <p className="text-sm text-[#e04787]">{submitError}</p>}
+        <ConsoleFormFeedback error={submitError} />
         <ConsoleButton
           onClick={() => handleCreateTechStack()}
           disabled={isSubmitting}

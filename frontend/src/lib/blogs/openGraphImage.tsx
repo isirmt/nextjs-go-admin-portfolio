@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { ImageResponse } from "next/og";
+import type { BlogArticle } from "@/types/blogs/common";
 import { getPublicBlogArticle } from "./publicApi";
 
 export const blogOpenGraphImageRevalidateSeconds = 1200;
@@ -29,20 +30,17 @@ async function getThumbnailResponse(imageId: string) {
   return response.ok && response.body ? response : null;
 }
 
-export async function createBlogOpenGraphImageResponse(slug: string) {
-  const article = await getPublicBlogArticle(
-    slug,
-    blogOpenGraphImageRevalidateSeconds,
-  );
-  if (!article) return new Response("Not Found", { status: 404 });
-
+export async function createBlogOpenGraphImageResponseFromArticle(
+  article: Pick<BlogArticle, "title" | "thumbnail_image_id">,
+  cacheControl = `public, max-age=${blogOpenGraphImageRevalidateSeconds}`,
+) {
   if (article.thumbnail_image_id) {
     const thumbnailResponse = await getThumbnailResponse(
       article.thumbnail_image_id,
     );
     if (thumbnailResponse) {
       const headers = new Headers({
-        "Cache-Control": `public, max-age=${blogOpenGraphImageRevalidateSeconds}`,
+        "Cache-Control": cacheControl,
       });
       const contentLength = thumbnailResponse.headers.get("Content-Length");
       const contentType = thumbnailResponse.headers.get("Content-Type");
@@ -94,9 +92,16 @@ export async function createBlogOpenGraphImageResponse(slug: string) {
       ],
     },
   );
-  response.headers.set(
-    "Cache-Control",
-    `public, max-age=${blogOpenGraphImageRevalidateSeconds}`,
-  );
+  response.headers.set("Cache-Control", cacheControl);
   return response;
+}
+
+export async function createBlogOpenGraphImageResponse(slug: string) {
+  const article = await getPublicBlogArticle(
+    slug,
+    blogOpenGraphImageRevalidateSeconds,
+  );
+  if (!article) return new Response("Not Found", { status: 404 });
+
+  return createBlogOpenGraphImageResponseFromArticle(article);
 }

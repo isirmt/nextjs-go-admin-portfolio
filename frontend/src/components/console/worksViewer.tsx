@@ -6,6 +6,7 @@ import { useCallback, useMemo, useState } from "react";
 import WorkRegisterForm from "./workRegisterForm";
 import { Work } from "@/types/works/common";
 import ConsoleButton from "./consoleButton";
+import ConsoleConfirmDialog from "./consoleConfirmDialog";
 import ConsoleModal from "./consoleModal";
 
 const initializeWorkValues = (work: Work) => {
@@ -38,6 +39,9 @@ export default function WorksViewer() {
   const { works, refreshWorks } = useWorksContext();
   const [editingWorkId, setEditingWorkId] = useState<string | null>(null);
   const [deletingWorkId, setDeletingWorkId] = useState<string | null>(null);
+  const [deleteTargetWorkId, setDeleteTargetWorkId] = useState<string | null>(
+    null,
+  );
 
   const workInitialValues = useMemo(
     () =>
@@ -49,11 +53,6 @@ export default function WorksViewer() {
 
   const handleDelete = useCallback(
     async (workId: string) => {
-      const shouldDelete = window.confirm("削除しますか？");
-      if (!shouldDelete) {
-        return;
-      }
-
       setDeletingWorkId(workId);
       try {
         const response = await backendApi(`/works/${workId}`, {
@@ -69,6 +68,7 @@ export default function WorksViewer() {
           setEditingWorkId(null);
         }
         await refreshWorks();
+        setDeleteTargetWorkId(null);
       } finally {
         setDeletingWorkId(null);
       }
@@ -107,7 +107,7 @@ export default function WorksViewer() {
                 </ConsoleButton>
                 <ConsoleButton
                   disabled={isDeleting}
-                  onClick={() => handleDelete(work.id)}
+                  onClick={() => setDeleteTargetWorkId(work.id)}
                   variant="danger"
                 >
                   {isDeleting ? "削除中" : "削除"}
@@ -136,6 +136,20 @@ export default function WorksViewer() {
           />
         </ConsoleModal>
       ) : null}
+      <ConsoleConfirmDialog
+        open={deleteTargetWorkId !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTargetWorkId(null);
+        }}
+        title="制作物を削除"
+        description="この制作物を削除します。元に戻すことはできません。"
+        confirmLabel="削除する"
+        confirmingLabel="削除中"
+        isConfirming={deletingWorkId !== null}
+        onConfirm={() => {
+          if (deleteTargetWorkId) return handleDelete(deleteTargetWorkId);
+        }}
+      />
     </div>
   );
 }

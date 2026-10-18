@@ -6,6 +6,8 @@ import { lineSeedJp } from "@/lib/fonts";
 import DateCard from "./dateCard";
 import PageContentHeader from "../public/pageContentHeader";
 import Link from "next/link";
+import Arrow from "../shapes/arrow";
+import BlogArticleTagList from "./blogArticleTagList";
 
 type BlogArticleContentProps = {
   article: BlogArticle;
@@ -35,15 +37,35 @@ export default function BlogArticleContent({
           >
             {article.title}
           </h1>
+          {article.tags.length ? (
+            <BlogArticleTagList tags={article.tags} />
+          ) : null}
         </div>
       </PageContentHeader>
-      <div className="mx-auto w-full max-w-[960px] px-4">
+      <div className="mx-auto mb-2 flex w-full max-w-[960px] flex-col items-start px-4">
         <Link
           href="/blogs"
-          className="mb-8 block w-fit bg-blue-50 font-mono text-blue-700 underline transition-colors hover:no-underline"
+          className="inline-flex w-fit items-center gap-2 border-b border-transparent pt-1.5 hover:border-[#555]"
         >
-          一覧に戻る
+          <Arrow className="size-8 rotate-180 stroke-[#555]" />
+          <span className="font-mono text-lg leading-none font-semibold text-[#555]">
+            投稿一覧に戻る
+          </span>
         </Link>
+      </div>
+      <div className="mx-auto flex w-full max-w-[960px] flex-col items-end px-4">
+        {article.series.map((series) => (
+          <Link
+            key={series.id}
+            href={`/blogs/series/${series.slug}`}
+            className="inline-flex w-fit items-center gap-2 border-b border-transparent pt-1.5 hover:border-[#3651ca]"
+          >
+            <span className="font-mono text-lg leading-none font-semibold text-[#3651ca]">
+              シリーズ『{series.title}』
+            </span>
+            <Arrow className="size-8 stroke-[#3651ca]" />
+          </Link>
+        ))}
         <BlogMarkdownPreview content={article.body_markdown} />
       </div>
     </article>

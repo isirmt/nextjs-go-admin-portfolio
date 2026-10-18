@@ -5,17 +5,24 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { ImagesProvider } from "@/contexts/imagesContext";
+import { useBlogArticlesContext } from "@/contexts/blogArticlesContext";
 import { BlogTagsProvider } from "@/contexts/blogTagsContext";
+import useConsoleMutation from "@/hooks/useConsoleMutation";
 import backendApi from "@/lib/auth/backendFetch";
 import type { BlogArticle } from "@/types/blogs/common";
 import ConsoleButton from "./consoleButton";
-import { ConsoleTextArea, ConsoleTextField } from "./consoleField";
+import ConsoleConfirmDialog from "./consoleConfirmDialog";
+import ConsoleFormFeedback from "./consoleFormFeedback";
+import { ConsoleTextField } from "./consoleField";
 import ImageSelectingDialog from "./imageSelectingDialog";
 import { LabelBox, LabelText } from "./labelBlock";
 import ConsoleSegmentedControl from "./consoleSegmentedControl";
 import useConsoleTextField from "@/hooks/useConsoleTextField";
 import BlogMarkdownPreview from "@/components/blogs/blogMarkdownPreview";
 import BlogTagSelectingBox from "./blogTagSelectingBox";
+import BlogMarkdownEditor, {
+  type BlogMarkdownEditorHandle,
+} from "./blogMarkdownEditor";
 
 type BlogArticleEditorProps = { articleId?: string };
 
@@ -42,6 +49,7 @@ function SelectedImageTiles({ imageIds }: { imageIds: string[] }) {
 
 function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
   const router = useRouter();
+  const { refreshBlogArticles } = useBlogArticlesContext();
   const [status, setStatus] = useState<"draft" | "published">("draft");
   const title = useConsoleTextField();
   const slug = useConsoleTextField();
@@ -56,11 +64,20 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
   const [bodyView, setBodyView] = useState<"edit" | "preview">("edit");
   const [isThumbnailDialogOpen, setIsThumbnailDialogOpen] = useState(false);
   const [isBodyImageDialogOpen, setIsBodyImageDialogOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
+  const {
+    isPending: isSubmitting,
+    error: submitError,
+    run: runSubmit,
+  } = useConsoleMutation();
+  const {
+    isPending: isDeleting,
+    error: deleteError,
+    run: runDelete,
+  } = useConsoleMutation();
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
-  const bodyRef = useRef<HTMLTextAreaElement>(null);
+  const blogMarkdownEditorRef = useRef<BlogMarkdownEditorHandle | null>(null);
   const bodySelectionRef = useRef({ start: 0, end: 0 });
 
   useEffect(() => {
@@ -95,7 +112,7 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
         }
       } catch (reason) {
         if (isCurrent)
-          setSubmitError(
+          setLoadError(
             reason instanceof Error
               ? reason.message
               : "記事の取得に失敗しました",
@@ -108,11 +125,11 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
   }, [articleId, resetBodyMarkdown, resetPublishedAt, resetSlug, resetTitle]);
 
   const openBodyImageDialog = () => {
-    const textarea = bodyRef.current;
-    bodySelectionRef.current = {
-      start: textarea?.selectionStart ?? bodyMarkdown.value.length,
-      end: textarea?.selectionEnd ?? bodyMarkdown.value.length,
-    };
+    bodySelectionRef.current =
+      blogMarkdownEditorRef.current?.getSelectionOffsets() ?? {
+        start: bodyMarkdown.value.length,
+        end: bodyMarkdown.value.length,
+      };
     setIsBodyImageDialogOpen(true);
   };
 
@@ -125,17 +142,15 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
     );
     requestAnimationFrame(() => {
       const cursor = start + markdown.length;
-      bodyRef.current?.focus();
-      bodyRef.current?.setSelectionRange(cursor, cursor);
+      blogMarkdownEditorRef.current?.focusAtOffset(cursor);
     });
   };
 
   const handleSubmit = async (event: React.SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setIsSubmitting(true);
-    setSubmitError(null);
+    setLoadError(null);
     setSubmitSuccess(null);
-    try {
+    const result = await runSubmit(async () => {
       const response = await backendApi(
         articleId ? `/blogs/${articleId}` : "/blogs",
         {
@@ -157,35 +172,28 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
       if (!response.ok)
         throw new Error((await response.text()) || "記事の保存に失敗しました");
       const saved = (await response.json()) as BlogArticle;
+      await refreshBlogArticles();
+      return saved;
+    }, "記事の保存に失敗しました");
+
+    if (result.ok) {
       setSubmitSuccess(articleId ? "更新しました" : "作成しました");
-      if (!articleId) router.replace(`/console/blogs/${saved.id}`);
-    } catch (reason) {
-      setSubmitError(
-        reason instanceof Error ? reason.message : "記事の保存に失敗しました",
-      );
-    } finally {
-      setIsSubmitting(false);
+      if (!articleId) router.replace(`/console/blogs/${result.data.id}`);
     }
   };
 
   const handleDelete = async () => {
-    if (!articleId || !window.confirm("この記事を削除しますか？")) return;
-    setIsDeleting(true);
-    setSubmitError(null);
-    try {
+    if (!articleId) return;
+    setLoadError(null);
+    await runDelete(async () => {
       const response = await backendApi(`/blogs/${articleId}`, {
         method: "DELETE",
       });
       if (!response.ok)
         throw new Error((await response.text()) || "記事の削除に失敗しました");
+      await refreshBlogArticles();
       router.replace("/console/blogs");
-    } catch (reason) {
-      setSubmitError(
-        reason instanceof Error ? reason.message : "記事の削除に失敗しました",
-      );
-    } finally {
-      setIsDeleting(false);
-    }
+    }, "記事の削除に失敗しました");
   };
 
   return (
@@ -252,20 +260,11 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
           </LabelBox>
           <LabelBox isLong>
             <LabelText required>本文（Markdown）</LabelText>
-            <ConsoleSegmentedControl
-              name="body-view"
-              value={bodyView}
-              onChange={setBodyView}
-              options={[
-                { value: "edit", label: "編集" },
-                { value: "preview", label: "プレビュー" },
-              ]}
-            />
             {bodyView === "edit" ? (
-              <ConsoleTextArea
-                ref={bodyRef}
-                required
-                {...bodyMarkdown.inputProps}
+              <BlogMarkdownEditor
+                ref={blogMarkdownEditorRef}
+                value={bodyMarkdown.value}
+                onChange={bodyMarkdown.setValue}
               />
             ) : (
               <div className="min-h-64 border border-[#c68ef0] bg-white px-4 py-3 text-[#222]">
@@ -278,28 +277,48 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
             )}
           </LabelBox>
         </div>
-        <footer className="mt-8">
-          {submitError ? (
-            <p className="mb-2 text-sm text-[#e04787]">{submitError}</p>
-          ) : null}
-          {submitSuccess ? (
-            <p className="mb-2 text-sm text-[#0c8d62]">{submitSuccess}</p>
-          ) : null}
+        <div className="sticky bottom-0 mt-8 flex flex-col items-center gap-2 bg-white py-2.5">
+          <ConsoleSegmentedControl
+            name="body-view"
+            value={bodyView}
+            onChange={setBodyView}
+            options={[
+              { value: "edit", label: "編集" },
+              { value: "preview", label: "プレビュー" },
+            ]}
+          />
+          <ConsoleFormFeedback
+            className="mb-2"
+            error={loadError ?? submitError ?? deleteError}
+            success={submitSuccess}
+          />
           <ConsoleButton type="submit" disabled={isSubmitting}>
             {isSubmitting ? "保存中" : "保存"}
           </ConsoleButton>
+        </div>
+        <div>
           {articleId ? (
             <ConsoleButton
               className="mt-20"
               disabled={isSubmitting || isDeleting}
-              onClick={handleDelete}
+              onClick={() => setIsDeleteDialogOpen(true)}
               variant="danger"
             >
               {isDeleting ? "削除中" : "削除"}
             </ConsoleButton>
           ) : null}
-        </footer>
+        </div>
       </form>
+      <ConsoleConfirmDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        title="記事を削除"
+        description="この記事を削除します。元に戻すことはできません。"
+        confirmLabel="削除する"
+        confirmingLabel="削除中"
+        isConfirming={isDeleting}
+        onConfirm={handleDelete}
+      />
       <ImageSelectingDialog
         open={isThumbnailDialogOpen}
         onOpenChange={setIsThumbnailDialogOpen}

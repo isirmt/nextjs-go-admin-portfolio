@@ -25,6 +25,7 @@ type BlogArticle struct {
 	Tags             []*BlogTag                `gorm:"joinForeignKey:ArticleID;joinReferences:TagID;many2many:blog_article_tags" json:"tags"`
 	BodyImages       []*BlogArticleImage       `gorm:"foreignKey:ArticleID;references:ID" json:"-"`
 	ThumbnailImage   *CommonImage              `gorm:"foreignKey:ThumbnailImageID;references:ID" json:"thumbnail_image"`
+	SeriesEntries    []*BlogSeriesArticle      `gorm:"foreignKey:ArticleID;references:ID" json:"-"`
 }
 
 // TableName BlogArticle's table name
