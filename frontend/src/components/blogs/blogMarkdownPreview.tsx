@@ -122,7 +122,7 @@ export default function BlogMarkdownPreview({
   if (!content.trim()) return null;
 
   return (
-    <div className="markdown font-noto">
+    <div className="markdown font-noto w-full min-w-0">
       <ReactMarkdown
         components={components}
         disallowedElements={["h1"]}
