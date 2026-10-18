@@ -15,9 +15,17 @@ export default async function BlogsPage() {
 
   return (
     <main className="relative w-full pb-40">
-      <PageContentHeader>
+      <PageContentHeader hideSparkles>
+        <video
+          src="/blog_header_mov.mp4"
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="pointer-events-none absolute top-0 left-0 z-0 h-full w-full object-cover opacity-20 select-none"
+        />
         <h1
-          className={`${delaGothicOne.className} text-center text-4xl font-bold text-[#12385f]`}
+          className={`${delaGothicOne.className} relative z-1 block w-fit bg-[#12385f] text-center text-4xl font-bold text-white`}
         >
           ブログ
         </h1>
