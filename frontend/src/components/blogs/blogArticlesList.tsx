@@ -6,11 +6,16 @@ import TagAndSortControls from "@/components/public/tagAndSortControls";
 import BlogArticleCard from "./blogArticleCard";
 import BlogArticleTagList from "./blogArticleTagList";
 
-type BlogSort = "newest" | "oldest";
+type BlogSort = "initial" | "newest" | "oldest";
 
 const BLOG_SORT_OPTIONS = [
   { value: "newest", label: "新しい順" },
   { value: "oldest", label: "古い順" },
+] as const;
+
+const BLOG_SORT_OPTIONS_WITH_INITIAL = [
+  { value: "initial", label: "初期順" },
+  ...BLOG_SORT_OPTIONS,
 ] as const;
 
 function articlePublishedTime(article: BlogArticleSummary) {
@@ -19,11 +24,15 @@ function articlePublishedTime(article: BlogArticleSummary) {
 
 export default function BlogArticlesList({
   articles,
+  defaultSort = "newest",
+  showInitialSort = false,
 }: {
   articles: BlogArticleSummary[];
+  defaultSort?: BlogSort;
+  showInitialSort?: boolean;
 }) {
   const [selectedTagIds, setSelectedTagIds] = useState<Set<string>>(new Set());
-  const [sort, setSort] = useState<BlogSort>("newest");
+  const [sort, setSort] = useState<BlogSort>(defaultSort);
 
   const tags = useMemo(() => {
     const tagsByID = new Map<string, BlogTag>();
@@ -43,6 +52,8 @@ export default function BlogArticlesList({
       const articleTagIDs = new Set(article.tags.map((tag) => tag.id));
       return [...selectedTagIds].every((tagID) => articleTagIDs.has(tagID));
     });
+
+    if (sort === "initial") return filtered;
 
     return [...filtered].sort((a, b) => {
       const difference = articlePublishedTime(a) - articlePublishedTime(b);
@@ -75,7 +86,9 @@ export default function BlogArticlesList({
         onToggleTag={handleToggleTag}
         onClearTags={clearTags}
         sort={sort}
-        sortOptions={BLOG_SORT_OPTIONS}
+        sortOptions={
+          showInitialSort ? BLOG_SORT_OPTIONS_WITH_INITIAL : BLOG_SORT_OPTIONS
+        }
         onSortChange={setSort}
         sortName="blog-sort"
       />
