@@ -44,7 +44,11 @@ export default async function BlogSeriesPage({ params }: BlogSeriesPageProps) {
         ) : null}
       </PageContentHeader>
       <section className="relative w-full px-20">
-        <BlogArticlesList articles={series.articles} />
+        <BlogArticlesList
+          articles={series.articles}
+          defaultSort="initial"
+          showInitialSort
+        />
       </section>
     </main>
   );
