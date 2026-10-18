@@ -26,6 +26,10 @@ export async function getPublicBlogArticles(): Promise<BlogArticleSummary[]> {
   return (await fetchPublicBlogs<BlogArticleSummary[]>("/blogs")) ?? [];
 }
 
+export async function getPublicBlogSeriesList(): Promise<BlogSeries[]> {
+  return (await fetchPublicBlogs<BlogSeries[]>("/blog-series")) ?? [];
+}
+
 export function getPublicBlogSeries(slug: string, revalidate?: number) {
   return fetchPublicBlogs<BlogSeries>(
     `/blog-series/${encodeURIComponent(slug)}`,
