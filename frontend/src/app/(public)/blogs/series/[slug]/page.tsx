@@ -35,12 +35,12 @@ export default async function BlogSeriesPage({ params }: BlogSeriesPageProps) {
     <main className="relative w-full pb-40">
       <PageContentHeader>
         <h1
-          className={`${delaGothicOne.className} text-center text-4xl font-bold text-[#12385f]`}
+          className={`${delaGothicOne.className} relative z-1 text-center text-4xl font-bold text-[#12385f]`}
         >
           『{series.title}』
         </h1>
         {series.description ? (
-          <p className="text-center font-mono text-lg text-[#12385f]">
+          <p className="relative z-1 text-center font-mono text-lg text-[#12385f]">
             {series.description}
           </p>
         ) : null}

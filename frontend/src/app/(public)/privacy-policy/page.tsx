@@ -7,7 +7,7 @@ export default async function ClientPage() {
     <main className="relative w-full pb-40">
       <PageContentHeader>
         <h1
-          className={`${delaGothicOne.className} text-center text-4xl font-bold text-[#12385f]`}
+          className={`${delaGothicOne.className} relative z-1 text-center text-4xl font-bold text-[#12385f]`}
         >
           プライバシーポリシー
         </h1>

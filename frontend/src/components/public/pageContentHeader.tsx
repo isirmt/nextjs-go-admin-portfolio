@@ -18,7 +18,7 @@ export default function PageContentHeader({
   return (
     <div
       ref={waveRef}
-      className="relative mb-16 flex flex-col items-center gap-2.5 bg-[#ecf3fa] px-12 pt-36 pb-32 select-none"
+      className="relative mb-16 flex flex-col items-center gap-3.5 bg-[#ecf3fa] px-12 pt-36 pb-32 select-none"
     >
       {!hideSparkles && (
         <Sparkle
