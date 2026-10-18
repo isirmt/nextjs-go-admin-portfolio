@@ -22,7 +22,7 @@ export default async function BlogsPage() {
           ブログ
         </h1>
       </PageContentHeader>
-      <section className="relative w-full px-20">
+      <section className="relative w-full lg:px-20">
         <BlogArticlesList articles={articles} />
       </section>
     </main>

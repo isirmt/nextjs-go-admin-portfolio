@@ -4,6 +4,8 @@ import BlogArticlesList from "@/components/blogs/blogArticlesList";
 import PageContentHeader from "@/components/public/pageContentHeader";
 import { delaGothicOne } from "@/lib/fonts";
 import { getPublicBlogSeries } from "@/lib/blogs/publicApi";
+import Link from "next/link";
+import Arrow from "@/components/shapes/arrow";
 
 type BlogSeriesPageProps = {
   params: Promise<{ slug: string }>;
@@ -43,7 +45,18 @@ export default async function BlogSeriesPage({ params }: BlogSeriesPageProps) {
           </p>
         ) : null}
       </PageContentHeader>
-      <section className="relative w-full px-20">
+      <section className="relative w-full lg:px-20">
+        <div className="mb-2 flex w-full flex-col items-start px-4">
+          <Link
+            href="/blogs"
+            className="inline-flex w-fit items-center gap-2 border-b border-transparent pt-1.5 hover:border-[#555]"
+          >
+            <Arrow className="size-8 rotate-180 stroke-[#555]" />
+            <span className="font-mono text-lg leading-none font-semibold text-[#555]">
+              投稿一覧に戻る
+            </span>
+          </Link>
+        </div>
         <BlogArticlesList
           articles={series.articles}
           defaultSort="initial"
