@@ -1,4 +1,8 @@
-import type { BlogArticle, BlogArticleSummary } from "@/types/blogs/common";
+import type {
+  BlogArticle,
+  BlogArticleSummary,
+  BlogSeries,
+} from "@/types/blogs/common";
 
 const backendBaseUrl = process.env.BACKEND_BASE_URL;
 
@@ -20,6 +24,13 @@ async function fetchPublicBlogs<T>(
 
 export async function getPublicBlogArticles(): Promise<BlogArticleSummary[]> {
   return (await fetchPublicBlogs<BlogArticleSummary[]>("/blogs")) ?? [];
+}
+
+export function getPublicBlogSeries(slug: string, revalidate?: number) {
+  return fetchPublicBlogs<BlogSeries>(
+    `/blog-series/${encodeURIComponent(slug)}`,
+    revalidate,
+  );
 }
 
 export function getPublicBlogArticle(slug: string, revalidate?: number) {
