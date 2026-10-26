@@ -9,7 +9,7 @@ import { Metadata } from "next";
 import SearchWindow from "@/components/works/searchWindow";
 import ProfileSection from "@/components/profile/section";
 import { getPublicBlogArticles } from "@/lib/blogs/publicApi";
-import { LatestBlogArticleProvider } from "@/contexts/latestBlogArticleContext";
+import { LatestBlogArticlesProvider } from "@/contexts/latestBlogArticlesContext";
 
 export const metadata: Metadata = {
   title: "isirmt - 色彩と体験 | 入本聖也",
@@ -39,7 +39,6 @@ export const metadata: Metadata = {
 
 export default async function Home() {
   const latestArticles = await getPublicBlogArticles(5);
-  const latestArticle = latestArticles[0] ?? null;
   const birthDate = new Date(2004, 3 - 1, 8);
   const today = new Date();
   const hasHadBirthday =
@@ -55,7 +54,7 @@ export default async function Home() {
         <WorksProvider>
           <TechsProvider>
             <SelectingCubeContextProvider>
-              <LatestBlogArticleProvider article={latestArticle}>
+              <LatestBlogArticlesProvider articles={latestArticles}>
                 <SearchWindow />
                 <section
                   aria-label="top-view"
@@ -69,7 +68,7 @@ export default async function Home() {
                 <section aria-label="works-display" className="relative w-full">
                   <WorkConveyer latestArticles={latestArticles} />
                 </section>
-              </LatestBlogArticleProvider>
+              </LatestBlogArticlesProvider>
             </SelectingCubeContextProvider>
           </TechsProvider>
         </WorksProvider>
