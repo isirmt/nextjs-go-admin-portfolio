@@ -11,6 +11,7 @@ import (
 	"realtime/internal/query"
 	"realtime/internal/query/model"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -27,6 +28,7 @@ const (
 	blogArticleStatusDraft     = "draft"
 	blogArticleStatusPublished = "published"
 	blogExcerptMaxRunes        = 140
+	blogArticlesMaxLimit       = 100
 )
 
 var (
@@ -391,6 +393,11 @@ func (pSrv *server) ensureBlogSlugAvailable(c echo.Context, slug, ignoredArticle
 }
 
 func (pSrv *server) handleGetBlogArticles(c echo.Context) error {
+	limit, err := parseBlogArticlesLimit(c.QueryParam("limit"))
+	if err != nil {
+		return c.String(http.StatusBadRequest, err.Error())
+	}
+
 	isAdmin := pSrv.isAdminRequest(c)
 	articleQuery := pSrv.withBlogArticleTags(pSrv.q.BlogArticle.WithContext(c.Request().Context()))
 	if isAdmin {
@@ -403,6 +410,9 @@ func (pSrv *server) handleGetBlogArticles(c echo.Context) error {
 			).
 			Order(pSrv.q.BlogArticle.PublishedAt.Desc())
 	}
+	if limit > 0 {
+		articleQuery = articleQuery.Limit(limit)
+	}
 	articles, err := articleQuery.Find()
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "failed to fetch blog articles")
@@ -413,6 +423,18 @@ func (pSrv *server) handleGetBlogArticles(c echo.Context) error {
 		response = append(response, blogArticleSummary(article, isAdmin))
 	}
 	return c.JSON(http.StatusOK, response)
+}
+
+func parseBlogArticlesLimit(raw string) (int, error) {
+	if strings.TrimSpace(raw) == "" {
+		return 0, nil
+	}
+
+	limit, err := strconv.Atoi(raw)
+	if err != nil || limit < 1 || limit > blogArticlesMaxLimit {
+		return 0, fmt.Errorf("limit must be between 1 and %d", blogArticlesMaxLimit)
+	}
+	return limit, nil
 }
 
 func (pSrv *server) handleGetBlogArticle(c echo.Context) error {
