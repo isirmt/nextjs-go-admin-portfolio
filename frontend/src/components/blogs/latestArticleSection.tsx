@@ -4,7 +4,7 @@
 import React from "react";
 import LatestArticleLoop from "./latestArticleLoop";
 import Link from "next/link";
-import { delaGothicOne, lineSeedJp } from "@/lib/fonts";
+import { lineSeedJp, smoochSans } from "@/lib/fonts";
 import { useLatestBlogArticlesContext } from "@/contexts/latestBlogArticlesContext";
 import BlogArticleTagList from "./blogArticleTagList";
 import DateCard from "./dateCard";
@@ -19,11 +19,11 @@ export default function LatestArticleSection() {
 
   return (
     <div className="relative my-12 flex w-full flex-col items-center bg-linear-to-br from-[#eafdff] to-[#e6f7ff] py-14 select-none">
-      <div
-        className={`${delaGothicOne.className} text-4xl text-[#6354eb] select-none`}
+      <h2
+        className={`${smoochSans.className} origin-bottom-left text-center text-5xl font-bold text-[#6354eb] select-none md:text-7xl`}
       >
-        最新記事
-      </div>
+        Latest Articles
+      </h2>
       <Link
         href={`/blogs/${latestArticle.slug}`}
         className="relative my-12 grid w-full grid-cols-1 gap-y-10 px-8 transition-all duration-200 hover:opacity-80 lg:grid-cols-2"
