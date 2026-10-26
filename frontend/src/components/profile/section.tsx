@@ -60,7 +60,7 @@ export default function ProfileSection({ age }: { age: number }) {
   return (
     <section
       aria-label="profile"
-      className="relative z-1 w-full overflow-x-clip overflow-y-visible"
+      className="relative z-2 w-full overflow-x-clip overflow-y-visible"
     >
       <div className="relative flex flex-wrap items-end justify-start overflow-visible bg-[linear-gradient(#ffffff,#f2faff_63%,#eef2ff)]">
         <div className="animate-scale-motion-little absolute top-0 right-0 size-full origin-bottom-right">

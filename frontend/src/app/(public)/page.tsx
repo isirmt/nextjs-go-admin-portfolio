@@ -10,6 +10,7 @@ import SearchWindow from "@/components/works/searchWindow";
 import ProfileSection from "@/components/profile/section";
 import { getPublicBlogArticles } from "@/lib/blogs/publicApi";
 import { LatestBlogArticlesProvider } from "@/contexts/latestBlogArticlesContext";
+import LatestArticleSection from "@/components/blogs/latestArticleSection";
 
 export const metadata: Metadata = {
   title: "isirmt - 色彩と体験 | 入本聖也",
@@ -65,6 +66,7 @@ export default async function Home() {
                 </section>
                 <Navigation />
                 <ProfileSection age={age} />
+                <LatestArticleSection />
                 <section aria-label="works-display" className="relative w-full">
                   <WorkConveyer />
                 </section>

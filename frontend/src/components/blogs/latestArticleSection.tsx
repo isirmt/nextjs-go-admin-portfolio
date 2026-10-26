@@ -8,8 +8,10 @@ import { lineSeedJp, smoochSans } from "@/lib/fonts";
 import { useLatestBlogArticlesContext } from "@/contexts/latestBlogArticlesContext";
 import BlogArticleTagList from "./blogArticleTagList";
 import DateCard from "./dateCard";
+import { useSineClipPath } from "@/hooks/useSineClipPath";
 
 export default function LatestArticleSection() {
+  const waveRef = useSineClipPath<HTMLDivElement>({ edge: "bottom" });
   const { articles: latestArticles } = useLatestBlogArticlesContext();
   if (!latestArticles || latestArticles.length === 0) {
     return null;
@@ -18,7 +20,10 @@ export default function LatestArticleSection() {
   const latestArticle = latestArticles[0];
 
   return (
-    <div className="relative my-12 flex w-full flex-col items-center bg-linear-to-br from-[#eafdff] to-[#e6f7ff] py-14 select-none">
+    <div
+      ref={waveRef}
+      className="relative z-1 -mb-20 flex w-full flex-col items-center bg-linear-to-br from-[#eafdff] to-[#e6f7ff] pt-32 pb-24 select-none"
+    >
       <h2
         className={`${smoochSans.className} origin-bottom-left text-center text-5xl font-bold text-[#6354eb] select-none md:text-7xl`}
       >

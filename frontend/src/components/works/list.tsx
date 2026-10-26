@@ -104,7 +104,6 @@ export default function WorksList() {
         >
           And More
         </div>
-        <LatestArticleSection />
         <div className="flex w-full flex-col items-center px-8 sm:px-20">
           <SectionText />
           <TagAndSortControls
