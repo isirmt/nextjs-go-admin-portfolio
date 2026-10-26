@@ -90,7 +90,7 @@ export default function WorksList() {
   return (
     <React.Fragment>
       <div
-        className={`relative flex flex-col items-center justify-center overflow-x-clip bg-[#fcfcfc] px-8 pt-32 pb-60 sm:px-20`}
+        className={`relative flex flex-col items-center justify-center overflow-x-clip bg-[#fcfcfc] pt-32 pb-60`}
       >
         <CloudLarge className="animate-up-down absolute bottom-[5%] left-[10%] size-36 [animation-delay:.13s] [animation-duration:1s]" />
         <CloudLarge className="animate-up-down absolute right-[30%] bottom-[35%] size-36 [animation-delay:.23s] [animation-duration:2s]" />
@@ -105,41 +105,43 @@ export default function WorksList() {
           And More
         </div>
         <LatestArticleSection />
-        <SectionText />
-        <TagAndSortControls
-          tags={techs}
-          selectedTagIds={selectedTechIds}
-          onToggleTag={toggleTech}
-          onClearTags={clearTechs}
-          sort={sort}
-          sortOptions={WORK_SORT_OPTIONS}
-          onSortChange={setSort}
-          sortName="work-sort"
-        />
-        <div className="flex w-fit flex-wrap justify-center gap-x-24 gap-y-24">
-          {visibleWorks.length > 0 ? (
-            visibleWorks.map((work) => (
-              <WorkCard
-                key={work.id}
-                work={work}
-                selectingId={selectingWorkId}
-                selectingFunc={handleSelectWork}
-                onRecordClick={recordClick}
-              />
-            ))
-          ) : (
-            <div className="font-noto pointer-events-none z-10 text-center text-4xl font-black text-[#555] select-none md:text-6xl">
-              <div className="leading-relaxed">
-                お探しの条件では見つかりませんでした(T_T)
+        <div className="flex w-full flex-col items-center px-8 sm:px-20">
+          <SectionText />
+          <TagAndSortControls
+            tags={techs}
+            selectedTagIds={selectedTechIds}
+            onToggleTag={toggleTech}
+            onClearTags={clearTechs}
+            sort={sort}
+            sortOptions={WORK_SORT_OPTIONS}
+            onSortChange={setSort}
+            sortName="work-sort"
+          />
+          <div className="flex w-fit flex-wrap justify-center gap-x-24 gap-y-24">
+            {visibleWorks.length > 0 ? (
+              visibleWorks.map((work) => (
+                <WorkCard
+                  key={work.id}
+                  work={work}
+                  selectingId={selectingWorkId}
+                  selectingFunc={handleSelectWork}
+                  onRecordClick={recordClick}
+                />
+              ))
+            ) : (
+              <div className="font-noto pointer-events-none z-10 text-center text-4xl font-black text-[#555] select-none md:text-6xl">
+                <div className="leading-relaxed">
+                  お探しの条件では見つかりませんでした(T_T)
+                </div>
+                <button
+                  className={`w-fit scale-100 cursor-pointer rounded-full border border-[#eb6854] bg-white px-2 py-0.5 text-sm text-[#eb6854] transition-[background-color,opacity,scale] duration-[250ms,100ms,500ms] ease-[linear,linear,cubic-bezier(0.34,1.56,0.64,1)] select-none hover:scale-110 hover:bg-[#ffe4e0] ${selectedTechIds.size > 0 ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`}
+                  onClick={clearTechs}
+                >
+                  CLEAR
+                </button>
               </div>
-              <button
-                className={`w-fit scale-100 cursor-pointer rounded-full border border-[#eb6854] bg-white px-2 py-0.5 text-sm text-[#eb6854] transition-[background-color,opacity,scale] duration-[250ms,100ms,500ms] ease-[linear,linear,cubic-bezier(0.34,1.56,0.64,1)] select-none hover:scale-110 hover:bg-[#ffe4e0] ${selectedTechIds.size > 0 ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`}
-                onClick={clearTechs}
-              >
-                CLEAR
-              </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
       {shouldMountDetail ? (
