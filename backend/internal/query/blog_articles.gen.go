@@ -37,6 +37,7 @@ func newBlogArticle(db *gorm.DB, opts ...gen.DOOption) blogArticle {
 	_blogArticle.CreatedAt = field.NewTime(tableName, "created_at")
 	_blogArticle.PublishedAt = field.NewTime(tableName, "published_at")
 	_blogArticle.UpdatedAt = field.NewTime(tableName, "updated_at")
+	_blogArticle.Excerpt = field.NewString(tableName, "excerpt")
 	_blogArticle.PreviewLinks = blogArticleHasManyPreviewLinks{
 		db: db.Session(&gorm.Session{}),
 
@@ -108,6 +109,7 @@ type blogArticle struct {
 	CreatedAt        field.Time
 	PublishedAt      field.Time
 	UpdatedAt        field.Time
+	Excerpt          field.String
 	PreviewLinks     blogArticleHasManyPreviewLinks
 
 	Tags blogArticleManyToManyTags
@@ -142,6 +144,7 @@ func (b *blogArticle) updateTableName(table string) *blogArticle {
 	b.CreatedAt = field.NewTime(table, "created_at")
 	b.PublishedAt = field.NewTime(table, "published_at")
 	b.UpdatedAt = field.NewTime(table, "updated_at")
+	b.Excerpt = field.NewString(table, "excerpt")
 
 	b.fillFieldMap()
 
@@ -168,7 +171,7 @@ func (b *blogArticle) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (b *blogArticle) fillFieldMap() {
-	b.fieldMap = make(map[string]field.Expr, 14)
+	b.fieldMap = make(map[string]field.Expr, 15)
 	b.fieldMap["id"] = b.ID
 	b.fieldMap["status"] = b.Status
 	b.fieldMap["title"] = b.Title
@@ -178,6 +181,7 @@ func (b *blogArticle) fillFieldMap() {
 	b.fieldMap["created_at"] = b.CreatedAt
 	b.fieldMap["published_at"] = b.PublishedAt
 	b.fieldMap["updated_at"] = b.UpdatedAt
+	b.fieldMap["excerpt"] = b.Excerpt
 
 }
 
