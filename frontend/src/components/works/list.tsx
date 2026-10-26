@@ -6,22 +6,16 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useInViewAnimation } from "@/hooks/useInViewAnimation";
 import { useScrollbarControl } from "@/hooks/useScrollbarControl";
 import { useWorkListView, WORK_SORT_OPTIONS } from "@/hooks/useWorkListView";
-import { delaGothicOne, smoochSans } from "@/lib/fonts";
+import { smoochSans } from "@/lib/fonts";
 import { SectionText } from "./sectionText";
 import { CloudLarge, CloudSmall } from "./clouds";
 import SelectedDetailScreen from "./selectedDetailScreen";
 import WorkCard from "./workCard";
 import { useTechsContext } from "@/contexts/techsContext";
-import type { BlogArticleSummary } from "@/types/blogs/common";
-import LatestArticleLoop from "@/components/blogs/latestArticleLoop";
 import TagAndSortControls from "@/components/public/tagAndSortControls";
-import Link from "next/link";
+import LatestArticleSection from "../blogs/latestArticleSection";
 
-type WorksListProps = {
-  latestArticles: BlogArticleSummary[];
-};
-
-export default function WorksList({ latestArticles }: WorksListProps) {
+export default function WorksList() {
   const { works } = useWorksContext();
   const { techs } = useTechsContext();
   const {
@@ -110,18 +104,7 @@ export default function WorksList({ latestArticles }: WorksListProps) {
         >
           And More
         </div>
-        <div
-          className={`${delaGothicOne.className} mt-4 text-4xl text-[#6354eb] select-none`}
-        >
-          最新記事
-        </div>
-        <LatestArticleLoop articles={latestArticles} />
-        <Link
-          href="/blogs"
-          className={`font-noto mb-16 rounded-full border bg-white px-3 py-2 text-xl text-[#6354EB] transition-[background-color,color,scale] duration-[250ms,250ms,500ms] ease-[linear,linear,cubic-bezier(0.34,1.56,0.64,1)] select-none hover:scale-110 hover:bg-[#e4e0ff]`}
-        >
-          ブログ投稿一覧へ
-        </Link>
+        <LatestArticleSection />
         <SectionText />
         <TagAndSortControls
           tags={techs}
