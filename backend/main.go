@@ -43,6 +43,21 @@ func main() {
 	if err := sqlDb.PingContext(ctx); err != nil {
 		log.Fatalf("failed to connect to db. %v", err)
 	}
+	defer sqlDb.Close()
+
+	if len(os.Args) > 1 {
+		switch os.Args[1] {
+		case "backfill-blog-excerpts":
+			updatedCount, err := backfillBlogArticleExcerpts(ctx, gormDb)
+			if err != nil {
+				log.Fatalf("failed to backfill blog excerpts: %v", err)
+			}
+			log.Printf("backfilled %d blog article excerpts", updatedCount)
+			return
+		default:
+			log.Fatalf("unknown command: %s", os.Args[1])
+		}
+	}
 
 	uploadDir := getEnv("UPLOAD_DIR", "./uploads")
 	if err := os.MkdirAll(uploadDir, 0o755); err != nil {
