@@ -10,7 +10,10 @@ require (
 	golang.org/x/time v0.5.0 // indirect
 )
 
-require gorm.io/gen v0.3.27
+require (
+	github.com/yuin/goldmark v1.7.17
+	gorm.io/gen v0.3.27
+)
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect

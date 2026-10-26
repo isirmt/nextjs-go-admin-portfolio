@@ -16,12 +16,17 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/yuin/goldmark"
+	"github.com/yuin/goldmark/ast"
+	"github.com/yuin/goldmark/extension"
+	"github.com/yuin/goldmark/text"
 	"gorm.io/gorm"
 )
 
 const (
 	blogArticleStatusDraft     = "draft"
 	blogArticleStatusPublished = "published"
+	blogExcerptMaxRunes        = 140
 )
 
 var (
@@ -44,6 +49,7 @@ type blogArticleInput struct {
 	title            string
 	slug             string
 	bodyMarkdown     string
+	excerpt          string
 	thumbnailImageID *string
 	publishedAt      *time.Time
 	bodyImageIDs     []string
@@ -217,11 +223,45 @@ func parseBlogArticleInput(req blogArticleRequest) (blogArticleInput, error) {
 		title:            title,
 		slug:             slug,
 		bodyMarkdown:     bodyMarkdown,
+		excerpt:          generateBlogExcerpt(bodyMarkdown),
 		thumbnailImageID: thumbnailImageID,
 		publishedAt:      publishedAt,
 		bodyImageIDs:     extractBlogImageIDs(bodyMarkdown),
 		tagIDs:           normalizeBlogTagIDs(req.TagIDs),
 	}, nil
+}
+
+func generateBlogExcerpt(markdown string) string {
+	source := []byte(markdown)
+	document := goldmark.New(goldmark.WithExtensions(extension.GFM)).Parser().Parse(text.NewReader(source))
+
+	var content strings.Builder
+	_ = ast.Walk(document, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
+		if !entering {
+			switch node.Kind() {
+			case ast.KindParagraph, ast.KindHeading, ast.KindListItem, ast.KindBlockquote:
+				content.WriteByte(' ')
+			}
+			return ast.WalkContinue, nil
+		}
+
+		switch node.Kind() {
+		case ast.KindFencedCodeBlock, ast.KindCodeBlock, ast.KindCodeSpan, ast.KindHTMLBlock, ast.KindRawHTML, ast.KindImage:
+			return ast.WalkSkipChildren, nil
+		case ast.KindText:
+			content.Write(node.Text(source))
+		case ast.KindString:
+			content.Write(node.Text(source))
+		}
+		return ast.WalkContinue, nil
+	})
+
+	excerpt := strings.Join(strings.Fields(content.String()), " ")
+	runes := []rune(excerpt)
+	if len(runes) <= blogExcerptMaxRunes {
+		return excerpt
+	}
+	return string(runes[:blogExcerptMaxRunes]) + "…"
 }
 
 func normalizeBlogTagIDs(ids []string) []string {
@@ -506,6 +546,7 @@ func (pSrv *server) handleCreateBlogArticle(c echo.Context) error {
 		Title:            input.title,
 		Slug:             input.slug,
 		BodyMarkdown:     input.bodyMarkdown,
+		Excerpt:          input.excerpt,
 		ThumbnailImageID: input.thumbnailImageID,
 		PublishedAt:      input.publishedAt,
 	}
@@ -570,6 +611,7 @@ func (pSrv *server) handleUpdateBlogArticle(c echo.Context) error {
 			"title":              input.title,
 			"slug":               input.slug,
 			"body_markdown":      input.bodyMarkdown,
+			"excerpt":            input.excerpt,
 			"thumbnail_image_id": input.thumbnailImageID,
 			"published_at":       input.publishedAt,
 		}); err != nil {
