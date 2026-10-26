@@ -66,7 +66,7 @@ export default async function Home() {
                 <Navigation />
                 <ProfileSection age={age} />
                 <section aria-label="works-display" className="relative w-full">
-                  <WorkConveyer latestArticles={latestArticles} />
+                  <WorkConveyer />
                 </section>
               </LatestBlogArticlesProvider>
             </SelectingCubeContextProvider>
