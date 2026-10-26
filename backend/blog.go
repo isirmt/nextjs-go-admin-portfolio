@@ -73,6 +73,7 @@ type blogArticleSummaryResponse struct {
 	Status           string            `json:"status,omitempty"`
 	Title            string            `json:"title"`
 	Slug             string            `json:"slug"`
+	Excerpt          string            `json:"excerpt"`
 	ThumbnailImageID *string           `json:"thumbnail_image_id"`
 	CreatedAt        string            `json:"created_at"`
 	PublishedAt      *string           `json:"published_at"`
@@ -127,6 +128,7 @@ func blogArticleSummary(article *model.BlogArticle, includeStatus bool) blogArti
 		Status:           status,
 		Title:            article.Title,
 		Slug:             article.Slug,
+		Excerpt:          article.Excerpt,
 		ThumbnailImageID: article.ThumbnailImageID,
 		CreatedAt:        formatBlogTime(article.CreatedAt),
 		PublishedAt:      formatOptionalBlogTime(article.PublishedAt),
