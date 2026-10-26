@@ -37,7 +37,11 @@ export default function LatestArticleSection() {
           <div className="relative flex aspect-1200/630 w-full max-w-[700px] items-center justify-center overflow-hidden">
             <img
               className="pointer-events-none absolute rounded-lg select-none"
-              src={`/blogs/${latestArticle.slug}/og-image`}
+              src={
+                latestArticle.thumbnail_image_id
+                  ? `/blogs/${latestArticle.slug}/og-image`
+                  : "/blog_isirmt_com_ogp.png"
+              }
               alt={latestArticle.title}
             />
           </div>
