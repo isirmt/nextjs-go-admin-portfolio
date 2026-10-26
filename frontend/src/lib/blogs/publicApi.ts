@@ -22,8 +22,11 @@ async function fetchPublicBlogs<T>(
   return (await response.json()) as T;
 }
 
-export async function getPublicBlogArticles(): Promise<BlogArticleSummary[]> {
-  return (await fetchPublicBlogs<BlogArticleSummary[]>("/blogs")) ?? [];
+export async function getPublicBlogArticles(
+  limit?: number,
+): Promise<BlogArticleSummary[]> {
+  const query = limit === undefined ? "" : `?limit=${limit}`;
+  return (await fetchPublicBlogs<BlogArticleSummary[]>(`/blogs${query}`)) ?? [];
 }
 
 export async function getPublicBlogSeriesList(): Promise<BlogSeries[]> {
