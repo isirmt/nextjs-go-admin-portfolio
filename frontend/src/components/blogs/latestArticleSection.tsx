@@ -59,9 +59,9 @@ export default function LatestArticleSection() {
       <LatestArticleLoop articles={latestArticles} />
       <Link
         href="/blogs"
-        className={`font-noto rounded-full border bg-white px-3 py-2 text-xl text-[#6354EB] transition-[background-color,color,scale] duration-[250ms,250ms,500ms] ease-[linear,linear,cubic-bezier(0.34,1.56,0.64,1)] select-none hover:scale-110 hover:bg-[#e4e0ff]`}
+        className={`font-noto rounded-full bg-[#4f89a3] px-6 py-3 text-xl font-bold text-[#e7f3ff] transition-all select-none hover:bg-[#6694b4]`}
       >
-        ブログ投稿一覧へ
+        投稿一覧
       </Link>
     </div>
   );
