@@ -42,7 +42,7 @@ export const delaGothicOne = Dela_Gothic_One({
 });
 
 export const smoochSans = Smooch_Sans({
-  weight: ["400"],
+  weight: ["400", "700"],
   subsets: ["latin"],
 });
 

@@ -17,6 +17,7 @@ export type BlogArticleSummary = {
   status: BlogArticleStatus;
   title: string;
   slug: string;
+  excerpt: string;
   thumbnail_image_id: string | null;
   created_at: string;
   published_at: string | null;

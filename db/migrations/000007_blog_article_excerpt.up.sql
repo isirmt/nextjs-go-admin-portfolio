@@ -1,0 +1,2 @@
+ALTER TABLE blog_articles
+ADD COLUMN excerpt TEXT NOT NULL DEFAULT '';

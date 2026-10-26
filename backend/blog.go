@@ -11,17 +11,24 @@ import (
 	"realtime/internal/query"
 	"realtime/internal/query/model"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/yuin/goldmark"
+	"github.com/yuin/goldmark/ast"
+	"github.com/yuin/goldmark/extension"
+	"github.com/yuin/goldmark/text"
 	"gorm.io/gorm"
 )
 
 const (
 	blogArticleStatusDraft     = "draft"
 	blogArticleStatusPublished = "published"
+	blogExcerptMaxRunes        = 140
+	blogArticlesMaxLimit       = 100
 )
 
 var (
@@ -44,6 +51,7 @@ type blogArticleInput struct {
 	title            string
 	slug             string
 	bodyMarkdown     string
+	excerpt          string
 	thumbnailImageID *string
 	publishedAt      *time.Time
 	bodyImageIDs     []string
@@ -67,6 +75,7 @@ type blogArticleSummaryResponse struct {
 	Status           string            `json:"status,omitempty"`
 	Title            string            `json:"title"`
 	Slug             string            `json:"slug"`
+	Excerpt          string            `json:"excerpt"`
 	ThumbnailImageID *string           `json:"thumbnail_image_id"`
 	CreatedAt        string            `json:"created_at"`
 	PublishedAt      *string           `json:"published_at"`
@@ -121,6 +130,7 @@ func blogArticleSummary(article *model.BlogArticle, includeStatus bool) blogArti
 		Status:           status,
 		Title:            article.Title,
 		Slug:             article.Slug,
+		Excerpt:          article.Excerpt,
 		ThumbnailImageID: article.ThumbnailImageID,
 		CreatedAt:        formatBlogTime(article.CreatedAt),
 		PublishedAt:      formatOptionalBlogTime(article.PublishedAt),
@@ -217,11 +227,45 @@ func parseBlogArticleInput(req blogArticleRequest) (blogArticleInput, error) {
 		title:            title,
 		slug:             slug,
 		bodyMarkdown:     bodyMarkdown,
+		excerpt:          generateBlogExcerpt(bodyMarkdown),
 		thumbnailImageID: thumbnailImageID,
 		publishedAt:      publishedAt,
 		bodyImageIDs:     extractBlogImageIDs(bodyMarkdown),
 		tagIDs:           normalizeBlogTagIDs(req.TagIDs),
 	}, nil
+}
+
+func generateBlogExcerpt(markdown string) string {
+	source := []byte(markdown)
+	document := goldmark.New(goldmark.WithExtensions(extension.GFM)).Parser().Parse(text.NewReader(source))
+
+	var content strings.Builder
+	_ = ast.Walk(document, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
+		if !entering {
+			switch node.Kind() {
+			case ast.KindParagraph, ast.KindHeading, ast.KindListItem, ast.KindBlockquote:
+				content.WriteByte(' ')
+			}
+			return ast.WalkContinue, nil
+		}
+
+		switch node.Kind() {
+		case ast.KindFencedCodeBlock, ast.KindCodeBlock, ast.KindCodeSpan, ast.KindHTMLBlock, ast.KindRawHTML, ast.KindImage:
+			return ast.WalkSkipChildren, nil
+		case ast.KindText:
+			content.Write(node.Text(source))
+		case ast.KindString:
+			content.Write(node.Text(source))
+		}
+		return ast.WalkContinue, nil
+	})
+
+	excerpt := strings.Join(strings.Fields(content.String()), " ")
+	runes := []rune(excerpt)
+	if len(runes) <= blogExcerptMaxRunes {
+		return excerpt
+	}
+	return string(runes[:blogExcerptMaxRunes]) + "…"
 }
 
 func normalizeBlogTagIDs(ids []string) []string {
@@ -349,6 +393,11 @@ func (pSrv *server) ensureBlogSlugAvailable(c echo.Context, slug, ignoredArticle
 }
 
 func (pSrv *server) handleGetBlogArticles(c echo.Context) error {
+	limit, err := parseBlogArticlesLimit(c.QueryParam("limit"))
+	if err != nil {
+		return c.String(http.StatusBadRequest, err.Error())
+	}
+
 	isAdmin := pSrv.isAdminRequest(c)
 	articleQuery := pSrv.withBlogArticleTags(pSrv.q.BlogArticle.WithContext(c.Request().Context()))
 	if isAdmin {
@@ -361,6 +410,9 @@ func (pSrv *server) handleGetBlogArticles(c echo.Context) error {
 			).
 			Order(pSrv.q.BlogArticle.PublishedAt.Desc())
 	}
+	if limit > 0 {
+		articleQuery = articleQuery.Limit(limit)
+	}
 	articles, err := articleQuery.Find()
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "failed to fetch blog articles")
@@ -371,6 +423,18 @@ func (pSrv *server) handleGetBlogArticles(c echo.Context) error {
 		response = append(response, blogArticleSummary(article, isAdmin))
 	}
 	return c.JSON(http.StatusOK, response)
+}
+
+func parseBlogArticlesLimit(raw string) (int, error) {
+	if strings.TrimSpace(raw) == "" {
+		return 0, nil
+	}
+
+	limit, err := strconv.Atoi(raw)
+	if err != nil || limit < 1 || limit > blogArticlesMaxLimit {
+		return 0, fmt.Errorf("limit must be between 1 and %d", blogArticlesMaxLimit)
+	}
+	return limit, nil
 }
 
 func (pSrv *server) handleGetBlogArticle(c echo.Context) error {
@@ -506,6 +570,7 @@ func (pSrv *server) handleCreateBlogArticle(c echo.Context) error {
 		Title:            input.title,
 		Slug:             input.slug,
 		BodyMarkdown:     input.bodyMarkdown,
+		Excerpt:          input.excerpt,
 		ThumbnailImageID: input.thumbnailImageID,
 		PublishedAt:      input.publishedAt,
 	}
@@ -570,6 +635,7 @@ func (pSrv *server) handleUpdateBlogArticle(c echo.Context) error {
 			"title":              input.title,
 			"slug":               input.slug,
 			"body_markdown":      input.bodyMarkdown,
+			"excerpt":            input.excerpt,
 			"thumbnail_image_id": input.thumbnailImageID,
 			"published_at":       input.publishedAt,
 		}); err != nil {
