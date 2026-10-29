@@ -7,12 +7,13 @@ toolchain go1.23.12
 require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/jackc/pgx/v5 v5.7.6 // indirect
+	golang.org/x/exp v0.0.0-20240112132812-db7319d0e0e3 // indirect
 	golang.org/x/time v0.5.0 // indirect
 )
 
 require (
 	github.com/yuin/goldmark v1.7.17
-	gorm.io/gen v0.3.27
+	gorm.io/gen v0.3.29
 )
 
 require (
