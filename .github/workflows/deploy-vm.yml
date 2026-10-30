@@ -12,6 +12,9 @@ concurrency:
   group: deploy-vm
   cancel-in-progress: false
 
+permissions:
+  contents: read
+
 jobs:
   deploy:
     if: >-
