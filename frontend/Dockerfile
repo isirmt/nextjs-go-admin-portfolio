@@ -1,10 +1,9 @@
 FROM node:24-bookworm-slim AS deps
 WORKDIR /app
 RUN corepack enable
-COPY package.json pnpm-lock.yaml* ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
-    pnpm config set store-dir /pnpm/store && \
-    pnpm install --frozen-lockfile
+    pnpm install --frozen-lockfile --store-dir /pnpm/store
 
 FROM node:24-bookworm-slim AS builder
 WORKDIR /app
