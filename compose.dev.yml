@@ -42,7 +42,7 @@ services:
     restart: unless-stopped
 
   backend:
-    image: golang:1.25-bookworm
+    image: golang:1.26-bookworm
     working_dir: /app
     command: [ "bash", "-c", "go mod download && go install github.com/air-verse/air@v1.52.3 && air -c .air.toml" ]
     environment:
