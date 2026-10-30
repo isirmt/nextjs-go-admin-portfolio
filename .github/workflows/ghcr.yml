@@ -54,7 +54,6 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        id: setup-buildx
         uses: docker/setup-buildx-action@v3
 
       - name: Log in to GHCR
@@ -86,26 +85,6 @@ jobs:
             type=raw,value=${{ needs.prepare.outputs.version }}
           flavor: |
             latest=false
-
-      - name: Cache frontend Docker mounts
-        id: cache_web_mounts
-        if: matrix.service == 'web' && steps.check.outputs.exists != 'true'
-        uses: actions/cache@v4
-        with:
-          path: .buildkit-cache/web
-          key: web-buildkit-mounts-${{ runner.os }}-${{ hashFiles('frontend/pnpm-lock.yaml', 'frontend/Dockerfile') }}-${{ github.sha }}
-          restore-keys: |
-            web-buildkit-mounts-${{ runner.os }}-${{ hashFiles('frontend/pnpm-lock.yaml', 'frontend/Dockerfile') }}-
-            web-buildkit-mounts-${{ runner.os }}-
-
-      - name: Restore frontend Docker cache mounts
-        if: matrix.service == 'web' && steps.check.outputs.exists != 'true'
-        uses: reproducible-containers/buildkit-cache-dance@v3
-        with:
-          builder: ${{ steps.setup-buildx.outputs.name }}
-          cache-dir: .buildkit-cache/web
-          dockerfile: frontend/Dockerfile
-          skip-extraction: ${{ steps.cache_web_mounts.outputs.cache-hit }}
 
       - name: Build and push version tag
         uses: docker/build-push-action@v5
