@@ -10,7 +10,7 @@ require (
 )
 
 require (
-	github.com/yuin/goldmark v1.7.17
+	github.com/yuin/goldmark v1.8.6
 	gorm.io/gen v0.3.29
 )
 
