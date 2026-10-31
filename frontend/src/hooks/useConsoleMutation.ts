@@ -10,8 +10,7 @@ type ConsoleMutationFailure = {
 };
 
 type ConsoleMutationResult<T> =
-  | ConsoleMutationSuccess<T>
-  | ConsoleMutationFailure;
+  ConsoleMutationSuccess<T> | ConsoleMutationFailure;
 
 export default function useConsoleMutation() {
   const [isPending, setIsPending] = useState(false);
