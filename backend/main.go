@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	gormlog "gorm.io/gorm/logger"
@@ -84,8 +84,7 @@ func main() {
 	}
 
 	router := echo.New()
-	router.HideBanner = true
-	router.Use(middleware.Logger())
+	router.Use(middleware.RequestLogger())
 	router.Use(middleware.Recover())
 	router.Use(middleware.CORSWithConfig(corsConfig(pSrv.allowedOrigin)))
 

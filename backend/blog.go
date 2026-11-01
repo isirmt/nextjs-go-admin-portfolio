@@ -16,7 +16,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/yuin/goldmark/v2/ast"
 	"github.com/yuin/goldmark/v2/extension"
 	"github.com/yuin/goldmark/v2/parser"
@@ -163,7 +163,7 @@ func blogArticleDetail(article *model.BlogArticle, includeStatus bool) blogArtic
 	return response
 }
 
-func (pSrv *server) respondBlogArticle(c echo.Context, statusCode int, article *model.BlogArticle, includeStatus bool) error {
+func (pSrv *server) respondBlogArticle(c *echo.Context, statusCode int, article *model.BlogArticle, includeStatus bool) error {
 	return c.JSON(statusCode, blogArticleDetail(article, includeStatus))
 }
 
@@ -297,7 +297,7 @@ func extractBlogImageIDs(markdown string) []string {
 	return ids
 }
 
-func validateBlogImageIDs(ctx echo.Context, q *query.Query, thumbnailImageID *string, bodyImageIDs []string) error {
+func validateBlogImageIDs(ctx *echo.Context, q *query.Query, thumbnailImageID *string, bodyImageIDs []string) error {
 	imageSet := make(map[string]struct{}, len(bodyImageIDs)+1)
 	if thumbnailImageID != nil {
 		imageSet[*thumbnailImageID] = struct{}{}
@@ -324,7 +324,7 @@ func validateBlogImageIDs(ctx echo.Context, q *query.Query, thumbnailImageID *st
 	return nil
 }
 
-func validateBlogTagIDs(ctx echo.Context, q *query.Query, tagIDs []string) error {
+func validateBlogTagIDs(ctx *echo.Context, q *query.Query, tagIDs []string) error {
 	if len(tagIDs) == 0 {
 		return nil
 	}
@@ -339,7 +339,7 @@ func validateBlogTagIDs(ctx echo.Context, q *query.Query, tagIDs []string) error
 	return nil
 }
 
-func syncBlogArticleImages(ctx echo.Context, tx *query.Query, articleID string, imageIDs []string) error {
+func syncBlogArticleImages(ctx *echo.Context, tx *query.Query, articleID string, imageIDs []string) error {
 	if _, err := tx.BlogArticleImage.WithContext(ctx.Request().Context()).
 		Where(tx.BlogArticleImage.ArticleID.Eq(articleID)).Delete(); err != nil {
 		return err
@@ -358,7 +358,7 @@ func syncBlogArticleImages(ctx echo.Context, tx *query.Query, articleID string, 
 	return tx.BlogArticleImage.WithContext(ctx.Request().Context()).Create(images...)
 }
 
-func syncBlogArticleTags(ctx echo.Context, tx *query.Query, articleID string, tagIDs []string) error {
+func syncBlogArticleTags(ctx *echo.Context, tx *query.Query, articleID string, tagIDs []string) error {
 	if _, err := tx.BlogArticleTag.WithContext(ctx.Request().Context()).
 		Where(tx.BlogArticleTag.ArticleID.Eq(articleID)).Delete(); err != nil {
 		return err
@@ -374,7 +374,7 @@ func syncBlogArticleTags(ctx echo.Context, tx *query.Query, articleID string, ta
 	return tx.BlogArticleTag.WithContext(ctx.Request().Context()).Create(tags...)
 }
 
-func (pSrv *server) ensureBlogSlugAvailable(c echo.Context, slug, ignoredArticleID string) error {
+func (pSrv *server) ensureBlogSlugAvailable(c *echo.Context, slug, ignoredArticleID string) error {
 	article, err := pSrv.q.BlogArticle.WithContext(c.Request().Context()).
 		Where(pSrv.q.BlogArticle.Slug.Eq(slug)).First()
 	if err != nil {
@@ -389,7 +389,7 @@ func (pSrv *server) ensureBlogSlugAvailable(c echo.Context, slug, ignoredArticle
 	return nil
 }
 
-func (pSrv *server) handleGetBlogArticles(c echo.Context) error {
+func (pSrv *server) handleGetBlogArticles(c *echo.Context) error {
 	limit, err := parseBlogArticlesLimit(c.QueryParam("limit"))
 	if err != nil {
 		return c.String(http.StatusBadRequest, err.Error())
@@ -434,7 +434,7 @@ func parseBlogArticlesLimit(raw string) (int, error) {
 	return limit, nil
 }
 
-func (pSrv *server) handleGetBlogArticle(c echo.Context) error {
+func (pSrv *server) handleGetBlogArticle(c *echo.Context) error {
 	identifier := strings.TrimSpace(c.Param("identifier"))
 	if identifier == "" {
 		return c.String(http.StatusBadRequest, "article identifier is required")
@@ -467,7 +467,7 @@ type relatedBlogArticleRow struct {
 	ID string `gorm:"column:id"`
 }
 
-func (pSrv *server) handleGetRelatedBlogArticles(c echo.Context) error {
+func (pSrv *server) handleGetRelatedBlogArticles(c *echo.Context) error {
 	identifier := strings.TrimSpace(c.Param("identifier"))
 	if identifier == "" {
 		return c.String(http.StatusBadRequest, "article identifier is required")
@@ -542,7 +542,7 @@ func (pSrv *server) handleGetRelatedBlogArticles(c echo.Context) error {
 	return c.JSON(http.StatusOK, response)
 }
 
-func (pSrv *server) handleCreateBlogArticle(c echo.Context) error {
+func (pSrv *server) handleCreateBlogArticle(c *echo.Context) error {
 	var req blogArticleRequest
 	if err := c.Bind(&req); err != nil {
 		return c.String(http.StatusBadRequest, "invalid request body")
@@ -594,7 +594,7 @@ func (pSrv *server) handleCreateBlogArticle(c echo.Context) error {
 	return pSrv.respondBlogArticle(c, http.StatusCreated, createdArticle, true)
 }
 
-func (pSrv *server) handleUpdateBlogArticle(c echo.Context) error {
+func (pSrv *server) handleUpdateBlogArticle(c *echo.Context) error {
 	articleID := strings.TrimSpace(c.Param("id"))
 	if articleID == "" {
 		return c.String(http.StatusBadRequest, "article id is required")
@@ -654,7 +654,7 @@ func (pSrv *server) handleUpdateBlogArticle(c echo.Context) error {
 	return pSrv.respondBlogArticle(c, http.StatusOK, updatedArticle, true)
 }
 
-func (pSrv *server) handleDeleteBlogArticle(c echo.Context) error {
+func (pSrv *server) handleDeleteBlogArticle(c *echo.Context) error {
 	articleID := strings.TrimSpace(c.Param("id"))
 	if articleID == "" {
 		return c.String(http.StatusBadRequest, "article id is required")
@@ -695,7 +695,7 @@ func parsePreviewLinkExpiry(raw *string) (*time.Time, error) {
 	return &utc, nil
 }
 
-func (pSrv *server) handleCreateBlogPreviewLink(c echo.Context) error {
+func (pSrv *server) handleCreateBlogPreviewLink(c *echo.Context) error {
 	articleID := strings.TrimSpace(c.Param("id"))
 	if articleID == "" {
 		return c.String(http.StatusBadRequest, "article id is required")
@@ -745,7 +745,7 @@ func (pSrv *server) handleCreateBlogPreviewLink(c echo.Context) error {
 	})
 }
 
-func (pSrv *server) handleGetBlogPreviewLinks(c echo.Context) error {
+func (pSrv *server) handleGetBlogPreviewLinks(c *echo.Context) error {
 	articleID := strings.TrimSpace(c.Param("id"))
 	if articleID == "" {
 		return c.String(http.StatusBadRequest, "article id is required")
@@ -775,7 +775,7 @@ func (pSrv *server) handleGetBlogPreviewLinks(c echo.Context) error {
 	return c.JSON(http.StatusOK, response)
 }
 
-func (pSrv *server) handleRevokeBlogPreviewLink(c echo.Context) error {
+func (pSrv *server) handleRevokeBlogPreviewLink(c *echo.Context) error {
 	articleID := strings.TrimSpace(c.Param("id"))
 	linkID := strings.TrimSpace(c.Param("linkId"))
 	if articleID == "" || linkID == "" {
@@ -798,7 +798,7 @@ func (pSrv *server) handleRevokeBlogPreviewLink(c echo.Context) error {
 	return c.NoContent(http.StatusNoContent)
 }
 
-func (pSrv *server) handleGetBlogPreview(c echo.Context) error {
+func (pSrv *server) handleGetBlogPreview(c *echo.Context) error {
 	token := strings.TrimSpace(c.Param("token"))
 	if token == "" {
 		return c.String(http.StatusBadRequest, "preview token is required")

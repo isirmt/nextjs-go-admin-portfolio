@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"gorm.io/gorm"
 )
 
@@ -97,7 +97,7 @@ func replaceWorkRelations(ctx context.Context, tx *query.Query, workID string, r
 	return createWorkRelations(ctx, tx, workID, relations)
 }
 
-func (pSrv *server) handleCreateWorkClick(c echo.Context) error {
+func (pSrv *server) handleCreateWorkClick(c *echo.Context) error {
 	workID := strings.TrimSpace(c.Param("id"))
 	if workID == "" {
 		return c.String(400, "work id is required")
@@ -123,7 +123,7 @@ func (pSrv *server) handleCreateWorkClick(c echo.Context) error {
 	return c.NoContent(http.StatusCreated)
 }
 
-func (pSrv *server) handleCreateWork(c echo.Context) error {
+func (pSrv *server) handleCreateWork(c *echo.Context) error {
 	var req createWorkRequest
 	if err := c.Bind(&req); err != nil {
 		return c.String(400, "invalid request body")
@@ -271,7 +271,7 @@ func (pSrv *server) handleCreateWork(c echo.Context) error {
 	return c.JSON(http.StatusCreated, work)
 }
 
-func (pSrv *server) handleUpdateWork(c echo.Context) error {
+func (pSrv *server) handleUpdateWork(c *echo.Context) error {
 	workID := strings.TrimSpace(c.Param("id"))
 	if workID == "" {
 		return c.String(400, "work id is required")
@@ -422,7 +422,7 @@ func (pSrv *server) handleUpdateWork(c echo.Context) error {
 	return c.String(http.StatusOK, "ok")
 }
 
-func (pSrv *server) handleDeleteWork(c echo.Context) error {
+func (pSrv *server) handleDeleteWork(c *echo.Context) error {
 	workID := strings.TrimSpace(c.Param("id"))
 	if workID == "" {
 		return c.String(400, "work id is required")

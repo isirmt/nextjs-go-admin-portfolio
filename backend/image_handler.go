@@ -13,11 +13,11 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"gorm.io/gorm"
 )
 
-func (pSrv *server) handleGetImages(c echo.Context) error {
+func (pSrv *server) handleGetImages(c *echo.Context) error {
 	ctx := c.Request().Context()
 	var images []*model.CommonImage
 	var err error
@@ -60,7 +60,7 @@ func (pSrv *server) handleGetImages(c echo.Context) error {
 	return c.JSON(200, images)
 }
 
-func (pSrv *server) handleGetImage(c echo.Context) error {
+func (pSrv *server) handleGetImage(c *echo.Context) error {
 	imageID := c.Param("id")
 	if imageID == "" {
 		return c.String(400, "image id is required")
@@ -78,7 +78,7 @@ func (pSrv *server) handleGetImage(c echo.Context) error {
 	return c.JSON(200, image)
 }
 
-func (pSrv *server) handleUploadImage(c echo.Context) error {
+func (pSrv *server) handleUploadImage(c *echo.Context) error {
 	fileHeader, err := c.FormFile("file")
 	if err != nil {
 		return c.String(400, "file is required")
@@ -140,7 +140,7 @@ func (pSrv *server) handleUploadImage(c echo.Context) error {
 	return c.JSON(200, newImage)
 }
 
-func (pSrv *server) handleServeImage(c echo.Context) error {
+func (pSrv *server) handleServeImage(c *echo.Context) error {
 	imageID := c.Param("id")
 	if imageID == "" {
 		return c.String(400, "image id is required")
@@ -162,7 +162,7 @@ func (pSrv *server) fetchImageByID(ctx context.Context, imageID string) (*model.
 	return pSrv.q.CommonImage.WithContext(ctx).Where(pSrv.q.CommonImage.ID.Eq(imageID)).First()
 }
 
-func (pSrv *server) serveImageContent(c echo.Context, image *model.CommonImage) error {
+func (pSrv *server) serveImageContent(c *echo.Context, image *model.CommonImage) error {
 	filePath := filepath.Join(pSrv.uploadDir, image.FilePath)
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -186,7 +186,7 @@ func (pSrv *server) serveImageContent(c echo.Context, image *model.CommonImage) 
 	return nil
 }
 
-func (pSrv *server) handleDeleteImage(c echo.Context) error {
+func (pSrv *server) handleDeleteImage(c *echo.Context) error {
 	imageID := strings.TrimSpace(c.Param("id"))
 	if imageID == "" {
 		return c.String(400, "image id is required")

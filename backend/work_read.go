@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 type workResponse struct {
@@ -32,7 +32,7 @@ func (pSrv *server) withWorkRelations(workQuery query.IIsirmtWorkDo) query.IIsir
 	)
 }
 
-func (pSrv *server) respondWorks(c echo.Context, works []*model.IsirmtWork) error {
+func (pSrv *server) respondWorks(c *echo.Context, works []*model.IsirmtWork) error {
 	responses := make([]workResponse, 0, len(works))
 	for _, work := range works {
 		if work.ID == nil {
@@ -77,7 +77,7 @@ func (pSrv *server) respondWorks(c echo.Context, works []*model.IsirmtWork) erro
 	return c.JSON(http.StatusOK, responses)
 }
 
-func (pSrv *server) handleGetWorks(c echo.Context) error {
+func (pSrv *server) handleGetWorks(c *echo.Context) error {
 	ctx := c.Request().Context()
 
 	works, err := pSrv.withWorkRelations(pSrv.q.IsirmtWork.WithContext(ctx)).
@@ -90,7 +90,7 @@ func (pSrv *server) handleGetWorks(c echo.Context) error {
 	return pSrv.respondWorks(c, works)
 }
 
-func (pSrv *server) handleGetRankingWorks(c echo.Context) error {
+func (pSrv *server) handleGetRankingWorks(c *echo.Context) error {
 	limit := 10
 	if rawLimit := strings.TrimSpace(c.QueryParam("limit")); rawLimit != "" {
 		parsedLimit, err := strconv.Atoi(rawLimit)

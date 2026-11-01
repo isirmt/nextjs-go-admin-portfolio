@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 type embedRequest struct {
@@ -82,7 +82,7 @@ func (pSrv *server) embedQuery(ctx context.Context, queryText string) ([]float64
 	return parsed.Vectors[0], nil
 }
 
-func (pSrv *server) handleSearchWorks(c echo.Context) error {
+func (pSrv *server) handleSearchWorks(c *echo.Context) error {
 	queryText := strings.TrimSpace(c.QueryParam("q"))
 	if queryText == "" {
 		return c.String(http.StatusBadRequest, "query parameter 'q' is required")

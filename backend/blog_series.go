@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"gorm.io/gorm"
 )
 
@@ -127,7 +127,7 @@ func (pSrv *server) withBlogSeriesArticles(seriesQuery query.IBlogSeriesDo) quer
 		Preload(pSrv.q.BlogSeries.ArticleEntries.Article.Tags)
 }
 
-func (pSrv *server) ensureBlogSeriesSlugAvailable(c echo.Context, slug, ignoredSeriesID string) error {
+func (pSrv *server) ensureBlogSeriesSlugAvailable(c *echo.Context, slug, ignoredSeriesID string) error {
 	series, err := pSrv.q.BlogSeries.WithContext(c.Request().Context()).
 		Where(pSrv.q.BlogSeries.Slug.Eq(slug)).First()
 	if err != nil {
@@ -142,7 +142,7 @@ func (pSrv *server) ensureBlogSeriesSlugAvailable(c echo.Context, slug, ignoredS
 	return nil
 }
 
-func validateBlogSeriesArticleIDs(c echo.Context, q *query.Query, articleIDs []string) error {
+func validateBlogSeriesArticleIDs(c *echo.Context, q *query.Query, articleIDs []string) error {
 	if len(articleIDs) == 0 {
 		return nil
 	}
@@ -157,7 +157,7 @@ func validateBlogSeriesArticleIDs(c echo.Context, q *query.Query, articleIDs []s
 	return nil
 }
 
-func syncBlogSeriesArticles(c echo.Context, tx *query.Query, seriesID string, articleIDs []string) error {
+func syncBlogSeriesArticles(c *echo.Context, tx *query.Query, seriesID string, articleIDs []string) error {
 	if _, err := tx.BlogSeriesArticle.WithContext(c.Request().Context()).
 		Where(tx.BlogSeriesArticle.SeriesID.Eq(seriesID)).Delete(); err != nil {
 		return err
@@ -177,7 +177,7 @@ func syncBlogSeriesArticles(c echo.Context, tx *query.Query, seriesID string, ar
 	return tx.BlogSeriesArticle.WithContext(c.Request().Context()).Create(entries...)
 }
 
-func (pSrv *server) handleGetBlogSeries(c echo.Context) error {
+func (pSrv *server) handleGetBlogSeries(c *echo.Context) error {
 	isAdmin := pSrv.isAdminRequest(c)
 	seriesQuery := pSrv.withBlogSeriesArticles(pSrv.q.BlogSeries.WithContext(c.Request().Context())).
 		Order(pSrv.q.BlogSeries.UpdatedAt.Desc())
@@ -218,7 +218,7 @@ func (pSrv *server) handleGetBlogSeries(c echo.Context) error {
 	return c.JSON(http.StatusOK, response)
 }
 
-func (pSrv *server) handleCreateBlogSeries(c echo.Context) error {
+func (pSrv *server) handleCreateBlogSeries(c *echo.Context) error {
 	var req blogSeriesRequest
 	if err := c.Bind(&req); err != nil {
 		return c.String(http.StatusBadRequest, "invalid request body")
@@ -259,7 +259,7 @@ func (pSrv *server) handleCreateBlogSeries(c echo.Context) error {
 	return c.JSON(http.StatusCreated, blogSeriesSummary(createdSeries, true))
 }
 
-func (pSrv *server) handleUpdateBlogSeries(c echo.Context) error {
+func (pSrv *server) handleUpdateBlogSeries(c *echo.Context) error {
 	seriesID := strings.TrimSpace(c.Param("id"))
 	if seriesID == "" {
 		return c.String(http.StatusBadRequest, "series id is required")
@@ -309,7 +309,7 @@ func (pSrv *server) handleUpdateBlogSeries(c echo.Context) error {
 	return c.JSON(http.StatusOK, blogSeriesSummary(updatedSeries, true))
 }
 
-func (pSrv *server) handleDeleteBlogSeries(c echo.Context) error {
+func (pSrv *server) handleDeleteBlogSeries(c *echo.Context) error {
 	seriesID := strings.TrimSpace(c.Param("id"))
 	if seriesID == "" {
 		return c.String(http.StatusBadRequest, "series id is required")
