@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"realtime/internal/query"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"gorm.io/gorm"
 )
 
@@ -23,6 +23,6 @@ type server struct {
 	wsSeq                uint64
 }
 
-func (pSrv *server) handleHealth(c echo.Context) error {
+func (pSrv *server) handleHealth(c *echo.Context) error {
 	return c.String(200, "ok")
 }

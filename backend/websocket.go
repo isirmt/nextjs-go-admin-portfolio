@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 const (
@@ -83,7 +83,7 @@ func (h *wsHub) Broadcast(message []byte) {
 	}
 }
 
-func (pSrv *server) handleWS(c echo.Context) error {
+func (pSrv *server) handleWS(c *echo.Context) error {
 	if pSrv.wsHub == nil {
 		return c.NoContent(http.StatusServiceUnavailable)
 	}

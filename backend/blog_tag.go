@@ -6,7 +6,7 @@ import (
 	"realtime/internal/query/model"
 	"strings"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"gorm.io/gorm"
 )
 
@@ -33,7 +33,7 @@ func blogTagSummary(tag *model.BlogTag) blogTagResponse {
 	}
 }
 
-func (pSrv *server) handleGetBlogTags(c echo.Context) error {
+func (pSrv *server) handleGetBlogTags(c *echo.Context) error {
 	tags, err := pSrv.q.BlogTag.WithContext(c.Request().Context()).
 		Order(pSrv.q.BlogTag.Name.Asc()).
 		Find()
@@ -48,7 +48,7 @@ func (pSrv *server) handleGetBlogTags(c echo.Context) error {
 	return c.JSON(http.StatusOK, response)
 }
 
-func (pSrv *server) handleGetBlogTag(c echo.Context) error {
+func (pSrv *server) handleGetBlogTag(c *echo.Context) error {
 	tagID := strings.TrimSpace(c.Param("id"))
 	if tagID == "" {
 		return c.String(http.StatusBadRequest, "blog tag id is required")
@@ -66,7 +66,7 @@ func (pSrv *server) handleGetBlogTag(c echo.Context) error {
 	return c.JSON(http.StatusOK, blogTagSummary(tag))
 }
 
-func (pSrv *server) handleCreateBlogTag(c echo.Context) error {
+func (pSrv *server) handleCreateBlogTag(c *echo.Context) error {
 	var req createBlogTagRequest
 	if err := c.Bind(&req); err != nil {
 		return c.String(http.StatusBadRequest, "invalid request body")
