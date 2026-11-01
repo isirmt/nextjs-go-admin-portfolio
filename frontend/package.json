@@ -48,7 +48,7 @@
     "@vitest/coverage-v8": "latest",
     "babel-plugin-react-compiler": "1.0.0",
     "baseline-browser-mapping": "^2.10.0",
-    "eslint": "9.39.5",
+    "eslint": "10.13.0",
     "eslint-config-next": "16.4.3",
     "eslint-plugin-storybook": "^10.6.3",
     "playwright": "latest",
