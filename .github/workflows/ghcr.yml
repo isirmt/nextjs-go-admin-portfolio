@@ -90,7 +90,7 @@ jobs:
             latest=false
 
       - name: Build and push version tag
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v7
         if: steps.check.outputs.exists != 'true'
         with:
           context: ${{ matrix.context }}
