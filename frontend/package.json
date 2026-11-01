@@ -40,7 +40,7 @@
     "@storybook/addon-vitest": "^10.6.3",
     "@storybook/nextjs-vite": "^10.6.3",
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^24",
+    "@types/node": "^26.0.0",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "@types/three": "^0.186.0",
