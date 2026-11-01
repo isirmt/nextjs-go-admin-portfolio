@@ -13,7 +13,6 @@ import SelectedDetailScreen from "./selectedDetailScreen";
 import WorkCard from "./workCard";
 import { useTechsContext } from "@/contexts/techsContext";
 import TagAndSortControls from "@/components/public/tagAndSortControls";
-import LatestArticleSection from "../blogs/latestArticleSection";
 
 export default function WorksList() {
   const { works } = useWorksContext();
