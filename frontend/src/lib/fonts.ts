@@ -55,4 +55,6 @@ export const kiwiMaru = Kiwi_Maru({
 export const lineSeedJp = LINE_Seed_JP({
   weight: ["400", "700"],
   subsets: ["latin"],
+  adjustFontFallback: false,
+  fallback: ["sans-serif"],
 });
