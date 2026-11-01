@@ -17,10 +17,9 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
-	"github.com/yuin/goldmark"
-	"github.com/yuin/goldmark/ast"
-	"github.com/yuin/goldmark/extension"
-	"github.com/yuin/goldmark/text"
+	"github.com/yuin/goldmark/v2/ast"
+	"github.com/yuin/goldmark/v2/extension"
+	"github.com/yuin/goldmark/v2/parser"
 	"gorm.io/gorm"
 )
 
@@ -237,7 +236,7 @@ func parseBlogArticleInput(req blogArticleRequest) (blogArticleInput, error) {
 
 func generateBlogExcerpt(markdown string) string {
 	source := []byte(markdown)
-	document := goldmark.New(goldmark.WithExtensions(extension.GFM)).Parser().Parse(text.NewReader(source))
+	document := parser.New(parser.WithExtensions(extension.GFMParser)).Parse(source)
 
 	var content strings.Builder
 	_ = ast.Walk(document, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
@@ -250,12 +249,10 @@ func generateBlogExcerpt(markdown string) string {
 		}
 
 		switch node.Kind() {
-		case ast.KindFencedCodeBlock, ast.KindCodeBlock, ast.KindCodeSpan, ast.KindHTMLBlock, ast.KindRawHTML, ast.KindImage:
+		case ast.KindCodeBlock, ast.KindCodeSpan, ast.KindHTMLBlock, ast.KindRawHTML, ast.KindImage:
 			return ast.WalkSkipChildren, nil
 		case ast.KindText:
-			content.Write(node.Text(source))
-		case ast.KindString:
-			content.Write(node.Text(source))
+			content.Write(node.(*ast.Text).Value.Bytes(source))
 		}
 		return ast.WalkContinue, nil
 	})
