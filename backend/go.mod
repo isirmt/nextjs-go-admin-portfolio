@@ -11,7 +11,7 @@ require (
 
 require (
 	github.com/labstack/echo/v4 v4.16.3
-	github.com/yuin/goldmark v1.4.13
+	github.com/yuin/goldmark v1.8.6
 	github.com/yuin/goldmark/v2 v2.1.9
 	gorm.io/gen v0.3.29
 )
