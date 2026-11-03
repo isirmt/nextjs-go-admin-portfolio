@@ -11,10 +11,12 @@ export default async function ConsoleLayout({
   return (
     <ConsoleSessionProvider>
       <HamburgerProvider>
-        <ConsoleHeader />
-        <div className="relative flex min-h-dvh lg:pl-72">
-          <ConsoleSidebar />
-          {children}
+        <div className="min-h-dvh bg-background font-sans text-foreground">
+          <ConsoleHeader />
+          <div className="relative flex min-h-dvh lg:pl-72">
+            <ConsoleSidebar />
+            {children}
+          </div>
         </div>
       </HamburgerProvider>
     </ConsoleSessionProvider>
