@@ -3,10 +3,6 @@ import "./globals.css";
 import { notoSansJp } from "@/lib/fonts";
 import ScrollbarWidthSetter from "@/components/public/scrollbarWidthSetter";
 import { GoogleTagManager } from "@next/third-parties/google";
-import { Noto_Sans } from "next/font/google";
-import { cn } from "@/lib/utils";
-
-const notoSans = Noto_Sans({subsets:['latin'],variable:'--font-sans'});
 
 export const dynamic = "force-dynamic";
 
@@ -26,7 +22,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ja" className={cn("font-sans", notoSans.variable)}>
+    <html lang="ja" className={notoSansJp.variable}>
       {process.env.GOOGLE_TAG_MANAGER_ID && (
         <GoogleTagManager gtmId={process.env.GOOGLE_TAG_MANAGER_ID} />
       )}
