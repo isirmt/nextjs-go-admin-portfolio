@@ -11,7 +11,7 @@ export default async function ConsoleLayout({
   return (
     <ConsoleSessionProvider>
       <HamburgerProvider>
-        <div className="min-h-dvh bg-background font-sans text-foreground">
+        <div className="bg-background text-foreground min-h-dvh font-sans">
           <ConsoleHeader />
           <div className="relative flex min-h-dvh lg:pl-72">
             <ConsoleSidebar />
