@@ -5,11 +5,11 @@ import { useBlogTagsContext } from "@/contexts/blogTagsContext";
 import backendApi from "@/lib/auth/backendFetch";
 import useConsoleMutation from "@/hooks/useConsoleMutation";
 import useConsoleTextField from "@/hooks/useConsoleTextField";
-import ConsoleButton from "./consoleButton";
 import ConsoleFormFeedback from "./consoleFormFeedback";
 import ConsoleSelectableTagButton from "./consoleSelectableTagButton";
 import { ConsoleTextField } from "./consoleField";
 import { LabelText } from "./labelBlock";
+import { Button } from "@/components/shadcn/ui/button";
 
 type BlogTagSelectingBoxProps = {
   selectedIds: string[];
@@ -86,13 +86,13 @@ export default function BlogTagSelectingBox({
           <ConsoleTextField {...slug.inputProps} placeholder="nextjs" />
         </label>
         <ConsoleFormFeedback error={submitError} />
-        <ConsoleButton
+        <Button
           type="button"
           onClick={handleCreateBlogTag}
           disabled={isSubmitting}
         >
           追加
-        </ConsoleButton>
+        </Button>
       </div>
     </div>
   );

@@ -23,6 +23,7 @@ import BlogTagSelectingBox from "./blogTagSelectingBox";
 import BlogMarkdownEditor, {
   type BlogMarkdownEditorHandle,
 } from "./blogMarkdownEditor";
+import { Button } from "@/components/shadcn/ui/button";
 
 type BlogArticleEditorProps = { articleId?: string };
 
@@ -292,9 +293,14 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
             error={loadError ?? submitError ?? deleteError}
             success={submitSuccess}
           />
-          <ConsoleButton type="submit" disabled={isSubmitting}>
+          <Button
+            type="submit"
+            size="lg"
+            className="w-full max-w-sm"
+            disabled={isSubmitting}
+          >
             {isSubmitting ? "保存中" : "保存"}
-          </ConsoleButton>
+          </Button>
         </div>
         <div>
           {articleId ? (
