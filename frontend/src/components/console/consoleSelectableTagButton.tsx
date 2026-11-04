@@ -1,18 +1,27 @@
 import type { ReactNode } from "react";
+import { Trash2Icon } from "lucide-react";
 import { Button } from "@/components/shadcn/ui/button";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/shadcn/ui/context-menu";
 
 type ConsoleSelectableTagButtonProps = {
   children: ReactNode;
   isSelected: boolean;
   onToggled: () => void;
+  onDeleteRequested?: () => void;
 };
 
 export default function ConsoleSelectableTagButton({
   children,
   isSelected,
   onToggled,
+  onDeleteRequested,
 }: ConsoleSelectableTagButtonProps) {
-  return (
+  const button = (
     <Button
       type="button"
       variant="outline"
@@ -23,5 +32,19 @@ export default function ConsoleSelectableTagButton({
     >
       {children}
     </Button>
+  );
+
+  if (!onDeleteRequested) return button;
+
+  return (
+    <ContextMenu>
+      <ContextMenuTrigger asChild>{button}</ContextMenuTrigger>
+      <ContextMenuContent>
+        <ContextMenuItem variant="destructive" onSelect={onDeleteRequested}>
+          <Trash2Icon />
+          削除
+        </ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
   );
 }
