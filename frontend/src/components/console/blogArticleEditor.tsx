@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Maximize2Icon, XIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ImagesProvider } from "@/contexts/imagesContext";
@@ -50,6 +51,7 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
   const { reset: resetPublishedAt } = publishedAt;
   const { reset: resetBodyMarkdown } = bodyMarkdown;
   const [bodyView, setBodyView] = useState<"edit" | "preview">("edit");
+  const [isBodyEditorExpanded, setIsBodyEditorExpanded] = useState(false);
   const {
     isPending: isSubmitting,
     error: submitError,
@@ -199,38 +201,88 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
             />
           </div>
           <Field className="lg:col-span-2">
-            <FieldTitle>
-              本文（Markdown） <span className="text-destructive">*</span>
-            </FieldTitle>
-            <Tabs
-              value={bodyView}
-              onValueChange={(nextValue) =>
-                setBodyView(nextValue as "edit" | "preview")
-              }
-              className="gap-3"
+            <div className="flex items-center justify-between gap-4">
+              <FieldTitle>
+                本文（Markdown） <span className="text-destructive">*</span>
+              </FieldTitle>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon-sm"
+                className="hidden lg:inline-flex"
+                onClick={() => setIsBodyEditorExpanded(true)}
+              >
+                <Maximize2Icon />
+              </Button>
+            </div>
+            {!isBodyEditorExpanded ? (
+              <Tabs
+                value={bodyView}
+                onValueChange={(nextValue) =>
+                  setBodyView(nextValue as "edit" | "preview")
+                }
+                className="gap-3"
+              >
+                <TabsList className="w-full">
+                  <TabsTrigger value="edit">編集</TabsTrigger>
+                  <TabsTrigger value="preview">プレビュー</TabsTrigger>
+                </TabsList>
+                <TabsContent value="edit">
+                  <BlogMarkdownEditor
+                    value={bodyMarkdown.value}
+                    onChange={bodyMarkdown.setValue}
+                  />
+                </TabsContent>
+                <TabsContent value="preview">
+                  <div className="min-h-64 border border-[#c68ef0] bg-white py-3 text-[#222]">
+                    <div className="mx-auto w-full max-w-240 px-4">
+                      {bodyMarkdown.value.trim() ? (
+                        <BlogMarkdownPreview content={bodyMarkdown.value} />
+                      ) : (
+                        <p className="text-sm text-[#7e11d1]">
+                          本文がありません
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </TabsContent>
+              </Tabs>
+            ) : null}
+          </Field>
+        </div>
+        {isBodyEditorExpanded ? (
+          <div className="bg-background fixed inset-0 z-110 hidden p-6 lg:block">
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              className="absolute top-6 right-6 z-1"
+              onClick={() => setIsBodyEditorExpanded(false)}
             >
-              <TabsList className="w-full">
-                <TabsTrigger value="edit">編集</TabsTrigger>
-                <TabsTrigger value="preview">プレビュー</TabsTrigger>
-              </TabsList>
-              <TabsContent value="edit">
+              <XIcon />
+            </Button>
+            <div className="grid size-full grid-cols-[minmax(0,2fr)_minmax(0,1fr)] gap-6 pr-14">
+              <div className="border-border/50 min-h-0 overflow-hidden rounded-xl border">
                 <BlogMarkdownEditor
+                  height="100%"
                   value={bodyMarkdown.value}
                   onChange={bodyMarkdown.setValue}
                 />
-              </TabsContent>
-              <TabsContent value="preview">
-                <div className="min-h-64 border border-[#c68ef0] bg-white px-4 py-3 text-[#222]">
+              </div>
+              <div className="border-border/50 min-h-0 overflow-y-auto rounded-xl border py-3 text-[#222]">
+                <div className="mx-auto w-full max-w-240 px-4">
                   {bodyMarkdown.value.trim() ? (
                     <BlogMarkdownPreview content={bodyMarkdown.value} />
                   ) : (
-                    <p className="text-sm text-[#7e11d1]">本文がありません</p>
+                    <p className="text-muted-foreground text-sm">
+                      本文がありません
+                    </p>
                   )}
                 </div>
-              </TabsContent>
-            </Tabs>
-          </Field>
-        </div>
+              </div>
+            </div>
+          </div>
+        ) : null}
         <div className="sticky bottom-0 mt-8 flex flex-col items-center gap-2 bg-white py-2.5">
           <ConsoleFormFeedback
             className="mb-2"

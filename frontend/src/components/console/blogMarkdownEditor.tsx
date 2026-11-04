@@ -25,12 +25,13 @@ export type BlogMarkdownEditorHandle = {
 type BlogMarkdownEditorProps = {
   value: string;
   onChange: (value: string) => void;
+  height?: string;
 };
 
 const BlogMarkdownEditor = forwardRef<
   BlogMarkdownEditorHandle,
   BlogMarkdownEditorProps
->(function BlogMarkdownEditor({ value, onChange }, ref) {
+>(function BlogMarkdownEditor({ value, onChange, height = "36rem" }, ref) {
   const { images, isLoading: areImagesLoading } = useImagesContext();
   const bodyEditorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const [monaco, setMonaco] = useState<Monaco | null>(null);
@@ -184,7 +185,7 @@ const BlogMarkdownEditor = forwardRef<
 
   return (
     <MonacoEditor
-      height="36rem"
+      height={height}
       language="markdown"
       value={value}
       onChange={(nextValue) => onChange(nextValue ?? "")}
