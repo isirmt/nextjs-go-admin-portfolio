@@ -4,19 +4,24 @@ import { createContext, useContext, useMemo, useState } from "react";
 type HamburgerContextValue = {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
+  isCollapsed: boolean;
+  setIsCollapsed: (collapsed: boolean) => void;
 };
 
 const HamburgerContext = createContext<HamburgerContextValue | null>(null);
 
 export function HamburgerProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const value = useMemo(
     () => ({
       isOpen,
       setIsOpen,
+      isCollapsed,
+      setIsCollapsed,
     }),
-    [isOpen],
+    [isCollapsed, isOpen],
   );
 
   return (
