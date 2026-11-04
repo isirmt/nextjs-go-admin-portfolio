@@ -8,6 +8,7 @@ import {
 import { isSortable, useSortable } from "@dnd-kit/react/sortable";
 import {
   EllipsisIcon,
+  GripVerticalIcon,
   ListOrderedIcon,
   PencilIcon,
   Trash2Icon,
@@ -50,32 +51,40 @@ function SortableSeriesArticle({
   article: BlogArticleSummary;
   index: number;
 }) {
-  const { ref, handleRef, isDragging } = useSortable({
+  const { ref, handleRef } = useSortable({
     id: article.id,
     index,
   });
 
   return (
-    <li
-      ref={ref}
-      className={`flex items-center gap-3 border border-dashed border-[#c68ef0] bg-white px-3 py-2 ${isDragging ? "opacity-50" : ""}`}
-    >
-      <span
-        ref={handleRef}
-        className="cursor-grab touch-none text-lg leading-none active:cursor-grabbing"
-        aria-label={`${article.title}を並び替え`}
-      >
-        ⠿
-      </span>
-      <span className="min-w-0 flex-1 truncate text-sm font-semibold">
-        {index + 1}. {article.title}
-      </span>
-      <span className="text-xs text-[#555]">/{article.slug}</span>
-    </li>
+    <TableRow ref={ref} className="bg-background hover:bg-background">
+      <TableCell className="w-14">
+        <span
+          ref={handleRef}
+          className="cursor-grab touch-none text-lg leading-none active:cursor-grabbing"
+        >
+          <GripVerticalIcon />
+        </span>
+      </TableCell>
+      <TableCell className="min-w-0">
+        <p className="truncate font-medium">
+          {index + 1}. {article.title}
+        </p>
+      </TableCell>
+      <TableCell className="text-muted-foreground hidden text-xs sm:table-cell">
+        /{article.slug}
+      </TableCell>
+    </TableRow>
   );
 }
 
-function SeriesArticleOrder({ series }: { series: BlogSeries }) {
+function SeriesArticleOrder({
+  series,
+  onSaved,
+}: {
+  series: BlogSeries;
+  onSaved: () => void;
+}) {
   const { refreshBlogSeries } = useBlogSeriesContext();
   const [articles, setArticles] = useState(series.articles);
   const { isPending, error, run } = useConsoleMutation();
@@ -94,7 +103,7 @@ function SeriesArticleOrder({ series }: { series: BlogSeries }) {
   }, []);
 
   const handleSaveOrder = async () => {
-    await run(async () => {
+    const result = await run(async () => {
       const response = await backendApi(`/blog-series/${series.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -112,24 +121,38 @@ function SeriesArticleOrder({ series }: { series: BlogSeries }) {
       }
       await refreshBlogSeries();
     }, "並び順の保存に失敗しました");
+
+    if (result.ok) onSaved();
   };
 
   return (
-    <div className="border-t border-[#c68ef0] bg-[#f5f5f5] px-4 py-4">
+    <div className="px-4 py-4">
+      <p className="mb-3 text-sm font-medium">記事の並び替え</p>
       {articles.length ? (
         <DragDropProvider sensors={[PointerSensor]} onDragEnd={handleDragEnd}>
-          <ul className="flex flex-col gap-2">
-            {articles.map((article, index) => (
-              <SortableSeriesArticle
-                key={article.id}
-                article={article}
-                index={index}
-              />
-            ))}
-          </ul>
+          <Table className="table-fixed">
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-14">順番</TableHead>
+                <TableHead>タイトル</TableHead>
+                <TableHead className="hidden sm:table-cell">SLUG</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {articles.map((article, index) => (
+                <SortableSeriesArticle
+                  key={article.id}
+                  article={article}
+                  index={index}
+                />
+              ))}
+            </TableBody>
+          </Table>
         </DragDropProvider>
       ) : (
-        <p className="text-sm text-[#7e11d1]">選択されている記事はありません</p>
+        <p className="text-muted-foreground text-sm">
+          選択されている記事はありません
+        </p>
       )}
       <ConsoleFormFeedback className="mt-3" error={error} />
       <Button
@@ -273,9 +296,12 @@ export default function BlogSeriesViewer() {
                   </TableCell>
                 </TableRow>
                 {isExpanded ? (
-                  <TableRow>
+                  <TableRow className="bg-background hover:bg-background">
                     <TableCell colSpan={4} className="p-0">
-                      <SeriesArticleOrder series={item} />
+                      <SeriesArticleOrder
+                        series={item}
+                        onSaved={() => setExpandedSeriesID(null)}
+                      />
                     </TableCell>
                   </TableRow>
                 ) : null}
