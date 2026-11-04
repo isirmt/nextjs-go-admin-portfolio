@@ -89,6 +89,14 @@ export default function BlogTagSelectingBox({
     }, "タグの登録に失敗しました");
   }, [name, refreshBlogTags, run, setSubmitError, slug]);
 
+  const handleCreateDialogOpenChange = useCallback(
+    (open: boolean) => {
+      if (open) setSubmitError(null);
+      setIsCreateDialogOpen(open);
+    },
+    [setSubmitError],
+  );
+
   const handleDeleteBlogTag = useCallback(async () => {
     if (!deletingTag) return;
 
@@ -117,7 +125,7 @@ export default function BlogTagSelectingBox({
             type="button"
             variant="outline"
             size="sm"
-            onClick={() => setIsCreateDialogOpen(true)}
+            onClick={() => handleCreateDialogOpenChange(true)}
           >
             <PlusIcon />
             タグを追加
@@ -139,7 +147,10 @@ export default function BlogTagSelectingBox({
         </div>
         <ConsoleFormFeedback className="mt-4" error={deleteError} />
       </CardContent>
-      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+      <Dialog
+        open={isCreateDialogOpen}
+        onOpenChange={handleCreateDialogOpenChange}
+      >
         <DialogContent className="rounded-xl shadow-none">
           <DialogHeader>
             <DialogTitle>タグを追加</DialogTitle>
