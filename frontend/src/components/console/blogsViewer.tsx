@@ -1,73 +1,163 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useCallback, useState } from "react";
+import { EllipsisIcon, PencilIcon, Trash2Icon } from "lucide-react";
 import { useBlogArticlesContext } from "@/contexts/blogArticlesContext";
+import backendApi from "@/lib/auth/backendFetch";
 import { formatJapaneseDateTime } from "@/lib/date";
-import ConsoleButton from "./consoleButton";
+import type { BlogArticleSummary } from "@/types/blogs/common";
+import useConsoleMutation from "@/hooks/useConsoleMutation";
+import ConsoleConfirmDialog from "./consoleConfirmDialog";
+import ConsoleFormFeedback from "./consoleFormFeedback";
+import { Badge } from "@/components/shadcn/ui/badge";
+import { Button } from "@/components/shadcn/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/shadcn/ui/dropdown-menu";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/shadcn/ui/table";
 
 export default function BlogsViewer() {
-  const router = useRouter();
-  const { articles, error, isLoading } = useBlogArticlesContext();
+  const { articles, error, isLoading, refreshBlogArticles } =
+    useBlogArticlesContext();
+  const [deletingArticle, setDeletingArticle] =
+    useState<BlogArticleSummary | null>(null);
+  const {
+    isPending: isDeleting,
+    error: deleteError,
+    run: runDelete,
+  } = useConsoleMutation();
+
+  const handleDelete = useCallback(async () => {
+    if (!deletingArticle) return;
+
+    const result = await runDelete(async () => {
+      const response = await backendApi(`/blogs/${deletingArticle.id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        throw new Error((await response.text()) || "記事の削除に失敗しました");
+      }
+      await refreshBlogArticles();
+    }, "記事の削除に失敗しました");
+
+    if (result.ok) setDeletingArticle(null);
+  }, [deletingArticle, refreshBlogArticles, runDelete]);
 
   return (
     <main className="relative w-full space-y-8 px-2.5 py-8 lg:px-16">
       <div className="flex flex-wrap items-center justify-end gap-4">
-        <Link
-          className="bg-[#67c8e6] px-4 py-2 text-lg font-bold text-white transition hover:bg-[#65b9d2]"
-          href="/console/blogs/new"
-        >
-          新規記事を作成
-        </Link>
+        <Button asChild>
+          <Link href="/console/blogs/new">新規記事を作成</Link>
+        </Button>
       </div>
       <h2 className="font-semibold text-[#7e11d1]">記事一覧</h2>
       {error ? <p className="text-sm text-[#e04787]">{error}</p> : null}
-      <ul className="flex flex-col gap-4">
-        {isLoading ? (
-          <li className="px-4 py-8 text-center text-sm text-[#7e11d1]">
-            読み込み中です
-          </li>
-        ) : null}
-        {!isLoading && articles.length === 0 ? (
-          <li className="border border-dashed border-[#c68ef0] bg-white px-4 py-8 text-center text-sm text-[#7e11d1]">
-            記事はありません
-          </li>
-        ) : null}
-        {articles.map((article) => (
-          <li
-            key={article.id}
-            className="flex flex-col overflow-hidden rounded border border-[#c68ef0] bg-white shadow-[.2rem_.2rem_0_0_#c68ef0]"
-          >
-            <div className="flex flex-wrap items-center gap-4 px-4 py-3">
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold">
-                  {article.title}
+      <ConsoleFormFeedback error={deleteError} />
+      <Table className="table-fixed">
+        <TableHeader>
+          <TableRow>
+            <TableHead>タイトル</TableHead>
+            <TableHead className="w-20">状態</TableHead>
+            <TableHead className="w-36">公開日時</TableHead>
+            <TableHead className="w-36">更新日時</TableHead>
+            <TableHead className="w-12" />
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {isLoading ? (
+            <TableRow>
+              <TableCell
+                colSpan={5}
+                className="text-muted-foreground h-28 text-center"
+              >
+                読み込み中です
+              </TableCell>
+            </TableRow>
+          ) : null}
+          {!isLoading && articles.length === 0 ? (
+            <TableRow>
+              <TableCell
+                colSpan={5}
+                className="text-muted-foreground h-28 text-center"
+              >
+                記事はありません
+              </TableCell>
+            </TableRow>
+          ) : null}
+          {articles.map((article) => (
+            <TableRow key={article.id}>
+              <TableCell className="min-w-0">
+                <p className="truncate font-medium">{article.title}</p>
+                <p className="text-muted-foreground truncate text-xs">
+                  /{article.slug}
                 </p>
-                <p className="truncate text-xs">/{article.slug}</p>
-              </div>
-              <span
-                className={
-                  article.status === "published"
-                    ? "rounded bg-[#1e946d] px-2 py-0.5 text-xs font-bold text-white select-none"
-                    : "rounded bg-[#7e11d1] px-2 py-0.5 text-xs font-bold text-white select-none"
-                }
-              >
-                {article.status === "published" ? "公開" : "下書き"}
-              </span>
-              <ConsoleButton
-                variant="text"
-                onClick={() => router.push(`/console/blogs/${article.id}`)}
-              >
-                編集
-              </ConsoleButton>
-            </div>
-            <div className="bg-[#f5f5f5] px-4 py-2 text-xs text-[#444]">
-              公開日時: {formatJapaneseDateTime(article.published_at, "未公開")}{" "}
-              / 更新日時: {formatJapaneseDateTime(article.updated_at)}
-            </div>
-          </li>
-        ))}
-      </ul>
+              </TableCell>
+              <TableCell>
+                <Badge
+                  variant={
+                    article.status === "published" ? "secondary" : "default"
+                  }
+                >
+                  {article.status === "published" ? "公開" : "下書き"}
+                </Badge>
+              </TableCell>
+              <TableCell>
+                {formatJapaneseDateTime(article.published_at, "未公開")}
+              </TableCell>
+              <TableCell>
+                {formatJapaneseDateTime(article.updated_at)}
+              </TableCell>
+              <TableCell>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button type="button" variant="ghost" size="icon-sm">
+                      <EllipsisIcon />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem asChild>
+                      <Link href={`/console/blogs/${article.id}`}>
+                        <PencilIcon />
+                        編集
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      variant="destructive"
+                      onSelect={() => setDeletingArticle(article)}
+                    >
+                      <Trash2Icon />
+                      削除
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+      <ConsoleConfirmDialog
+        open={deletingArticle !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeletingArticle(null);
+        }}
+        title="記事を削除"
+        description={`「${deletingArticle?.title ?? ""}」を削除しますか？`}
+        confirmLabel="削除"
+        confirmingLabel="削除中"
+        isConfirming={isDeleting}
+        onConfirm={handleDelete}
+      />
     </main>
   );
 }
