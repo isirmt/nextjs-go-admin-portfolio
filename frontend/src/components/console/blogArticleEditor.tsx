@@ -1,9 +1,8 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { ImagesProvider } from "@/contexts/imagesContext";
 import { useBlogArticlesContext } from "@/contexts/blogArticlesContext";
 import { BlogTagsProvider } from "@/contexts/blogTagsContext";
@@ -14,14 +13,12 @@ import ConsoleButton from "./consoleButton";
 import ConsoleConfirmDialog from "./consoleConfirmDialog";
 import ConsoleDateTimePicker from "./consoleDateTimePicker";
 import ConsoleFormFeedback from "./consoleFormFeedback";
-import ImageSelectingDialog from "./imageSelectingDialog";
 import ConsoleSegmentedControl from "./consoleSegmentedControl";
 import useConsoleTextField from "@/hooks/useConsoleTextField";
 import BlogMarkdownPreview from "@/components/blogs/blogMarkdownPreview";
 import BlogTagSelectingBox from "./blogTagSelectingBox";
-import BlogMarkdownEditor, {
-  type BlogMarkdownEditorHandle,
-} from "./blogMarkdownEditor";
+import BlogMarkdownEditor from "./blogMarkdownEditor";
+import ConsoleImagePicker from "./consoleImagePicker";
 import { Button } from "@/components/shadcn/ui/button";
 import {
   Field,
@@ -40,27 +37,6 @@ import {
 
 type BlogArticleEditorProps = { articleId?: string };
 
-function SelectedImageTiles({ imageIds }: { imageIds: string[] }) {
-  return imageIds.length ? (
-    <div className="flex flex-wrap gap-3">
-      {imageIds.map((id) => (
-        <div
-          key={id}
-          className="size-20 overflow-hidden border-2 border-[#67c8e6] bg-white"
-        >
-          <img
-            src={`/api/images/${id}/raw`}
-            alt=""
-            className="size-full object-contain"
-          />
-        </div>
-      ))}
-    </div>
-  ) : (
-    <p className="text-sm text-[#7e11d1]">画像未選択</p>
-  );
-}
-
 function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
   const router = useRouter();
   const { refreshBlogArticles } = useBlogArticlesContext();
@@ -76,8 +52,6 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
   const { reset: resetPublishedAt } = publishedAt;
   const { reset: resetBodyMarkdown } = bodyMarkdown;
   const [bodyView, setBodyView] = useState<"edit" | "preview">("edit");
-  const [isThumbnailDialogOpen, setIsThumbnailDialogOpen] = useState(false);
-  const [isBodyImageDialogOpen, setIsBodyImageDialogOpen] = useState(false);
   const {
     isPending: isSubmitting,
     error: submitError,
@@ -91,8 +65,6 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
-  const blogMarkdownEditorRef = useRef<BlogMarkdownEditorHandle | null>(null);
-  const bodySelectionRef = useRef({ start: 0, end: 0 });
 
   useEffect(() => {
     if (!articleId) return;
@@ -137,28 +109,6 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
       isCurrent = false;
     };
   }, [articleId, resetBodyMarkdown, resetPublishedAt, resetSlug, resetTitle]);
-
-  const openBodyImageDialog = () => {
-    bodySelectionRef.current =
-      blogMarkdownEditorRef.current?.getSelectionOffsets() ?? {
-        start: bodyMarkdown.value.length,
-        end: bodyMarkdown.value.length,
-      };
-    setIsBodyImageDialogOpen(true);
-  };
-
-  const insertBodyImage = ([imageId]: string[]) => {
-    if (!imageId) return;
-    const { start, end } = bodySelectionRef.current;
-    const markdown = `![画像](/api/images/${imageId}/raw)`;
-    bodyMarkdown.setValue(
-      (current) => `${current.slice(0, start)}${markdown}${current.slice(end)}`,
-    );
-    requestAnimationFrame(() => {
-      const cursor = start + markdown.length;
-      blogMarkdownEditorRef.current?.focusAtOffset(cursor);
-    });
-  };
 
   const handleSubmit = async (event: React.SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -262,22 +212,14 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
           <div className="lg:col-span-2">
             <BlogTagSelectingBox selectedIds={tagIds} onChange={setTagIds} />
           </div>
-          <Field>
-            <FieldTitle>サムネイル画像</FieldTitle>
-            <ConsoleButton
-              type="button"
-              onClick={() => setIsThumbnailDialogOpen(true)}
-            >
-              画像を選択
-            </ConsoleButton>
-            <SelectedImageTiles imageIds={thumbnailImageIds} />
-          </Field>
-          <Field>
-            <FieldTitle>本文への画像挿入</FieldTitle>
-            <ConsoleButton type="button" onClick={openBodyImageDialog}>
-              画像を挿入
-            </ConsoleButton>
-          </Field>
+          <div className="lg:col-span-2">
+            <ConsoleImagePicker
+              label="サムネイル画像"
+              selectedIds={thumbnailImageIds}
+              selectionMode="single"
+              onChange={setThumbnailImageIds}
+            />
+          </div>
           <Field className="lg:col-span-2">
             <FieldTitle>
               本文（Markdown） <span className="text-destructive">*</span>
@@ -295,7 +237,6 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
               </TabsList>
               <TabsContent value="edit">
                 <BlogMarkdownEditor
-                  ref={blogMarkdownEditorRef}
                   value={bodyMarkdown.value}
                   onChange={bodyMarkdown.setValue}
                 />
@@ -350,20 +291,6 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
         isConfirming={isDeleting}
         onConfirm={handleDelete}
       />
-      <ImageSelectingDialog
-        open={isThumbnailDialogOpen}
-        onOpenChange={setIsThumbnailDialogOpen}
-        initialSelectedIds={thumbnailImageIds}
-        onSelect={setThumbnailImageIds}
-      />
-      {isBodyImageDialogOpen ? (
-        <ImageSelectingDialog
-          open
-          onOpenChange={setIsBodyImageDialogOpen}
-          initialSelectedIds={[]}
-          onSelect={insertBodyImage}
-        />
-      ) : null}
     </main>
   );
 }
