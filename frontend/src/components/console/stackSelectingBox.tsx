@@ -1,15 +1,31 @@
 "use client";
 
 import backendApi from "@/lib/auth/backendFetch";
-import { useCallback } from "react";
-import ConsoleButton from "./consoleButton";
+import { PlusIcon } from "lucide-react";
+import { useCallback, useState } from "react";
 import ConsoleFormFeedback from "./consoleFormFeedback";
 import ConsoleSelectableTagButton from "./consoleSelectableTagButton";
-import { ConsoleTextField } from "./consoleField";
-import { LabelText } from "./labelBlock";
 import { useTechsContext } from "@/contexts/techsContext";
 import useConsoleMutation from "@/hooks/useConsoleMutation";
 import useConsoleTextField from "@/hooks/useConsoleTextField";
+import { Button } from "@/components/shadcn/ui/button";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/shadcn/ui/card";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/shadcn/ui/dialog";
+import { Field, FieldLabel } from "@/components/shadcn/ui/field";
+import { Input } from "@/components/shadcn/ui/input";
 
 type StackSelectingBoxProps = {
   onChange: (ids: string[]) => void;
@@ -21,6 +37,7 @@ export default function StackSelectingBox({
   selectedIds,
 }: StackSelectingBoxProps) {
   const { techs, refreshTechs } = useTechsContext();
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const stackName = useConsoleTextField();
   const {
     isPending: isSubmitting,
@@ -65,38 +82,88 @@ export default function StackSelectingBox({
 
       await refreshTechs();
       stackName.reset();
+      setIsCreateDialogOpen(false);
     }, "登録に失敗しました");
   }, [refreshTechs, run, setSubmitError, stackName]);
 
+  const handleCreateDialogOpenChange = useCallback(
+    (open: boolean) => {
+      if (open) setSubmitError(null);
+      setIsCreateDialogOpen(open);
+    },
+    [setSubmitError],
+  );
+
   return (
-    <div className="relative flex w-full flex-col gap-4 bg-[#f8f8f8] p-4">
-      <div className="flex flex-wrap gap-3">
-        {techs.map((stack) => {
-          const isSelected = selectedIds.includes(stack.id);
-          return (
-            <ConsoleSelectableTagButton
-              key={stack.id}
-              isSelected={isSelected}
-              onToggled={() => handleToggleSelect(stack.id)}
-            >
-              {stack.name}
-            </ConsoleSelectableTagButton>
-          );
-        })}
-      </div>
-      <div className="flex flex-col gap-4 border-y border-dashed border-[#c6a5ec] bg-white p-4">
-        <label className="text-xs font-semibold text-gray-600">
-          <LabelText required>スタック名</LabelText>
-          <ConsoleTextField {...stackName.inputProps} placeholder="Next.js" />
-        </label>
-        <ConsoleFormFeedback error={submitError} />
-        <ConsoleButton
-          onClick={() => handleCreateTechStack()}
-          disabled={isSubmitting}
-        >
-          追加
-        </ConsoleButton>
-      </div>
-    </div>
+    <Card size="sm" className="w-full rounded-xl shadow-none ring-0">
+      <CardHeader>
+        <CardTitle>技術構成を選択</CardTitle>
+        <CardAction>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => handleCreateDialogOpenChange(true)}
+          >
+            <PlusIcon />
+            技術構成を追加
+          </Button>
+        </CardAction>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-wrap gap-2">
+          {techs.map((stack) => {
+            const isSelected = selectedIds.includes(stack.id);
+            return (
+              <ConsoleSelectableTagButton
+                key={stack.id}
+                isSelected={isSelected}
+                onToggled={() => handleToggleSelect(stack.id)}
+              >
+                {stack.name}
+              </ConsoleSelectableTagButton>
+            );
+          })}
+        </div>
+      </CardContent>
+      <Dialog
+        open={isCreateDialogOpen}
+        onOpenChange={handleCreateDialogOpenChange}
+      >
+        <DialogContent className="rounded-xl shadow-none">
+          <DialogHeader>
+            <DialogTitle>技術構成を追加</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-4">
+            <Field>
+              <FieldLabel htmlFor="tech-stack-name">
+                技術構成名 <span className="text-destructive">*</span>
+              </FieldLabel>
+              <Input
+                id="tech-stack-name"
+                required
+                {...stackName.inputProps}
+                placeholder="Next.js"
+              />
+            </Field>
+            <ConsoleFormFeedback error={submitError} />
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button type="button" variant="outline" disabled={isSubmitting}>
+                  キャンセル
+                </Button>
+              </DialogClose>
+              <Button
+                type="button"
+                disabled={isSubmitting}
+                onClick={handleCreateTechStack}
+              >
+                {isSubmitting ? "追加中" : "追加"}
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </Card>
   );
 }

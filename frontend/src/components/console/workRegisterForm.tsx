@@ -3,10 +3,7 @@
 import backendApi from "@/lib/auth/backendFetch";
 import React, { useCallback, useState } from "react";
 import StackSelectingBox from "./stackSelectingBox";
-import ConsoleButton from "./consoleButton";
-import { ConsoleTextArea, ConsoleTextField } from "./consoleField";
 import ConsoleFormFeedback from "./consoleFormFeedback";
-import { LabelBox, LabelText } from "./labelBlock";
 import WorkUrlsInput, {
   WorkUrlItem,
   createEmptyWorkUrlItem,
@@ -16,6 +13,10 @@ import useConsoleMutation from "@/hooks/useConsoleMutation";
 import useConsoleTextField from "@/hooks/useConsoleTextField";
 import type { Work } from "@/types/works/common";
 import ConsoleImagePicker from "./consoleImagePicker";
+import { Button } from "@/components/shadcn/ui/button";
+import { Field, FieldLabel, FieldTitle } from "@/components/shadcn/ui/field";
+import { Input } from "@/components/shadcn/ui/input";
+import { Textarea } from "@/components/shadcn/ui/textarea";
 
 type WorkRegisterFormMode = "post" | "put";
 
@@ -240,84 +241,97 @@ export default function WorkRegisterForm({
     <section className="relative flex w-full flex-col space-y-4">
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <LabelBox>
-            <LabelText required>制作物名</LabelText>
-            <ConsoleTextField
-              name="title"
-              {...title.inputProps}
+          <Field>
+            <FieldLabel htmlFor="work-title">
+              制作物名 <span className="text-destructive">*</span>
+            </FieldLabel>
+            <Input
+              id="work-title"
               required
+              {...title.inputProps}
               placeholder="アプリケーション名"
             />
-          </LabelBox>
-          <LabelBox>
-            <LabelText required>コメント</LabelText>
-            <ConsoleTextField
-              name="comment"
-              {...comment.inputProps}
+          </Field>
+          <Field>
+            <FieldLabel htmlFor="work-comment">
+              コメント <span className="text-destructive">*</span>
+            </FieldLabel>
+            <Input
+              id="work-comment"
               required
+              {...comment.inputProps}
               placeholder="ここに一言コメント！"
             />
-          </LabelBox>
-          <LabelBox isLong>
-            <LabelText required>技術構成</LabelText>
+          </Field>
+          <div className="lg:col-span-2">
             <StackSelectingBox
               onChange={handleTechStacksSelected}
               selectedIds={inputTechStacks}
             />
-          </LabelBox>
-          <LabelBox isLong>
-            <LabelText required>関連リンク</LabelText>
+          </div>
+          <Field className="lg:col-span-2">
+            <FieldTitle>
+              関連リンク <span className="text-destructive">*</span>
+            </FieldTitle>
             <WorkUrlsInput items={inputUrls} onChange={setInputUrls} />
-          </LabelBox>
-          <LabelBox>
-            <LabelText required>作成日</LabelText>
-            <ConsoleTextField
-              name="published_date"
-              {...publishedDate.inputProps}
+          </Field>
+          <Field>
+            <FieldLabel htmlFor="work-published-date">
+              作成日 <span className="text-destructive">*</span>
+            </FieldLabel>
+            <Input
+              id="work-published-date"
+              required
               type="date"
-              required
+              {...publishedDate.inputProps}
             />
-          </LabelBox>
-          <LabelBox>
-            <LabelText required>アクセントカラー</LabelText>
-            <input
-              name="accent_color"
-              {...accentColor.inputProps}
+          </Field>
+          <Field>
+            <FieldLabel htmlFor="work-accent-color">
+              アクセントカラー <span className="text-destructive">*</span>
+            </FieldLabel>
+            <Input
+              id="work-accent-color"
+              required
               type="color"
-              required
-              className="w-full"
+              {...accentColor.inputProps}
+              className="h-10 w-full p-1"
             />
-          </LabelBox>
-          <LabelBox>
+          </Field>
+          <div>
             <ConsoleImagePicker
               label="サムネイル"
               selectedIds={inputThumbnailImage ? [inputThumbnailImage] : []}
               selectionMode="single"
               onChange={(ids) => setInputThumbnailImage(ids[0] ?? "")}
             />
-          </LabelBox>
-          <LabelBox>
+          </div>
+          <div>
             <ConsoleImagePicker
               label="参考画像"
               selectedIds={inputWorkImages}
               selectionMode="multiple"
               onChange={setInputWorkImages}
             />
-          </LabelBox>
-          <LabelBox isLong>
-            <LabelText required>説明</LabelText>
-            <ConsoleTextArea
-              name="description"
+          </div>
+          <Field className="lg:col-span-2">
+            <FieldLabel htmlFor="work-description">
+              説明 <span className="text-destructive">*</span>
+            </FieldLabel>
+            <Textarea
+              id="work-description"
+              required
               {...description.inputProps}
               rows={5}
+              className="field-sizing-content min-h-32"
             />
-          </LabelBox>
-          <LabelBox isLong>
+          </Field>
+          <div className="flex flex-col items-center gap-2 lg:col-span-2">
             <ConsoleFormFeedback error={submitError} success={submitSuccess} />
-            <ConsoleButton type="submit" disabled={isSubmitting}>
+            <Button type="submit" size="lg" disabled={isSubmitting}>
               {isSubmitting ? "送信中" : "登録"}
-            </ConsoleButton>
-          </LabelBox>
+            </Button>
+          </div>
         </div>
       </form>
     </section>

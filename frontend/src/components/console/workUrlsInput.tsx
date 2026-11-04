@@ -6,10 +6,11 @@ import {
   type DragEndEvent,
 } from "@dnd-kit/react";
 import { isSortable, useSortable } from "@dnd-kit/react/sortable";
+import { GripVerticalIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import { useCallback } from "react";
-import ConsoleButton from "./consoleButton";
-import { ConsoleTextField } from "./consoleField";
-import { LabelText } from "./labelBlock";
+import { Button } from "@/components/shadcn/ui/button";
+import { Field, FieldLabel } from "@/components/shadcn/ui/field";
+import { Input } from "@/components/shadcn/ui/input";
 
 export type WorkUrlItem = {
   id: string;
@@ -52,39 +53,52 @@ function SortableWorkUrlItem({
   return (
     <div
       ref={ref}
-      className={`flex w-full flex-col gap-3 border border-dotted border-[#c68ef0] bg-white/60 p-4 ${isDragging ? "opacity-50" : ""}`}
+      className={`border-border/50 bg-muted/30 flex w-full flex-col gap-4 rounded-xl border p-4 ${isDragging ? "opacity-50" : ""}`}
     >
-      <div className="flex items-center justify-between text-sm font-semibold text-[#7e11d1] select-none">
+      <div className="flex items-center justify-between text-sm font-medium select-none">
         <span>LINK {index + 1}</span>
         <div className="flex items-center gap-3">
-          <span
+          <button
+            type="button"
             ref={handleRef}
-            className="cursor-grab touch-none text-lg leading-none active:cursor-grabbing"
+            className="text-muted-foreground cursor-grab touch-none active:cursor-grabbing"
           >
-            ⠿
-          </span>
-          <ConsoleButton onClick={() => onRemove(item.id)} variant="danger">
+            <GripVerticalIcon />
+          </button>
+          <Button
+            type="button"
+            variant="destructive"
+            size="sm"
+            onClick={() => onRemove(item.id)}
+          >
+            <Trash2Icon />
             削除
-          </ConsoleButton>
+          </Button>
         </div>
       </div>
-      <label>
-        <LabelText required>ラベル</LabelText>
-        <ConsoleTextField
+      <Field>
+        <FieldLabel htmlFor={`work-url-label-${item.id}`}>
+          ラベル <span className="text-destructive">*</span>
+        </FieldLabel>
+        <Input
+          id={`work-url-label-${item.id}`}
           value={item.label}
           onChange={(e) => onFieldChange(item.id, "label", e.target.value)}
           placeholder="Example"
         />
-      </label>
-      <label>
-        <LabelText required>URL</LabelText>
-        <ConsoleTextField
+      </Field>
+      <Field>
+        <FieldLabel htmlFor={`work-url-value-${item.id}`}>
+          URL <span className="text-destructive">*</span>
+        </FieldLabel>
+        <Input
+          id={`work-url-value-${item.id}`}
           type="url"
           value={item.url}
           onChange={(e) => onFieldChange(item.id, "url", e.target.value)}
           placeholder="https://example.com"
         />
-      </label>
+      </Field>
     </div>
   );
 }
@@ -133,17 +147,18 @@ export default function WorkUrlsInput({ items, onChange }: WorkUrlsInputProps) {
 
   if (!items.length) {
     return (
-      <div className="flex flex-col items-center justify-center gap-4">
-        <ConsoleButton onClick={handleAddItem} variant="icon">
-          +
-        </ConsoleButton>
+      <div>
+        <Button type="button" variant="outline" onClick={handleAddItem}>
+          <PlusIcon />
+          リンクを追加
+        </Button>
       </div>
     );
   }
 
   return (
     <DragDropProvider sensors={[PointerSensor]} onDragEnd={handleDragEnd}>
-      <div className="flex flex-col items-center justify-center gap-4">
+      <div className="flex flex-col gap-4">
         {items.map((item, index) => (
           <SortableWorkUrlItem
             key={item.id}
@@ -153,9 +168,10 @@ export default function WorkUrlsInput({ items, onChange }: WorkUrlsInputProps) {
             onRemove={handleRemove}
           />
         ))}
-        <ConsoleButton onClick={handleAddItem} variant="icon">
-          +
-        </ConsoleButton>
+        <Button type="button" variant="outline" onClick={handleAddItem}>
+          <PlusIcon />
+          リンクを追加
+        </Button>
       </div>
     </DragDropProvider>
   );
