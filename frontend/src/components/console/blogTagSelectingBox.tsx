@@ -192,8 +192,8 @@ export default function BlogTagSelectingBox({
         onOpenChange={(open) => {
           if (!open) setDeletingTag(null);
         }}
-        title="タグを削除"
-        description={`「${deletingTag?.name ?? ""}」を削除します。このタグが付いている記事からも外れます。`}
+        title={`「${deletingTag?.name ?? ""}」を削除`}
+        description={`削除しますか？`}
         confirmLabel="削除"
         confirmingLabel="削除中"
         isConfirming={isDeleting}
