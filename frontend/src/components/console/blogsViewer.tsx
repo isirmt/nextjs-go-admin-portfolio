@@ -69,8 +69,12 @@ export default function BlogsViewer() {
           <TableRow>
             <TableHead>タイトル</TableHead>
             <TableHead className="w-20">状態</TableHead>
-            <TableHead className="w-36">公開日時</TableHead>
-            <TableHead className="w-36">更新日時</TableHead>
+            <TableHead className="hidden w-36 md:table-cell">
+              公開日時
+            </TableHead>
+            <TableHead className="hidden w-36 md:table-cell">
+              更新日時
+            </TableHead>
             <TableHead className="w-12" />
           </TableRow>
         </TableHeader>
@@ -112,10 +116,10 @@ export default function BlogsViewer() {
                   {article.status === "published" ? "公開" : "下書き"}
                 </Badge>
               </TableCell>
-              <TableCell>
+              <TableCell className="hidden md:table-cell">
                 {formatJapaneseDateTime(article.published_at, "未公開")}
               </TableCell>
-              <TableCell>
+              <TableCell className="hidden md:table-cell">
                 {formatJapaneseDateTime(article.updated_at)}
               </TableCell>
               <TableCell>
