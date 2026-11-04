@@ -144,13 +144,7 @@ export default function BlogTagSelectingBox({
           <DialogHeader>
             <DialogTitle>タグを追加</DialogTitle>
           </DialogHeader>
-          <form
-            className="flex flex-col gap-4"
-            onSubmit={(event) => {
-              event.preventDefault();
-              void handleCreateBlogTag();
-            }}
-          >
+          <div className="flex flex-col gap-4">
             <Field>
               <FieldLabel htmlFor="blog-tag-name">
                 タグ名 <span className="text-destructive">*</span>
@@ -180,11 +174,15 @@ export default function BlogTagSelectingBox({
                   キャンセル
                 </Button>
               </DialogClose>
-              <Button type="submit" disabled={isSubmitting}>
+              <Button
+                type="button"
+                disabled={isSubmitting}
+                onClick={handleCreateBlogTag}
+              >
                 {isSubmitting ? "追加中" : "追加"}
               </Button>
             </DialogFooter>
-          </form>
+          </div>
         </DialogContent>
       </Dialog>
       <ConsoleConfirmDialog
