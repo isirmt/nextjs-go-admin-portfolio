@@ -259,10 +259,9 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
             </FieldLabel>
             <Input id="blog-slug" required {...slug.inputProps} />
           </Field>
-          <Field className="lg:col-span-2">
-            <FieldTitle>タグ</FieldTitle>
+          <div className="lg:col-span-2">
             <BlogTagSelectingBox selectedIds={tagIds} onChange={setTagIds} />
-          </Field>
+          </div>
           <Field>
             <FieldTitle>サムネイル画像</FieldTitle>
             <ConsoleButton
