@@ -12,6 +12,7 @@ import backendApi from "@/lib/auth/backendFetch";
 import type { BlogArticle } from "@/types/blogs/common";
 import ConsoleButton from "./consoleButton";
 import ConsoleConfirmDialog from "./consoleConfirmDialog";
+import ConsoleDateTimePicker from "./consoleDateTimePicker";
 import ConsoleFormFeedback from "./consoleFormFeedback";
 import ImageSelectingDialog from "./imageSelectingDialog";
 import { LabelBox, LabelText } from "./labelBlock";
@@ -232,7 +233,10 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
           </LabelBox>
           <LabelBox>
             <LabelText>公開日時</LabelText>
-            <Input type="datetime-local" {...publishedAt.inputProps} />
+            <ConsoleDateTimePicker
+              value={publishedAt.value}
+              onChange={publishedAt.setValue}
+            />
           </LabelBox>
           <LabelBox isLong>
             <LabelText required>タイトル</LabelText>
