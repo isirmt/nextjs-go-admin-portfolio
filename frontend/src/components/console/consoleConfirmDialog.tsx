@@ -1,7 +1,15 @@
 "use client";
 
-import ConsoleButton from "./consoleButton";
-import ConsoleModal from "./consoleModal";
+import { Button } from "@/components/shadcn/ui/button";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/shadcn/ui/alert-dialog";
 
 type ConsoleConfirmDialogProps = {
   open: boolean;
@@ -25,30 +33,34 @@ export default function ConsoleConfirmDialog({
   onConfirm,
 }: ConsoleConfirmDialogProps) {
   return (
-    <ConsoleModal
+    <AlertDialog
       open={open}
       onOpenChange={(nextOpen) => {
         if (!isConfirming) onOpenChange(nextOpen);
       }}
-      title={title}
-      description={description}
     >
-      <div className="flex flex-wrap justify-end gap-3">
-        <ConsoleButton
-          variant="text"
-          disabled={isConfirming}
-          onClick={() => onOpenChange(false)}
-        >
-          キャンセル
-        </ConsoleButton>
-        <ConsoleButton
-          disabled={isConfirming}
-          className="w-auto bg-[#e04787] text-base hover:bg-[#b03062]"
-          onClick={onConfirm}
-        >
-          {isConfirming ? confirmingLabel : confirmLabel}
-        </ConsoleButton>
-      </div>
-    </ConsoleModal>
+      <AlertDialogContent className="rounded-xl shadow-none">
+        <AlertDialogHeader>
+          <AlertDialogTitle>{title}</AlertDialogTitle>
+          <AlertDialogDescription>{description}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel
+            disabled={isConfirming}
+            onClick={() => onOpenChange(false)}
+          >
+            キャンセル
+          </AlertDialogCancel>
+          <Button
+            type="button"
+            variant="destructive"
+            disabled={isConfirming}
+            onClick={onConfirm}
+          >
+            {isConfirming ? confirmingLabel : confirmLabel}
+          </Button>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
