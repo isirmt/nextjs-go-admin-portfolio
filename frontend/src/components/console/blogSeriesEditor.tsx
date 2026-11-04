@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useCallback, useState } from "react";
@@ -8,10 +7,28 @@ import useConsoleMutation from "@/hooks/useConsoleMutation";
 import useConsoleTextField from "@/hooks/useConsoleTextField";
 import backendApi from "@/lib/auth/backendFetch";
 import type { BlogSeries } from "@/types/blogs/common";
-import ConsoleButton from "./consoleButton";
-import { ConsoleTextArea, ConsoleTextField } from "./consoleField";
 import ConsoleFormFeedback from "./consoleFormFeedback";
-import { LabelText } from "./labelBlock";
+import { Button } from "@/components/shadcn/ui/button";
+import { Badge } from "@/components/shadcn/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/shadcn/ui/card";
+import { Field, FieldLabel } from "@/components/shadcn/ui/field";
+import { Input } from "@/components/shadcn/ui/input";
+import { Textarea } from "@/components/shadcn/ui/textarea";
+import { Checkbox } from "@/components/shadcn/ui/checkbox";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/shadcn/ui/table";
+import { formatJapaneseDateTime } from "@/lib/date";
 
 type BlogSeriesEditorProps = {
   series: BlogSeries | null;
@@ -69,59 +86,90 @@ export default function BlogSeriesEditor({
 
   return (
     <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
-      <label>
-        <LabelText required>シリーズ名</LabelText>
-        <ConsoleTextField required {...title.inputProps} />
-      </label>
-      <label>
-        <LabelText required>SLUG</LabelText>
-        <ConsoleTextField required {...slug.inputProps} />
-      </label>
-      <label>
-        <LabelText>説明</LabelText>
-        <ConsoleTextArea {...description.inputProps} />
-      </label>
-      <section className="flex flex-col gap-3 py-4">
-        <LabelText>記事を選択</LabelText>
-        <div className="flex flex-wrap gap-4">
-          {articles.map((article) => {
-            const isSelected = articleIds.includes(article.id);
-            return (
-              <button
-                key={article.id}
-                type="button"
-                aria-pressed={isSelected}
-                onClick={() => handleToggleArticle(article.id)}
-                className={`relative w-28 cursor-pointer overflow-hidden rounded border-2 bg-white text-left shadow-[.25rem_.25rem_0_0_#67c8e6] ${isSelected ? "border-[#65a6df]" : "border-[#67c8e6]"}`}
-              >
-                <div
-                  className={`absolute top-0 left-0 z-1 flex size-full items-center justify-center bg-[#65a6df]/75 transition-all duration-200 ${isSelected ? "opacity-100" : "opacity-0 hover:opacity-100"}`}
-                >
-                  <span className="font-dot flex size-12 items-center justify-center rounded-full border-4 border-white text-2xl font-semibold text-white drop-shadow">
-                    {articleIds.findIndex((id) => id === article.id) + 1}
-                  </span>
-                </div>
-                <img
-                  src={
-                    article.thumbnail_image_id
-                      ? `/api/images/${article.thumbnail_image_id}/raw`
-                      : `/console/blogs/${article.id}/og-image`
-                  }
-                  alt=""
-                  className="aspect-square w-full object-contain"
-                />
-                <p className="truncate px-2 py-1.5 text-xs font-semibold">
-                  {article.title}
-                </p>
-              </button>
-            );
-          })}
-        </div>
-      </section>
+      <Field>
+        <FieldLabel htmlFor="blog-series-title">
+          シリーズ名 <span className="text-destructive">*</span>
+        </FieldLabel>
+        <Input id="blog-series-title" required {...title.inputProps} />
+      </Field>
+      <Field>
+        <FieldLabel htmlFor="blog-series-slug">
+          SLUG <span className="text-destructive">*</span>
+        </FieldLabel>
+        <Input id="blog-series-slug" required {...slug.inputProps} />
+      </Field>
+      <Field>
+        <FieldLabel htmlFor="blog-series-description">説明</FieldLabel>
+        <Textarea id="blog-series-description" {...description.inputProps} />
+      </Field>
+      <Card size="sm" className="rounded-xl shadow-none ring-0">
+        <CardHeader>
+          <CardTitle>記事を選択</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table className="table-fixed">
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-14">選択</TableHead>
+                <TableHead>タイトル</TableHead>
+                <TableHead className="w-20">状態</TableHead>
+                <TableHead className="hidden w-36 md:table-cell">
+                  公開日時
+                </TableHead>
+                <TableHead className="w-14">順番</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {articles.map((article) => {
+                const isSelected = articleIds.includes(article.id);
+                return (
+                  <TableRow
+                    key={article.id}
+                    data-state={isSelected ? "selected" : undefined}
+                    onClick={() => handleToggleArticle(article.id)}
+                    className="cursor-pointer"
+                  >
+                    <TableCell className="py-4">
+                      <Checkbox
+                        checked={isSelected}
+                        onCheckedChange={() => handleToggleArticle(article.id)}
+                        onClick={(event) => event.stopPropagation()}
+                      />
+                    </TableCell>
+                    <TableCell className="min-w-0 py-4">
+                      <p className="truncate font-medium">{article.title}</p>
+                      <p className="text-muted-foreground truncate text-xs">
+                        /{article.slug}
+                      </p>
+                    </TableCell>
+                    <TableCell className="py-4">
+                      <Badge
+                        variant={
+                          article.status === "published"
+                            ? "secondary"
+                            : "default"
+                        }
+                      >
+                        {article.status === "published" ? "公開" : "下書き"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="hidden py-4 md:table-cell">
+                      {formatJapaneseDateTime(article.published_at, "未公開")}
+                    </TableCell>
+                    <TableCell className="py-4 text-center font-medium">
+                      {isSelected ? articleIds.indexOf(article.id) + 1 : "-"}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
       <ConsoleFormFeedback error={error} />
-      <ConsoleButton type="submit" disabled={isPending}>
+      <Button type="submit" size="lg" disabled={isPending}>
         {isPending ? "保存中" : "保存"}
-      </ConsoleButton>
+      </Button>
     </form>
   );
 }

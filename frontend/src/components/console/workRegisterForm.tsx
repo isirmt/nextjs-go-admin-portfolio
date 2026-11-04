@@ -1,14 +1,9 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import backendApi from "@/lib/auth/backendFetch";
 import React, { useCallback, useState } from "react";
-import ImageSelectingDialog from "./imageSelectingDialog";
 import StackSelectingBox from "./stackSelectingBox";
-import ConsoleButton from "./consoleButton";
-import { ConsoleTextArea, ConsoleTextField } from "./consoleField";
 import ConsoleFormFeedback from "./consoleFormFeedback";
-import { LabelBox, LabelText } from "./labelBlock";
 import WorkUrlsInput, {
   WorkUrlItem,
   createEmptyWorkUrlItem,
@@ -16,6 +11,13 @@ import WorkUrlsInput, {
 import { useWorksContext } from "@/contexts/worksContext";
 import useConsoleMutation from "@/hooks/useConsoleMutation";
 import useConsoleTextField from "@/hooks/useConsoleTextField";
+import type { Work } from "@/types/works/common";
+import ConsoleImagePicker from "./consoleImagePicker";
+import ConsoleDatePicker from "./consoleDatePicker";
+import { Button } from "@/components/shadcn/ui/button";
+import { Field, FieldLabel, FieldTitle } from "@/components/shadcn/ui/field";
+import { Input } from "@/components/shadcn/ui/input";
+import { Textarea } from "@/components/shadcn/ui/textarea";
 
 type WorkRegisterFormMode = "post" | "put";
 
@@ -25,7 +27,7 @@ type WorkRegisterFormUrlValue = {
   url: string;
 };
 
-type WorkRegisterFormInitialValues = {
+export type WorkRegisterFormInitialValues = {
   title?: string;
   comment?: string;
   publishedDate?: string;
@@ -41,7 +43,7 @@ type WorkRegisterFormProps = {
   mode?: WorkRegisterFormMode;
   workId?: string;
   initialValues?: WorkRegisterFormInitialValues;
-  onSubmitted?: () => void;
+  onSubmitted?: (workId?: string) => void;
 };
 
 const initializeUrlItems = (
@@ -59,28 +61,23 @@ const initializeUrlItems = (
 
 const currentDateInputValue = () => new Date().toISOString().split("T")[0];
 
-function SelectedImageTiles({ imageIds }: { imageIds: string[] }) {
-  if (imageIds.length === 0) {
-    return <p className="text-sm text-[#7e11d1]">画像未選択</p>;
-  }
-
-  return (
-    <div className="flex flex-wrap gap-3">
-      {imageIds.map((imageId) => (
-        <div
-          key={imageId}
-          className="size-20 overflow-hidden border-2 border-[#67c8e6] bg-white"
-        >
-          <img
-            src={`/api/images/${imageId}/raw`}
-            alt=""
-            className="size-full object-contain"
-          />
-        </div>
-      ))}
-    </div>
-  );
-}
+export const createWorkRegisterFormInitialValues = (
+  work: Work,
+): WorkRegisterFormInitialValues => ({
+  title: work.title,
+  comment: work.comment,
+  publishedDate: work.created_at ? work.created_at.slice(0, 10) : "",
+  accentColor: work.accent_color,
+  thumbnailImageId: work.thumbnail_image_id ?? "",
+  workImageIds: [...(work.images ?? [])]
+    .sort((a, b) => a.display_order - b.display_order)
+    .map((image) => image.image_id),
+  techStackIds: (work.tech_stacks ?? []).map((stack) => stack.id),
+  description: work.description ?? "",
+  urls: [...(work.urls ?? [])]
+    .sort((a, b) => a.display_order - b.display_order)
+    .map((url) => ({ id: url.id, label: url.label, url: url.url })),
+});
 
 export default function WorkRegisterForm({
   mode = "post",
@@ -109,8 +106,6 @@ export default function WorkRegisterForm({
   const [inputUrls, setInputUrls] = useState<WorkUrlItem[]>(
     initializeUrlItems(initialValues?.urls),
   );
-  const [isThumbnailDialogOpen, setIsThumbnailDialogOpen] = useState(false);
-  const [isWorkImagesDialogOpen, setIsWorkImagesDialogOpen] = useState(false);
   const {
     isPending: isSubmitting,
     error: submitError,
@@ -203,6 +198,10 @@ export default function WorkRegisterForm({
             );
           }
 
+          const createdWorkID = isEditingMode
+            ? undefined
+            : ((await response.json()) as { id?: string }).id;
+
           await refreshWorks();
           if (!isEditingMode) {
             resetNewWorkForm();
@@ -210,7 +209,7 @@ export default function WorkRegisterForm({
           setSubmitSuccess(
             isEditingMode ? "更新が完了しました" : "登録が完了しました",
           );
-          onSubmitted?.();
+          onSubmitted?.(createdWorkID);
         },
         isEditingMode ? "更新に失敗しました" : "登録に失敗しました",
       );
@@ -235,14 +234,6 @@ export default function WorkRegisterForm({
     ],
   );
 
-  const handleThumbnailSelected = useCallback((id: string[]) => {
-    setInputThumbnailImage(id[0] ?? "");
-  }, []);
-
-  const handleWorkImagesSelected = useCallback((ids: string[]) => {
-    setInputWorkImages(ids);
-  }, []);
-
   const handleTechStacksSelected = useCallback((ids: string[]) => {
     setInputTechStacks(ids);
   }, []);
@@ -251,105 +242,98 @@ export default function WorkRegisterForm({
     <section className="relative flex w-full flex-col space-y-4">
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <LabelBox>
-            <LabelText required>制作物名</LabelText>
-            <ConsoleTextField
-              name="title"
-              {...title.inputProps}
+          <Field>
+            <FieldLabel htmlFor="work-title">
+              制作物名 <span className="text-destructive">*</span>
+            </FieldLabel>
+            <Input
+              id="work-title"
               required
+              {...title.inputProps}
               placeholder="アプリケーション名"
             />
-          </LabelBox>
-          <LabelBox>
-            <LabelText required>コメント</LabelText>
-            <ConsoleTextField
-              name="comment"
-              {...comment.inputProps}
+          </Field>
+          <Field>
+            <FieldLabel htmlFor="work-comment">
+              コメント <span className="text-destructive">*</span>
+            </FieldLabel>
+            <Input
+              id="work-comment"
               required
+              {...comment.inputProps}
               placeholder="ここに一言コメント！"
             />
-          </LabelBox>
-          <LabelBox isLong>
-            <LabelText required>技術構成</LabelText>
+          </Field>
+          <div className="lg:col-span-2">
             <StackSelectingBox
               onChange={handleTechStacksSelected}
               selectedIds={inputTechStacks}
             />
-          </LabelBox>
-          <LabelBox isLong>
-            <LabelText required>関連リンク</LabelText>
+          </div>
+          <Field className="lg:col-span-2">
+            <FieldTitle>
+              関連リンク <span className="text-destructive">*</span>
+            </FieldTitle>
             <WorkUrlsInput items={inputUrls} onChange={setInputUrls} />
-          </LabelBox>
-          <LabelBox>
-            <LabelText required>作成日</LabelText>
-            <ConsoleTextField
-              name="published_date"
-              {...publishedDate.inputProps}
-              type="date"
-              required
+          </Field>
+          <Field>
+            <FieldLabel htmlFor="work-published-date">
+              作成日 <span className="text-destructive">*</span>
+            </FieldLabel>
+            <ConsoleDatePicker
+              id="work-published-date"
+              value={publishedDate.value}
+              onChange={publishedDate.setValue}
             />
-          </LabelBox>
-          <LabelBox>
-            <LabelText required>アクセントカラー</LabelText>
-            <input
-              name="accent_color"
-              {...accentColor.inputProps}
+          </Field>
+          <Field>
+            <FieldLabel htmlFor="work-accent-color">
+              アクセントカラー <span className="text-destructive">*</span>
+            </FieldLabel>
+            <Input
+              id="work-accent-color"
+              required
               type="color"
+              {...accentColor.inputProps}
+              className="h-10 w-full p-1"
+            />
+          </Field>
+          <div>
+            <ConsoleImagePicker
+              label="サムネイル"
+              selectedIds={inputThumbnailImage ? [inputThumbnailImage] : []}
+              selectionMode="single"
+              onChange={(ids) => setInputThumbnailImage(ids[0] ?? "")}
+            />
+          </div>
+          <div>
+            <ConsoleImagePicker
+              label="参考画像"
+              selectedIds={inputWorkImages}
+              selectionMode="multiple"
+              onChange={setInputWorkImages}
+            />
+          </div>
+          <Field className="lg:col-span-2">
+            <FieldLabel htmlFor="work-description">
+              説明 <span className="text-destructive">*</span>
+            </FieldLabel>
+            <Textarea
+              id="work-description"
               required
-              className="w-full"
-            />
-          </LabelBox>
-          <LabelBox>
-            <LabelText required>サムネイル</LabelText>
-            <ConsoleButton
-              type="button"
-              onClick={() => setIsThumbnailDialogOpen(true)}
-            >
-              画像を選択
-            </ConsoleButton>
-            <SelectedImageTiles
-              imageIds={inputThumbnailImage ? [inputThumbnailImage] : []}
-            />
-          </LabelBox>
-          <LabelBox>
-            <LabelText required>参考画像</LabelText>
-            <ConsoleButton
-              type="button"
-              onClick={() => setIsWorkImagesDialogOpen(true)}
-            >
-              画像を選択
-            </ConsoleButton>
-            <SelectedImageTiles imageIds={inputWorkImages} />
-          </LabelBox>
-          <LabelBox isLong>
-            <LabelText required>説明</LabelText>
-            <ConsoleTextArea
-              name="description"
               {...description.inputProps}
               rows={5}
+              className="field-sizing-content min-h-32"
             />
-          </LabelBox>
-          <LabelBox isLong>
+          </Field>
+          <div className="flex flex-col items-center gap-2 lg:col-span-2">
             <ConsoleFormFeedback error={submitError} success={submitSuccess} />
-            <ConsoleButton type="submit" disabled={isSubmitting}>
+            <Button type="submit" size="lg" disabled={isSubmitting}>
               {isSubmitting ? "送信中" : "登録"}
-            </ConsoleButton>
-          </LabelBox>
+            </Button>
+          </div>
         </div>
       </form>
-      <ImageSelectingDialog
-        open={isThumbnailDialogOpen}
-        onOpenChange={setIsThumbnailDialogOpen}
-        initialSelectedIds={inputThumbnailImage ? [inputThumbnailImage] : []}
-        onSelect={handleThumbnailSelected}
-      />
-      <ImageSelectingDialog
-        open={isWorkImagesDialogOpen}
-        onOpenChange={setIsWorkImagesDialogOpen}
-        initialSelectedIds={inputWorkImages}
-        multiple
-        onSelect={handleWorkImagesSelected}
-      />
     </section>
   );
 }

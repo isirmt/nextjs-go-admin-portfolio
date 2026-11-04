@@ -1,51 +1,40 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import Link from "next/link";
+import { Maximize2Icon, XIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { ImagesProvider } from "@/contexts/imagesContext";
 import { useBlogArticlesContext } from "@/contexts/blogArticlesContext";
 import { BlogTagsProvider } from "@/contexts/blogTagsContext";
 import useConsoleMutation from "@/hooks/useConsoleMutation";
 import backendApi from "@/lib/auth/backendFetch";
 import type { BlogArticle } from "@/types/blogs/common";
-import ConsoleButton from "./consoleButton";
-import ConsoleConfirmDialog from "./consoleConfirmDialog";
+import ConsoleDateTimePicker from "./consoleDateTimePicker";
 import ConsoleFormFeedback from "./consoleFormFeedback";
-import { ConsoleTextField } from "./consoleField";
-import ImageSelectingDialog from "./imageSelectingDialog";
-import { LabelBox, LabelText } from "./labelBlock";
 import ConsoleSegmentedControl from "./consoleSegmentedControl";
 import useConsoleTextField from "@/hooks/useConsoleTextField";
 import BlogMarkdownPreview from "@/components/blogs/blogMarkdownPreview";
 import BlogTagSelectingBox from "./blogTagSelectingBox";
-import BlogMarkdownEditor, {
-  type BlogMarkdownEditorHandle,
-} from "./blogMarkdownEditor";
+import BlogMarkdownEditor from "./blogMarkdownEditor";
+import ConsoleImagePicker from "./consoleImagePicker";
+import { Button } from "@/components/shadcn/ui/button";
+import {
+  Field,
+  FieldLabel,
+  FieldLegend,
+  FieldSet,
+  FieldTitle,
+} from "@/components/shadcn/ui/field";
+import { Input } from "@/components/shadcn/ui/input";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/shadcn/ui/tabs";
 
 type BlogArticleEditorProps = { articleId?: string };
-
-function SelectedImageTiles({ imageIds }: { imageIds: string[] }) {
-  return imageIds.length ? (
-    <div className="flex flex-wrap gap-3">
-      {imageIds.map((id) => (
-        <div
-          key={id}
-          className="size-20 overflow-hidden border-2 border-[#67c8e6] bg-white"
-        >
-          <img
-            src={`/api/images/${id}/raw`}
-            alt=""
-            className="size-full object-contain"
-          />
-        </div>
-      ))}
-    </div>
-  ) : (
-    <p className="text-sm text-[#7e11d1]">画像未選択</p>
-  );
-}
 
 function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
   const router = useRouter();
@@ -62,23 +51,14 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
   const { reset: resetPublishedAt } = publishedAt;
   const { reset: resetBodyMarkdown } = bodyMarkdown;
   const [bodyView, setBodyView] = useState<"edit" | "preview">("edit");
-  const [isThumbnailDialogOpen, setIsThumbnailDialogOpen] = useState(false);
-  const [isBodyImageDialogOpen, setIsBodyImageDialogOpen] = useState(false);
+  const [isBodyEditorExpanded, setIsBodyEditorExpanded] = useState(false);
   const {
     isPending: isSubmitting,
     error: submitError,
     run: runSubmit,
   } = useConsoleMutation();
-  const {
-    isPending: isDeleting,
-    error: deleteError,
-    run: runDelete,
-  } = useConsoleMutation();
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
-  const blogMarkdownEditorRef = useRef<BlogMarkdownEditorHandle | null>(null);
-  const bodySelectionRef = useRef({ start: 0, end: 0 });
 
   useEffect(() => {
     if (!articleId) return;
@@ -124,28 +104,6 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
     };
   }, [articleId, resetBodyMarkdown, resetPublishedAt, resetSlug, resetTitle]);
 
-  const openBodyImageDialog = () => {
-    bodySelectionRef.current =
-      blogMarkdownEditorRef.current?.getSelectionOffsets() ?? {
-        start: bodyMarkdown.value.length,
-        end: bodyMarkdown.value.length,
-      };
-    setIsBodyImageDialogOpen(true);
-  };
-
-  const insertBodyImage = ([imageId]: string[]) => {
-    if (!imageId) return;
-    const { start, end } = bodySelectionRef.current;
-    const markdown = `![画像](/api/images/${imageId}/raw)`;
-    bodyMarkdown.setValue(
-      (current) => `${current.slice(0, start)}${markdown}${current.slice(end)}`,
-    );
-    requestAnimationFrame(() => {
-      const cursor = start + markdown.length;
-      blogMarkdownEditorRef.current?.focusAtOffset(cursor);
-    });
-  };
-
   const handleSubmit = async (event: React.SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     setLoadError(null);
@@ -182,20 +140,6 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
     }
   };
 
-  const handleDelete = async () => {
-    if (!articleId) return;
-    setLoadError(null);
-    await runDelete(async () => {
-      const response = await backendApi(`/blogs/${articleId}`, {
-        method: "DELETE",
-      });
-      if (!response.ok)
-        throw new Error((await response.text()) || "記事の削除に失敗しました");
-      await refreshBlogArticles();
-      router.replace("/console/blogs");
-    }, "記事の削除に失敗しました");
-  };
-
   return (
     <main className="relative w-full space-y-8 px-2.5 py-8 lg:px-16">
       <header className="flex flex-wrap items-center justify-between gap-4">
@@ -211,8 +155,10 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
       </header>
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <LabelBox>
-            <LabelText required>状態</LabelText>
+          <FieldSet className="gap-3">
+            <FieldLegend variant="label">
+              状態 <span className="text-destructive">*</span>
+            </FieldLegend>
             <ConsoleSegmentedControl
               name="status"
               value={status}
@@ -222,117 +168,137 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
                 { value: "published", label: "公開" },
               ]}
             />
-          </LabelBox>
-          <LabelBox>
-            <LabelText>公開日時</LabelText>
-            <ConsoleTextField
-              type="datetime-local"
-              {...publishedAt.inputProps}
+          </FieldSet>
+          <Field>
+            <FieldLabel htmlFor="blog-published-at">公開日時</FieldLabel>
+            <ConsoleDateTimePicker
+              id="blog-published-at"
+              value={publishedAt.value}
+              onChange={publishedAt.setValue}
             />
-          </LabelBox>
-          <LabelBox isLong>
-            <LabelText required>タイトル</LabelText>
-            <ConsoleTextField required {...title.inputProps} />
-          </LabelBox>
-          <LabelBox isLong>
-            <LabelText required>SLUG</LabelText>
-            <ConsoleTextField required {...slug.inputProps} />
-          </LabelBox>
-          <LabelBox isLong>
-            <LabelText>タグ</LabelText>
+          </Field>
+          <Field className="lg:col-span-2">
+            <FieldLabel htmlFor="blog-title">
+              タイトル <span className="text-destructive">*</span>
+            </FieldLabel>
+            <Input id="blog-title" required {...title.inputProps} />
+          </Field>
+          <Field className="lg:col-span-2">
+            <FieldLabel htmlFor="blog-slug">
+              SLUG <span className="text-destructive">*</span>
+            </FieldLabel>
+            <Input id="blog-slug" required {...slug.inputProps} />
+          </Field>
+          <div className="lg:col-span-2">
             <BlogTagSelectingBox selectedIds={tagIds} onChange={setTagIds} />
-          </LabelBox>
-          <LabelBox>
-            <LabelText>サムネイル画像</LabelText>
-            <ConsoleButton
-              type="button"
-              onClick={() => setIsThumbnailDialogOpen(true)}
-            >
-              画像を選択
-            </ConsoleButton>
-            <SelectedImageTiles imageIds={thumbnailImageIds} />
-          </LabelBox>
-          <LabelBox>
-            <LabelText>本文への画像挿入</LabelText>
-            <ConsoleButton type="button" onClick={openBodyImageDialog}>
-              画像を挿入
-            </ConsoleButton>
-          </LabelBox>
-          <LabelBox isLong>
-            <LabelText required>本文（Markdown）</LabelText>
-            {bodyView === "edit" ? (
-              <BlogMarkdownEditor
-                ref={blogMarkdownEditorRef}
-                value={bodyMarkdown.value}
-                onChange={bodyMarkdown.setValue}
-              />
-            ) : (
-              <div className="min-h-64 border border-[#c68ef0] bg-white px-4 py-3 text-[#222]">
-                {bodyMarkdown.value.trim() ? (
-                  <BlogMarkdownPreview content={bodyMarkdown.value} />
-                ) : (
-                  <p className="text-sm text-[#7e11d1]">本文がありません</p>
-                )}
-              </div>
-            )}
-          </LabelBox>
+          </div>
+          <div className="lg:col-span-2">
+            <ConsoleImagePicker
+              label="サムネイル画像"
+              selectedIds={thumbnailImageIds}
+              selectionMode="single"
+              onChange={setThumbnailImageIds}
+            />
+          </div>
+          <Field className="lg:col-span-2">
+            <div className="flex items-center justify-between gap-4">
+              <FieldTitle>
+                本文（Markdown） <span className="text-destructive">*</span>
+              </FieldTitle>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon-sm"
+                className="hidden lg:inline-flex"
+                onClick={() => setIsBodyEditorExpanded(true)}
+              >
+                <Maximize2Icon />
+              </Button>
+            </div>
+            {!isBodyEditorExpanded ? (
+              <Tabs
+                value={bodyView}
+                onValueChange={(nextValue) =>
+                  setBodyView(nextValue as "edit" | "preview")
+                }
+                className="gap-3"
+              >
+                <TabsList className="w-full">
+                  <TabsTrigger value="edit">編集</TabsTrigger>
+                  <TabsTrigger value="preview">プレビュー</TabsTrigger>
+                </TabsList>
+                <TabsContent value="edit">
+                  <BlogMarkdownEditor
+                    value={bodyMarkdown.value}
+                    onChange={bodyMarkdown.setValue}
+                  />
+                </TabsContent>
+                <TabsContent value="preview">
+                  <div className="min-h-64 border border-[#c68ef0] bg-white py-3 text-[#222]">
+                    <div className="mx-auto w-full max-w-240 px-4">
+                      {bodyMarkdown.value.trim() ? (
+                        <BlogMarkdownPreview content={bodyMarkdown.value} />
+                      ) : (
+                        <p className="text-sm text-[#7e11d1]">
+                          本文がありません
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </TabsContent>
+              </Tabs>
+            ) : null}
+          </Field>
         </div>
-        <div className="sticky bottom-0 mt-8 flex flex-col items-center gap-2 bg-white py-2.5">
-          <ConsoleSegmentedControl
-            name="body-view"
-            value={bodyView}
-            onChange={setBodyView}
-            options={[
-              { value: "edit", label: "編集" },
-              { value: "preview", label: "プレビュー" },
-            ]}
-          />
+        {isBodyEditorExpanded ? (
+          <div className="bg-background fixed inset-0 z-110 hidden p-6 lg:block">
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              className="absolute top-6 right-6 z-1"
+              onClick={() => setIsBodyEditorExpanded(false)}
+            >
+              <XIcon />
+            </Button>
+            <div className="grid size-full grid-cols-[minmax(0,2fr)_minmax(0,1fr)] gap-6 pr-14">
+              <div className="border-border/50 min-h-0 overflow-hidden rounded-xl border">
+                <BlogMarkdownEditor
+                  height="100%"
+                  value={bodyMarkdown.value}
+                  onChange={bodyMarkdown.setValue}
+                />
+              </div>
+              <div className="border-border/50 min-h-0 overflow-y-auto rounded-xl border py-3 text-[#222]">
+                <div className="mx-auto w-full max-w-240 px-4">
+                  {bodyMarkdown.value.trim() ? (
+                    <BlogMarkdownPreview content={bodyMarkdown.value} />
+                  ) : (
+                    <p className="text-muted-foreground text-sm">
+                      本文がありません
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : null}
+        <div className="mt-8 flex flex-col items-center gap-2">
           <ConsoleFormFeedback
             className="mb-2"
-            error={loadError ?? submitError ?? deleteError}
+            error={loadError ?? submitError}
             success={submitSuccess}
           />
-          <ConsoleButton type="submit" disabled={isSubmitting}>
+          <Button
+            type="submit"
+            size="lg"
+            className="w-full max-w-sm"
+            disabled={isSubmitting}
+          >
             {isSubmitting ? "保存中" : "保存"}
-          </ConsoleButton>
-        </div>
-        <div>
-          {articleId ? (
-            <ConsoleButton
-              className="mt-20"
-              disabled={isSubmitting || isDeleting}
-              onClick={() => setIsDeleteDialogOpen(true)}
-              variant="danger"
-            >
-              {isDeleting ? "削除中" : "削除"}
-            </ConsoleButton>
-          ) : null}
+          </Button>
         </div>
       </form>
-      <ConsoleConfirmDialog
-        open={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
-        title="記事を削除"
-        description="この記事を削除します。元に戻すことはできません。"
-        confirmLabel="削除する"
-        confirmingLabel="削除中"
-        isConfirming={isDeleting}
-        onConfirm={handleDelete}
-      />
-      <ImageSelectingDialog
-        open={isThumbnailDialogOpen}
-        onOpenChange={setIsThumbnailDialogOpen}
-        initialSelectedIds={thumbnailImageIds}
-        onSelect={setThumbnailImageIds}
-      />
-      {isBodyImageDialogOpen ? (
-        <ImageSelectingDialog
-          open
-          onOpenChange={setIsBodyImageDialogOpen}
-          initialSelectedIds={[]}
-          onSelect={insertBodyImage}
-        />
-      ) : null}
     </main>
   );
 }

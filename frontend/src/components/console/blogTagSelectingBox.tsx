@@ -1,15 +1,33 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
+import { PlusIcon } from "lucide-react";
 import { useBlogTagsContext } from "@/contexts/blogTagsContext";
 import backendApi from "@/lib/auth/backendFetch";
 import useConsoleMutation from "@/hooks/useConsoleMutation";
 import useConsoleTextField from "@/hooks/useConsoleTextField";
-import ConsoleButton from "./consoleButton";
+import type { BlogTag } from "@/types/blogs/common";
+import ConsoleConfirmDialog from "./consoleConfirmDialog";
 import ConsoleFormFeedback from "./consoleFormFeedback";
 import ConsoleSelectableTagButton from "./consoleSelectableTagButton";
-import { ConsoleTextField } from "./consoleField";
-import { LabelText } from "./labelBlock";
+import { Button } from "@/components/shadcn/ui/button";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/shadcn/ui/card";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/shadcn/ui/dialog";
+import { Field, FieldLabel } from "@/components/shadcn/ui/field";
+import { Input } from "@/components/shadcn/ui/input";
 
 type BlogTagSelectingBoxProps = {
   selectedIds: string[];
@@ -21,6 +39,8 @@ export default function BlogTagSelectingBox({
   onChange,
 }: BlogTagSelectingBoxProps) {
   const { blogTags, refreshBlogTags } = useBlogTagsContext();
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [deletingTag, setDeletingTag] = useState<BlogTag | null>(null);
   const name = useConsoleTextField();
   const slug = useConsoleTextField();
   const {
@@ -28,6 +48,11 @@ export default function BlogTagSelectingBox({
     error: submitError,
     setError: setSubmitError,
     run,
+  } = useConsoleMutation();
+  const {
+    isPending: isDeleting,
+    error: deleteError,
+    run: runDelete,
   } = useConsoleMutation();
 
   const handleToggle = useCallback(
@@ -60,40 +85,129 @@ export default function BlogTagSelectingBox({
       await refreshBlogTags();
       name.reset();
       slug.reset();
+      setIsCreateDialogOpen(false);
     }, "タグの登録に失敗しました");
   }, [name, refreshBlogTags, run, setSubmitError, slug]);
 
+  const handleCreateDialogOpenChange = useCallback(
+    (open: boolean) => {
+      if (open) setSubmitError(null);
+      setIsCreateDialogOpen(open);
+    },
+    [setSubmitError],
+  );
+
+  const handleDeleteBlogTag = useCallback(async () => {
+    if (!deletingTag) return;
+
+    const result = await runDelete(async () => {
+      const response = await backendApi(`/blog-tags/${deletingTag.id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        throw new Error((await response.text()) || "タグの削除に失敗しました");
+      }
+      await refreshBlogTags();
+    }, "タグの削除に失敗しました");
+
+    if (result.ok) {
+      onChange(selectedIds.filter((id) => id !== deletingTag.id));
+      setDeletingTag(null);
+    }
+  }, [deletingTag, onChange, refreshBlogTags, runDelete, selectedIds]);
+
   return (
-    <div className="relative flex w-full flex-col gap-4 bg-[#f8f8f8] p-4">
-      <div className="flex flex-wrap gap-3">
-        {blogTags.map((tag) => (
-          <ConsoleSelectableTagButton
-            key={tag.id}
-            isSelected={selectedIds.includes(tag.id)}
-            onToggled={() => handleToggle(tag.id)}
+    <Card size="sm" className="w-full rounded-xl shadow-none ring-0">
+      <CardHeader>
+        <CardTitle>タグを選択</CardTitle>
+        <CardAction>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => handleCreateDialogOpenChange(true)}
           >
-            {tag.name}
-          </ConsoleSelectableTagButton>
-        ))}
-      </div>
-      <div className="flex flex-col gap-4 border-y border-dashed border-[#c6a5ec] bg-white p-4">
-        <label className="text-xs font-semibold text-gray-600">
-          <LabelText required>タグ名</LabelText>
-          <ConsoleTextField {...name.inputProps} placeholder="Next.js" />
-        </label>
-        <label className="text-xs font-semibold text-gray-600">
-          <LabelText required>SLUG</LabelText>
-          <ConsoleTextField {...slug.inputProps} placeholder="nextjs" />
-        </label>
-        <ConsoleFormFeedback error={submitError} />
-        <ConsoleButton
-          type="button"
-          onClick={handleCreateBlogTag}
-          disabled={isSubmitting}
-        >
-          追加
-        </ConsoleButton>
-      </div>
-    </div>
+            <PlusIcon />
+            タグを追加
+          </Button>
+        </CardAction>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-wrap gap-2">
+          {blogTags.map((tag) => (
+            <ConsoleSelectableTagButton
+              key={tag.id}
+              isSelected={selectedIds.includes(tag.id)}
+              onToggled={() => handleToggle(tag.id)}
+              onDeleteRequested={() => setDeletingTag(tag)}
+            >
+              {tag.name}
+            </ConsoleSelectableTagButton>
+          ))}
+        </div>
+        <ConsoleFormFeedback className="mt-4" error={deleteError} />
+      </CardContent>
+      <Dialog
+        open={isCreateDialogOpen}
+        onOpenChange={handleCreateDialogOpenChange}
+      >
+        <DialogContent className="rounded-xl shadow-none">
+          <DialogHeader>
+            <DialogTitle>タグを追加</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-4">
+            <Field>
+              <FieldLabel htmlFor="blog-tag-name">
+                タグ名 <span className="text-destructive">*</span>
+              </FieldLabel>
+              <Input
+                id="blog-tag-name"
+                required
+                {...name.inputProps}
+                placeholder="Next.js"
+              />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="blog-tag-slug">
+                SLUG <span className="text-destructive">*</span>
+              </FieldLabel>
+              <Input
+                id="blog-tag-slug"
+                required
+                {...slug.inputProps}
+                placeholder="nextjs"
+              />
+            </Field>
+            <ConsoleFormFeedback error={submitError} />
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button type="button" variant="outline" disabled={isSubmitting}>
+                  キャンセル
+                </Button>
+              </DialogClose>
+              <Button
+                type="button"
+                disabled={isSubmitting}
+                onClick={handleCreateBlogTag}
+              >
+                {isSubmitting ? "追加中" : "追加"}
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+      <ConsoleConfirmDialog
+        open={deletingTag !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeletingTag(null);
+        }}
+        title={`「${deletingTag?.name ?? ""}」を削除`}
+        description={`削除しますか？`}
+        confirmLabel="削除"
+        confirmingLabel="削除中"
+        isConfirming={isDeleting}
+        onConfirm={handleDeleteBlogTag}
+      />
+    </Card>
   );
 }

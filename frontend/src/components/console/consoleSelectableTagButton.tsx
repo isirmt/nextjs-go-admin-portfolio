@@ -1,4 +1,12 @@
 import type { ReactNode } from "react";
+import { Trash2Icon } from "lucide-react";
+import { Button } from "@/components/shadcn/ui/button";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/shadcn/ui/context-menu";
 
 type ConsoleSelectableTagButtonProps = {
   children: ReactNode;
@@ -11,17 +19,32 @@ export default function ConsoleSelectableTagButton({
   children,
   isSelected,
   onToggled,
+  onDeleteRequested,
 }: ConsoleSelectableTagButtonProps) {
-  return (
-    <button
+  const button = (
+    <Button
       type="button"
+      variant="outline"
+      size="sm"
+      aria-pressed={isSelected}
       onClick={onToggled}
-      className={`relative flex cursor-pointer items-center gap-3 overflow-hidden rounded border-2 bg-white px-3 py-2 shadow-[.25rem_.25rem_0_0_#67c8e6] ${isSelected ? "border-[#65a6df]" : "border-[#67c8e6]"}`}
+      className={isSelected ? "border-primary text-primary" : undefined}
     >
-      <span
-        className={`absolute top-0 left-0 z-1 flex size-full items-center justify-center transition-all duration-200 ${isSelected ? "bg-[#65a6df]/75" : "bg-transparent hover:bg-[#65a6df]/75"}`}
-      />
-      <span className="text-sm font-semibold text-[#3a3a3a]">{children}</span>
-    </button>
+      {children}
+    </Button>
+  );
+
+  if (!onDeleteRequested) return button;
+
+  return (
+    <ContextMenu>
+      <ContextMenuTrigger asChild>{button}</ContextMenuTrigger>
+      <ContextMenuContent>
+        <ContextMenuItem variant="destructive" onSelect={onDeleteRequested}>
+          <Trash2Icon />
+          削除
+        </ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
   );
 }
