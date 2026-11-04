@@ -80,7 +80,7 @@ export default function ImagesViewer() {
           if (!open) setDeleteTargetImageId(null);
         }}
         title="画像を削除"
-        description="この画像を削除します。元に戻すことはできません。"
+        description="この画像を削除しますか？"
         confirmLabel="削除する"
         confirmingLabel="削除中"
         isConfirming={deletingImageId !== null}
