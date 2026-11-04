@@ -1,3 +1,5 @@
+import { RadioGroup, RadioGroupItem } from "@/components/shadcn/ui/radio-group";
+
 type ConsoleSegmentedControlOption<T extends string> = {
   value: T;
   label: string;
@@ -19,38 +21,38 @@ export default function ConsoleSegmentedControl<T extends string>({
   const selectedIndex = options.findIndex((option) => option.value === value);
 
   return (
-    <div
-      className="relative grid w-full max-w-64 self-center rounded-full border border-[#6354eb] p-0.5"
+    <RadioGroup
+      name={name}
+      value={value}
+      onValueChange={(nextValue) => onChange(nextValue as T)}
+      className="bg-muted relative grid h-10 w-full gap-0 rounded-2xl p-1"
       style={{
         gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))`,
       }}
     >
       <span
         aria-hidden
-        className="pointer-events-none absolute inset-y-0.5 left-0.5 rounded-full bg-[#6354eb] transition-transform duration-200 ease-out"
+        className="border-border bg-background pointer-events-none absolute inset-y-1 left-1 rounded-xl border shadow-sm transition-transform duration-200 ease-out"
         style={{
-          width: `calc((100% - 0.25rem) / ${options.length})`,
+          width: `calc((100% - 0.5rem) / ${options.length})`,
           transform: `translateX(${Math.max(selectedIndex, 0) * 100}%)`,
         }}
       />
       {options.map((option) => (
         <label
           key={option.value}
-          className="relative z-1 min-w-0 cursor-pointer"
+          className="relative z-1 flex min-w-0 cursor-pointer items-center justify-center"
         >
-          <input
+          <RadioGroupItem
+            id={`${name}-${option.value}`}
             className="peer sr-only"
-            type="radio"
-            name={name}
             value={option.value}
-            checked={value === option.value}
-            onChange={() => onChange(option.value)}
           />
-          <span className="block rounded-full px-4 py-1 text-center text-sm font-bold whitespace-nowrap text-[#6354eb] transition-colors duration-200 peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[#6354eb]">
+          <span className="text-muted-foreground peer-focus-visible:outline-ring peer-data-[state=checked]:text-foreground flex h-full w-full items-center justify-center rounded-xl px-4 text-center text-sm font-medium whitespace-nowrap transition-colors duration-200 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2">
             {option.label}
           </span>
         </label>
       ))}
-    </div>
+    </RadioGroup>
   );
 }

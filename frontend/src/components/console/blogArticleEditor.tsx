@@ -24,6 +24,12 @@ import BlogMarkdownEditor, {
   type BlogMarkdownEditorHandle,
 } from "./blogMarkdownEditor";
 import { Button } from "@/components/shadcn/ui/button";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/shadcn/ui/tabs";
 
 type BlogArticleEditorProps = { articleId?: string };
 
@@ -261,33 +267,37 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
           </LabelBox>
           <LabelBox isLong>
             <LabelText required>本文（Markdown）</LabelText>
-            {bodyView === "edit" ? (
-              <BlogMarkdownEditor
-                ref={blogMarkdownEditorRef}
-                value={bodyMarkdown.value}
-                onChange={bodyMarkdown.setValue}
-              />
-            ) : (
-              <div className="min-h-64 border border-[#c68ef0] bg-white px-4 py-3 text-[#222]">
-                {bodyMarkdown.value.trim() ? (
-                  <BlogMarkdownPreview content={bodyMarkdown.value} />
-                ) : (
-                  <p className="text-sm text-[#7e11d1]">本文がありません</p>
-                )}
-              </div>
-            )}
+            <Tabs
+              value={bodyView}
+              onValueChange={(nextValue) =>
+                setBodyView(nextValue as "edit" | "preview")
+              }
+              className="gap-3"
+            >
+              <TabsList className="w-full">
+                <TabsTrigger value="edit">編集</TabsTrigger>
+                <TabsTrigger value="preview">プレビュー</TabsTrigger>
+              </TabsList>
+              <TabsContent value="edit">
+                <BlogMarkdownEditor
+                  ref={blogMarkdownEditorRef}
+                  value={bodyMarkdown.value}
+                  onChange={bodyMarkdown.setValue}
+                />
+              </TabsContent>
+              <TabsContent value="preview">
+                <div className="min-h-64 border border-[#c68ef0] bg-white px-4 py-3 text-[#222]">
+                  {bodyMarkdown.value.trim() ? (
+                    <BlogMarkdownPreview content={bodyMarkdown.value} />
+                  ) : (
+                    <p className="text-sm text-[#7e11d1]">本文がありません</p>
+                  )}
+                </div>
+              </TabsContent>
+            </Tabs>
           </LabelBox>
         </div>
         <div className="sticky bottom-0 mt-8 flex flex-col items-center gap-2 bg-white py-2.5">
-          <ConsoleSegmentedControl
-            name="body-view"
-            value={bodyView}
-            onChange={setBodyView}
-            options={[
-              { value: "edit", label: "編集" },
-              { value: "preview", label: "プレビュー" },
-            ]}
-          />
           <ConsoleFormFeedback
             className="mb-2"
             error={loadError ?? submitError ?? deleteError}
