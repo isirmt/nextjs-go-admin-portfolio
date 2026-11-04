@@ -7,9 +7,9 @@ import useConsoleMutation from "@/hooks/useConsoleMutation";
 import useConsoleTextField from "@/hooks/useConsoleTextField";
 import ConsoleFormFeedback from "./consoleFormFeedback";
 import ConsoleSelectableTagButton from "./consoleSelectableTagButton";
-import { ConsoleTextField } from "./consoleField";
 import { LabelText } from "./labelBlock";
 import { Button } from "@/components/shadcn/ui/button";
+import { Input } from "@/components/shadcn/ui/input";
 
 type BlogTagSelectingBoxProps = {
   selectedIds: string[];
@@ -79,11 +79,11 @@ export default function BlogTagSelectingBox({
       <div className="flex flex-col gap-4 border-y border-dashed border-[#c6a5ec] bg-white p-4">
         <label className="text-xs font-semibold text-gray-600">
           <LabelText required>タグ名</LabelText>
-          <ConsoleTextField {...name.inputProps} placeholder="Next.js" />
+          <Input {...name.inputProps} placeholder="Next.js" />
         </label>
         <label className="text-xs font-semibold text-gray-600">
           <LabelText required>SLUG</LabelText>
-          <ConsoleTextField {...slug.inputProps} placeholder="nextjs" />
+          <Input {...slug.inputProps} placeholder="nextjs" />
         </label>
         <ConsoleFormFeedback error={submitError} />
         <Button

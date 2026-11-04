@@ -13,7 +13,6 @@ import type { BlogArticle } from "@/types/blogs/common";
 import ConsoleButton from "./consoleButton";
 import ConsoleConfirmDialog from "./consoleConfirmDialog";
 import ConsoleFormFeedback from "./consoleFormFeedback";
-import { ConsoleTextField } from "./consoleField";
 import ImageSelectingDialog from "./imageSelectingDialog";
 import { LabelBox, LabelText } from "./labelBlock";
 import ConsoleSegmentedControl from "./consoleSegmentedControl";
@@ -24,6 +23,7 @@ import BlogMarkdownEditor, {
   type BlogMarkdownEditorHandle,
 } from "./blogMarkdownEditor";
 import { Button } from "@/components/shadcn/ui/button";
+import { Input } from "@/components/shadcn/ui/input";
 import {
   Tabs,
   TabsContent,
@@ -232,18 +232,15 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
           </LabelBox>
           <LabelBox>
             <LabelText>公開日時</LabelText>
-            <ConsoleTextField
-              type="datetime-local"
-              {...publishedAt.inputProps}
-            />
+            <Input type="datetime-local" {...publishedAt.inputProps} />
           </LabelBox>
           <LabelBox isLong>
             <LabelText required>タイトル</LabelText>
-            <ConsoleTextField required {...title.inputProps} />
+            <Input required {...title.inputProps} />
           </LabelBox>
           <LabelBox isLong>
             <LabelText required>SLUG</LabelText>
-            <ConsoleTextField required {...slug.inputProps} />
+            <Input required {...slug.inputProps} />
           </LabelBox>
           <LabelBox isLong>
             <LabelText>タグ</LabelText>
