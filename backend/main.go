@@ -117,6 +117,7 @@ func main() {
 	epBlogTags.GET("", pSrv.handleGetBlogTags)
 	epBlogTags.GET("/:id", pSrv.handleGetBlogTag)
 	epBlogTags.POST("", pSrv.requireAdmin(pSrv.handleCreateBlogTag))
+	epBlogTags.DELETE("/:id", pSrv.requireAdmin(pSrv.handleDeleteBlogTag))
 
 	epBlogSeries := router.Group("/blog-series")
 	epBlogSeries.GET("", pSrv.handleGetBlogSeries)

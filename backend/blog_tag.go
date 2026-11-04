@@ -107,3 +107,21 @@ func (pSrv *server) handleCreateBlogTag(c *echo.Context) error {
 	}
 	return c.JSON(http.StatusCreated, blogTagSummary(tag))
 }
+
+func (pSrv *server) handleDeleteBlogTag(c *echo.Context) error {
+	tagID := strings.TrimSpace(c.Param("id"))
+	if tagID == "" {
+		return c.String(http.StatusBadRequest, "blog tag id is required")
+	}
+
+	result, err := pSrv.q.BlogTag.WithContext(c.Request().Context()).
+		Where(pSrv.q.BlogTag.ID.Eq(tagID)).
+		Delete()
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "failed to delete blog tag")
+	}
+	if result.RowsAffected == 0 {
+		return c.String(http.StatusNotFound, "blog tag not found")
+	}
+	return c.NoContent(http.StatusNoContent)
+}
