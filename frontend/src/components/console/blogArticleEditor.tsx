@@ -283,7 +283,7 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
             </div>
           </div>
         ) : null}
-        <div className="sticky bottom-0 mt-8 flex flex-col items-center gap-2 bg-white py-2.5">
+        <div className="mt-8 flex flex-col items-center gap-2">
           <ConsoleFormFeedback
             className="mb-2"
             error={loadError ?? submitError}
