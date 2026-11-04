@@ -6,13 +6,18 @@ import {
   type DragEndEvent,
 } from "@dnd-kit/react";
 import { isSortable, useSortable } from "@dnd-kit/react/sortable";
-import { useCallback, useState } from "react";
+import {
+  EllipsisIcon,
+  ListOrderedIcon,
+  PencilIcon,
+  Trash2Icon,
+} from "lucide-react";
+import { Fragment, useCallback, useState } from "react";
 import { useBlogSeriesContext } from "@/contexts/blogSeriesContext";
 import useConsoleMutation from "@/hooks/useConsoleMutation";
 import backendApi from "@/lib/auth/backendFetch";
 import { formatJapaneseDateTime } from "@/lib/date";
 import type { BlogArticleSummary, BlogSeries } from "@/types/blogs/common";
-import ConsoleButton from "./consoleButton";
 import BlogSeriesEditor from "./blogSeriesEditor";
 import ConsoleConfirmDialog from "./consoleConfirmDialog";
 import ConsoleFormFeedback from "./consoleFormFeedback";
@@ -22,6 +27,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/shadcn/ui/dialog";
+import { Button } from "@/components/shadcn/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/shadcn/ui/dropdown-menu";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/shadcn/ui/table";
 
 function SortableSeriesArticle({
   article,
@@ -112,13 +132,14 @@ function SeriesArticleOrder({ series }: { series: BlogSeries }) {
         <p className="text-sm text-[#7e11d1]">選択されている記事はありません</p>
       )}
       <ConsoleFormFeedback className="mt-3" error={error} />
-      <ConsoleButton
+      <Button
+        type="button"
         className="mt-3"
         disabled={isPending}
         onClick={handleSaveOrder}
       >
         {isPending ? "保存中" : "並び順を保存"}
-      </ConsoleButton>
+      </Button>
     </div>
   );
 }
@@ -165,67 +186,104 @@ export default function BlogSeriesViewer() {
   return (
     <main className="relative w-full space-y-8 px-2.5 py-8 lg:px-16">
       <div className="flex flex-wrap items-center justify-end gap-4">
-        <ConsoleButton className="w-auto" onClick={openCreate}>
+        <Button type="button" onClick={openCreate}>
           新規シリーズを作成
-        </ConsoleButton>
+        </Button>
       </div>
       <h2 className="font-semibold text-[#7e11d1]">シリーズ一覧</h2>
-      {error ? <p className="text-sm text-[#e04787]">{error}</p> : null}
-      {deleteError ? (
-        <p className="text-sm text-[#e04787]">{deleteError}</p>
-      ) : null}
-      <ul className="flex flex-col gap-4">
-        {isLoading ? (
-          <li className="px-4 py-8 text-center text-sm text-[#7e11d1]">
-            読み込み中です
-          </li>
-        ) : null}
-        {!isLoading && series.length === 0 ? (
-          <li className="border border-dashed border-[#c68ef0] bg-white px-4 py-8 text-center text-sm text-[#7e11d1]">
-            シリーズはありません
-          </li>
-        ) : null}
-        {series.map((item) => {
-          const isExpanded = expandedSeriesID === item.id;
-          return (
-            <li
-              key={item.id}
-              className="overflow-hidden rounded border border-[#c68ef0] bg-white shadow-[.2rem_.2rem_0_0_#c68ef0]"
-            >
-              <div className="flex flex-wrap items-center gap-4 px-4 py-3">
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold">{item.title}</p>
-                  <p className="truncate text-xs">/{item.slug}</p>
-                </div>
-                <span className="text-xs text-[#444]">
-                  {item.articles.length} 記事
-                </span>
-                <ConsoleButton
-                  variant="text"
-                  onClick={() =>
-                    setExpandedSeriesID(isExpanded ? null : item.id)
-                  }
-                >
-                  {isExpanded ? "閉じる" : "記事を並び替え"}
-                </ConsoleButton>
-                <ConsoleButton variant="text" onClick={() => openEdit(item)}>
-                  編集
-                </ConsoleButton>
-                <ConsoleButton
-                  variant="danger"
-                  onClick={() => setDeletingSeries(item)}
-                >
-                  削除
-                </ConsoleButton>
-              </div>
-              <div className="bg-[#f5f5f5] px-4 py-2 text-xs text-[#444]">
-                更新日時: {formatJapaneseDateTime(item.updated_at)}
-              </div>
-              {isExpanded ? <SeriesArticleOrder series={item} /> : null}
-            </li>
-          );
-        })}
-      </ul>
+      <ConsoleFormFeedback error={error} />
+      <ConsoleFormFeedback error={deleteError} />
+      <Table className="table-fixed">
+        <TableHeader>
+          <TableRow>
+            <TableHead>シリーズ名</TableHead>
+            <TableHead className="w-20">記事数</TableHead>
+            <TableHead className="hidden w-36 md:table-cell">
+              更新日時
+            </TableHead>
+            <TableHead className="w-12" />
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {isLoading ? (
+            <TableRow>
+              <TableCell
+                colSpan={4}
+                className="text-muted-foreground h-28 text-center"
+              >
+                読み込み中です
+              </TableCell>
+            </TableRow>
+          ) : null}
+          {!isLoading && series.length === 0 ? (
+            <TableRow>
+              <TableCell
+                colSpan={4}
+                className="text-muted-foreground h-28 text-center"
+              >
+                シリーズはありません
+              </TableCell>
+            </TableRow>
+          ) : null}
+          {series.map((item) => {
+            const isExpanded = expandedSeriesID === item.id;
+
+            return (
+              <Fragment key={item.id}>
+                <TableRow>
+                  <TableCell className="min-w-0">
+                    <p className="truncate font-medium">{item.title}</p>
+                    <p className="text-muted-foreground truncate text-xs">
+                      /{item.slug}
+                    </p>
+                  </TableCell>
+                  <TableCell>{item.articles.length}</TableCell>
+                  <TableCell className="hidden md:table-cell">
+                    {formatJapaneseDateTime(item.updated_at)}
+                  </TableCell>
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button type="button" variant="ghost" size="icon-sm">
+                          <EllipsisIcon />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          onSelect={() =>
+                            setExpandedSeriesID(isExpanded ? null : item.id)
+                          }
+                        >
+                          <ListOrderedIcon />
+                          {isExpanded ? "並び替えを閉じる" : "記事を並び替え"}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => openEdit(item)}>
+                          <PencilIcon />
+                          編集
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          variant="destructive"
+                          onSelect={() => setDeletingSeries(item)}
+                        >
+                          <Trash2Icon />
+                          削除
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+                {isExpanded ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="p-0">
+                      <SeriesArticleOrder series={item} />
+                    </TableCell>
+                  </TableRow>
+                ) : null}
+              </Fragment>
+            );
+          })}
+        </TableBody>
+      </Table>
       <Dialog open={isEditorOpen} onOpenChange={setIsEditorOpen}>
         <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-xl shadow-none sm:max-w-4xl">
           <DialogHeader>
