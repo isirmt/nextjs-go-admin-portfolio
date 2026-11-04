@@ -13,6 +13,7 @@ import useConsoleMutation from "@/hooks/useConsoleMutation";
 import useConsoleTextField from "@/hooks/useConsoleTextField";
 import type { Work } from "@/types/works/common";
 import ConsoleImagePicker from "./consoleImagePicker";
+import ConsoleDatePicker from "./consoleDatePicker";
 import { Button } from "@/components/shadcn/ui/button";
 import { Field, FieldLabel, FieldTitle } from "@/components/shadcn/ui/field";
 import { Input } from "@/components/shadcn/ui/input";
@@ -279,11 +280,10 @@ export default function WorkRegisterForm({
             <FieldLabel htmlFor="work-published-date">
               作成日 <span className="text-destructive">*</span>
             </FieldLabel>
-            <Input
+            <ConsoleDatePicker
               id="work-published-date"
-              required
-              type="date"
-              {...publishedDate.inputProps}
+              value={publishedDate.value}
+              onChange={publishedDate.setValue}
             />
           </Field>
           <Field>
