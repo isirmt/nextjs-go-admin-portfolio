@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
+import { PlusIcon } from "lucide-react";
 import { useBlogTagsContext } from "@/contexts/blogTagsContext";
 import backendApi from "@/lib/auth/backendFetch";
 import useConsoleMutation from "@/hooks/useConsoleMutation";
@@ -8,6 +9,21 @@ import useConsoleTextField from "@/hooks/useConsoleTextField";
 import ConsoleFormFeedback from "./consoleFormFeedback";
 import ConsoleSelectableTagButton from "./consoleSelectableTagButton";
 import { Button } from "@/components/shadcn/ui/button";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/shadcn/ui/card";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/shadcn/ui/dialog";
 import { Field, FieldLabel } from "@/components/shadcn/ui/field";
 import { Input } from "@/components/shadcn/ui/input";
 
@@ -21,6 +37,7 @@ export default function BlogTagSelectingBox({
   onChange,
 }: BlogTagSelectingBoxProps) {
   const { blogTags, refreshBlogTags } = useBlogTagsContext();
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const name = useConsoleTextField();
   const slug = useConsoleTextField();
   const {
@@ -60,54 +77,87 @@ export default function BlogTagSelectingBox({
       await refreshBlogTags();
       name.reset();
       slug.reset();
+      setIsCreateDialogOpen(false);
     }, "タグの登録に失敗しました");
   }, [name, refreshBlogTags, run, setSubmitError, slug]);
 
   return (
-    <div className="relative flex w-full flex-col gap-4 bg-[#f8f8f8] p-4">
-      <div className="flex flex-wrap gap-3">
-        {blogTags.map((tag) => (
-          <ConsoleSelectableTagButton
-            key={tag.id}
-            isSelected={selectedIds.includes(tag.id)}
-            onToggled={() => handleToggle(tag.id)}
+    <Card size="sm" className="w-full rounded-xl shadow-none ring-0">
+      <CardHeader>
+        <CardTitle>タグを選択</CardTitle>
+        <CardAction>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setIsCreateDialogOpen(true)}
           >
-            {tag.name}
-          </ConsoleSelectableTagButton>
-        ))}
-      </div>
-      <div className="flex flex-col gap-4 border-y border-dashed border-[#c6a5ec] bg-white p-4">
-        <Field>
-          <FieldLabel htmlFor="blog-tag-name">
-            タグ名 <span className="text-destructive">*</span>
-          </FieldLabel>
-          <Input
-            id="blog-tag-name"
-            required
-            {...name.inputProps}
-            placeholder="Next.js"
-          />
-        </Field>
-        <Field>
-          <FieldLabel htmlFor="blog-tag-slug">
-            SLUG <span className="text-destructive">*</span>
-          </FieldLabel>
-          <Input
-            id="blog-tag-slug"
-            required
-            {...slug.inputProps}
-            placeholder="nextjs"
-          />
-        </Field>
-        <ConsoleFormFeedback error={submitError} />
-        <Button
-          type="button"
-          onClick={handleCreateBlogTag}
-          disabled={isSubmitting}
-        >
-          追加
-        </Button>
-      </div>
-    </div>
+            <PlusIcon />
+            タグを追加
+          </Button>
+        </CardAction>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-wrap gap-2">
+          {blogTags.map((tag) => (
+            <ConsoleSelectableTagButton
+              key={tag.id}
+              isSelected={selectedIds.includes(tag.id)}
+              onToggled={() => handleToggle(tag.id)}
+            >
+              {tag.name}
+            </ConsoleSelectableTagButton>
+          ))}
+        </div>
+      </CardContent>
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <DialogContent className="rounded-xl shadow-none">
+          <DialogHeader>
+            <DialogTitle>タグを追加</DialogTitle>
+          </DialogHeader>
+          <form
+            className="flex flex-col gap-4"
+            onSubmit={(event) => {
+              event.preventDefault();
+              void handleCreateBlogTag();
+            }}
+          >
+            <Field>
+              <FieldLabel htmlFor="blog-tag-name">
+                タグ名 <span className="text-destructive">*</span>
+              </FieldLabel>
+              <Input
+                id="blog-tag-name"
+                required
+                {...name.inputProps}
+                placeholder="Next.js"
+              />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="blog-tag-slug">
+                SLUG <span className="text-destructive">*</span>
+              </FieldLabel>
+              <Input
+                id="blog-tag-slug"
+                required
+                {...slug.inputProps}
+                placeholder="nextjs"
+              />
+            </Field>
+            <ConsoleFormFeedback error={submitError} />
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button type="button" variant="outline" disabled={isSubmitting}>
+                  キャンセル
+                </Button>
+              </DialogClose>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "追加中" : "追加"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </Card>
   );
 }
