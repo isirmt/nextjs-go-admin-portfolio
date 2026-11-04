@@ -1,6 +1,7 @@
 import ConsoleSidebar from "@/components/console/sidebar";
 import ConsoleHeader from "@/components/console/header";
 import ConsoleSessionProvider from "@/components/providers/consoleSessionProvider";
+import { Toaster } from "@/components/shadcn/ui/sonner";
 import { HamburgerProvider } from "@/contexts/hamburgerContext";
 
 export default async function ConsoleLayout({
@@ -17,6 +18,7 @@ export default async function ConsoleLayout({
             <ConsoleSidebar />
             {children}
           </div>
+          <Toaster position="top-center" />
         </div>
       </HamburgerProvider>
     </ConsoleSessionProvider>
