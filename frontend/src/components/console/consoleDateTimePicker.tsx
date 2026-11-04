@@ -14,6 +14,7 @@ import {
 } from "@/components/shadcn/ui/popover";
 
 type ConsoleDateTimePickerProps = {
+  id?: string;
   value: string;
   onChange: (value: string) => void;
 };
@@ -41,6 +42,7 @@ function parseLocalDateTime(value: string) {
 }
 
 export default function ConsoleDateTimePicker({
+  id,
   value,
   onChange,
 }: ConsoleDateTimePickerProps) {
@@ -76,6 +78,7 @@ export default function ConsoleDateTimePicker({
       <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
         <PopoverTrigger asChild>
           <Button
+            id={id}
             type="button"
             variant="outline"
             className="w-full justify-start font-normal"

@@ -7,8 +7,8 @@ import useConsoleMutation from "@/hooks/useConsoleMutation";
 import useConsoleTextField from "@/hooks/useConsoleTextField";
 import ConsoleFormFeedback from "./consoleFormFeedback";
 import ConsoleSelectableTagButton from "./consoleSelectableTagButton";
-import { LabelText } from "./labelBlock";
 import { Button } from "@/components/shadcn/ui/button";
+import { Field, FieldLabel } from "@/components/shadcn/ui/field";
 import { Input } from "@/components/shadcn/ui/input";
 
 type BlogTagSelectingBoxProps = {
@@ -77,14 +77,28 @@ export default function BlogTagSelectingBox({
         ))}
       </div>
       <div className="flex flex-col gap-4 border-y border-dashed border-[#c6a5ec] bg-white p-4">
-        <label className="text-xs font-semibold text-gray-600">
-          <LabelText required>タグ名</LabelText>
-          <Input {...name.inputProps} placeholder="Next.js" />
-        </label>
-        <label className="text-xs font-semibold text-gray-600">
-          <LabelText required>SLUG</LabelText>
-          <Input {...slug.inputProps} placeholder="nextjs" />
-        </label>
+        <Field>
+          <FieldLabel htmlFor="blog-tag-name">
+            タグ名 <span className="text-destructive">*</span>
+          </FieldLabel>
+          <Input
+            id="blog-tag-name"
+            required
+            {...name.inputProps}
+            placeholder="Next.js"
+          />
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="blog-tag-slug">
+            SLUG <span className="text-destructive">*</span>
+          </FieldLabel>
+          <Input
+            id="blog-tag-slug"
+            required
+            {...slug.inputProps}
+            placeholder="nextjs"
+          />
+        </Field>
         <ConsoleFormFeedback error={submitError} />
         <Button
           type="button"

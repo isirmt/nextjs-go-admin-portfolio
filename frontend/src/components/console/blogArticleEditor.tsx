@@ -15,7 +15,6 @@ import ConsoleConfirmDialog from "./consoleConfirmDialog";
 import ConsoleDateTimePicker from "./consoleDateTimePicker";
 import ConsoleFormFeedback from "./consoleFormFeedback";
 import ImageSelectingDialog from "./imageSelectingDialog";
-import { LabelBox, LabelText } from "./labelBlock";
 import ConsoleSegmentedControl from "./consoleSegmentedControl";
 import useConsoleTextField from "@/hooks/useConsoleTextField";
 import BlogMarkdownPreview from "@/components/blogs/blogMarkdownPreview";
@@ -24,6 +23,13 @@ import BlogMarkdownEditor, {
   type BlogMarkdownEditorHandle,
 } from "./blogMarkdownEditor";
 import { Button } from "@/components/shadcn/ui/button";
+import {
+  Field,
+  FieldLabel,
+  FieldLegend,
+  FieldSet,
+  FieldTitle,
+} from "@/components/shadcn/ui/field";
 import { Input } from "@/components/shadcn/ui/input";
 import {
   Tabs,
@@ -219,8 +225,10 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
       </header>
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <LabelBox>
-            <LabelText required>状態</LabelText>
+          <FieldSet className="gap-3">
+            <FieldLegend variant="label">
+              状態 <span className="text-destructive">*</span>
+            </FieldLegend>
             <ConsoleSegmentedControl
               name="status"
               value={status}
@@ -230,28 +238,33 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
                 { value: "published", label: "公開" },
               ]}
             />
-          </LabelBox>
-          <LabelBox>
-            <LabelText>公開日時</LabelText>
+          </FieldSet>
+          <Field>
+            <FieldLabel htmlFor="blog-published-at">公開日時</FieldLabel>
             <ConsoleDateTimePicker
+              id="blog-published-at"
               value={publishedAt.value}
               onChange={publishedAt.setValue}
             />
-          </LabelBox>
-          <LabelBox isLong>
-            <LabelText required>タイトル</LabelText>
-            <Input required {...title.inputProps} />
-          </LabelBox>
-          <LabelBox isLong>
-            <LabelText required>SLUG</LabelText>
-            <Input required {...slug.inputProps} />
-          </LabelBox>
-          <LabelBox isLong>
-            <LabelText>タグ</LabelText>
+          </Field>
+          <Field className="lg:col-span-2">
+            <FieldLabel htmlFor="blog-title">
+              タイトル <span className="text-destructive">*</span>
+            </FieldLabel>
+            <Input id="blog-title" required {...title.inputProps} />
+          </Field>
+          <Field className="lg:col-span-2">
+            <FieldLabel htmlFor="blog-slug">
+              SLUG <span className="text-destructive">*</span>
+            </FieldLabel>
+            <Input id="blog-slug" required {...slug.inputProps} />
+          </Field>
+          <Field className="lg:col-span-2">
+            <FieldTitle>タグ</FieldTitle>
             <BlogTagSelectingBox selectedIds={tagIds} onChange={setTagIds} />
-          </LabelBox>
-          <LabelBox>
-            <LabelText>サムネイル画像</LabelText>
+          </Field>
+          <Field>
+            <FieldTitle>サムネイル画像</FieldTitle>
             <ConsoleButton
               type="button"
               onClick={() => setIsThumbnailDialogOpen(true)}
@@ -259,15 +272,17 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
               画像を選択
             </ConsoleButton>
             <SelectedImageTiles imageIds={thumbnailImageIds} />
-          </LabelBox>
-          <LabelBox>
-            <LabelText>本文への画像挿入</LabelText>
+          </Field>
+          <Field>
+            <FieldTitle>本文への画像挿入</FieldTitle>
             <ConsoleButton type="button" onClick={openBodyImageDialog}>
               画像を挿入
             </ConsoleButton>
-          </LabelBox>
-          <LabelBox isLong>
-            <LabelText required>本文（Markdown）</LabelText>
+          </Field>
+          <Field className="lg:col-span-2">
+            <FieldTitle>
+              本文（Markdown） <span className="text-destructive">*</span>
+            </FieldTitle>
             <Tabs
               value={bodyView}
               onValueChange={(nextValue) =>
@@ -296,7 +311,7 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
                 </div>
               </TabsContent>
             </Tabs>
-          </LabelBox>
+          </Field>
         </div>
         <div className="sticky bottom-0 mt-8 flex flex-col items-center gap-2 bg-white py-2.5">
           <ConsoleFormFeedback
