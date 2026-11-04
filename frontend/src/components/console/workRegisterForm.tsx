@@ -14,6 +14,7 @@ import WorkUrlsInput, {
 import { useWorksContext } from "@/contexts/worksContext";
 import useConsoleMutation from "@/hooks/useConsoleMutation";
 import useConsoleTextField from "@/hooks/useConsoleTextField";
+import type { Work } from "@/types/works/common";
 import ConsoleImagePicker from "./consoleImagePicker";
 
 type WorkRegisterFormMode = "post" | "put";
@@ -24,7 +25,7 @@ type WorkRegisterFormUrlValue = {
   url: string;
 };
 
-type WorkRegisterFormInitialValues = {
+export type WorkRegisterFormInitialValues = {
   title?: string;
   comment?: string;
   publishedDate?: string;
@@ -40,7 +41,7 @@ type WorkRegisterFormProps = {
   mode?: WorkRegisterFormMode;
   workId?: string;
   initialValues?: WorkRegisterFormInitialValues;
-  onSubmitted?: () => void;
+  onSubmitted?: (workId?: string) => void;
 };
 
 const initializeUrlItems = (
@@ -57,6 +58,24 @@ const initializeUrlItems = (
 };
 
 const currentDateInputValue = () => new Date().toISOString().split("T")[0];
+
+export const createWorkRegisterFormInitialValues = (
+  work: Work,
+): WorkRegisterFormInitialValues => ({
+  title: work.title,
+  comment: work.comment,
+  publishedDate: work.created_at ? work.created_at.slice(0, 10) : "",
+  accentColor: work.accent_color,
+  thumbnailImageId: work.thumbnail_image_id ?? "",
+  workImageIds: [...(work.images ?? [])]
+    .sort((a, b) => a.display_order - b.display_order)
+    .map((image) => image.image_id),
+  techStackIds: (work.tech_stacks ?? []).map((stack) => stack.id),
+  description: work.description ?? "",
+  urls: [...(work.urls ?? [])]
+    .sort((a, b) => a.display_order - b.display_order)
+    .map((url) => ({ id: url.id, label: url.label, url: url.url })),
+});
 
 export default function WorkRegisterForm({
   mode = "post",
@@ -177,6 +196,10 @@ export default function WorkRegisterForm({
             );
           }
 
+          const createdWorkID = isEditingMode
+            ? undefined
+            : ((await response.json()) as { id?: string }).id;
+
           await refreshWorks();
           if (!isEditingMode) {
             resetNewWorkForm();
@@ -184,7 +207,7 @@ export default function WorkRegisterForm({
           setSubmitSuccess(
             isEditingMode ? "更新が完了しました" : "登録が完了しました",
           );
-          onSubmitted?.();
+          onSubmitted?.(createdWorkID);
         },
         isEditingMode ? "更新に失敗しました" : "登録に失敗しました",
       );

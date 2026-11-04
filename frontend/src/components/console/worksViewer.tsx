@@ -1,16 +1,15 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import Link from "next/link";
+import { useCallback, useState } from "react";
 import { EllipsisIcon, PencilIcon, Trash2Icon } from "lucide-react";
 import { useWorksContext } from "@/contexts/worksContext";
 import backendApi from "@/lib/auth/backendFetch";
 import { formatJapaneseDateTime } from "@/lib/date";
 import type { Work } from "@/types/works/common";
 import useConsoleMutation from "@/hooks/useConsoleMutation";
-import WorkRegisterForm from "./workRegisterForm";
 import ConsoleConfirmDialog from "./consoleConfirmDialog";
 import ConsoleFormFeedback from "./consoleFormFeedback";
-import ConsoleModal from "./consoleModal";
 import { Button } from "@/components/shadcn/ui/button";
 import {
   DropdownMenu,
@@ -27,49 +26,14 @@ import {
   TableRow,
 } from "@/components/shadcn/ui/table";
 
-const initializeWorkValues = (work: Work) => {
-  const sortedImages = [...(work.images ?? [])]
-    .sort((a, b) => a.display_order - b.display_order)
-    .map((image) => image.image_id);
-  const sortedUrls = [...(work.urls ?? [])]
-    .sort((a, b) => a.display_order - b.display_order)
-    .map((url) => ({
-      id: url.id,
-      label: url.label,
-      url: url.url,
-    }));
-  const techIds = (work.tech_stacks ?? []).map((stack) => stack.id);
-
-  return {
-    title: work.title,
-    comment: work.comment,
-    publishedDate: work.created_at ? work.created_at.slice(0, 10) : "",
-    accentColor: work.accent_color,
-    thumbnailImageId: work.thumbnail_image_id ?? "",
-    workImageIds: sortedImages,
-    techStackIds: techIds,
-    description: work.description ?? "",
-    urls: sortedUrls,
-  };
-};
-
 export default function WorksViewer() {
   const { works, isLoading, error, refreshWorks } = useWorksContext();
-  const [editingWorkId, setEditingWorkId] = useState<string | null>(null);
   const [deletingWork, setDeletingWork] = useState<Work | null>(null);
   const {
     isPending: isDeleting,
     error: deleteError,
     run: runDelete,
   } = useConsoleMutation();
-
-  const workInitialValues = useMemo(
-    () =>
-      new Map<string, ReturnType<typeof initializeWorkValues>>(
-        works.map((work) => [work.id, initializeWorkValues(work)]),
-      ),
-    [works],
-  );
 
   const handleDelete = useCallback(async () => {
     if (!deletingWork) return;
@@ -84,24 +48,18 @@ export default function WorksViewer() {
       await refreshWorks();
     }, "削除に失敗しました");
 
-    if (result.ok) {
-      if (editingWorkId === deletingWork.id) setEditingWorkId(null);
-      setDeletingWork(null);
-    }
-  }, [deletingWork, editingWorkId, refreshWorks, runDelete]);
-
-  const editingWork = editingWorkId
-    ? works.find((work) => work.id === editingWorkId)
-    : undefined;
-  const editingInitialValues = editingWorkId
-    ? workInitialValues.get(editingWorkId)
-    : undefined;
+    if (result.ok) setDeletingWork(null);
+  }, [deletingWork, refreshWorks, runDelete]);
 
   return (
     <section className="space-y-4">
-      <h2 className="text-lg font-semibold">制作物一覧</h2>
-      {error ? <p className="text-sm text-[#e04787]">{error}</p> : null}
-      <ConsoleFormFeedback error={deleteError} />
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <h2 className="text-lg font-semibold text-[#7e11d1]">制作物一覧</h2>
+        <Button asChild>
+          <Link href="/console/works/new">新規制作物を作成</Link>
+        </Button>
+      </div>
+      <ConsoleFormFeedback error={error ?? deleteError} />
       <Table className="table-fixed">
         <TableHeader>
           <TableRow>
@@ -152,11 +110,11 @@ export default function WorksViewer() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem
-                      onSelect={() => setEditingWorkId(work.id)}
-                    >
-                      <PencilIcon />
-                      編集
+                    <DropdownMenuItem asChild>
+                      <Link href={`/console/works/${work.id}`}>
+                        <PencilIcon />
+                        編集
+                      </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       variant="destructive"
@@ -172,23 +130,6 @@ export default function WorksViewer() {
           ))}
         </TableBody>
       </Table>
-      {editingWork && editingInitialValues ? (
-        <ConsoleModal
-          open
-          onOpenChange={(open) => {
-            if (!open) setEditingWorkId(null);
-          }}
-          title="制作物編集"
-          description={editingWork.title}
-        >
-          <WorkRegisterForm
-            mode="put"
-            workId={editingWork.id}
-            initialValues={editingInitialValues}
-            onSubmitted={() => setEditingWorkId(null)}
-          />
-        </ConsoleModal>
-      ) : null}
       <ConsoleConfirmDialog
         open={deletingWork !== null}
         onOpenChange={(open) => {
