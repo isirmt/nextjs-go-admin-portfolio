@@ -16,7 +16,12 @@ import ConsoleButton from "./consoleButton";
 import BlogSeriesEditor from "./blogSeriesEditor";
 import ConsoleConfirmDialog from "./consoleConfirmDialog";
 import ConsoleFormFeedback from "./consoleFormFeedback";
-import ConsoleModal from "./consoleModal";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/shadcn/ui/dialog";
 
 function SortableSeriesArticle({
   article,
@@ -221,25 +226,27 @@ export default function BlogSeriesViewer() {
           );
         })}
       </ul>
-      <ConsoleModal
-        open={isEditorOpen}
-        onOpenChange={setIsEditorOpen}
-        title={editingSeries ? "シリーズを編集" : "新規シリーズを作成"}
-        description="シリーズの情報と所属記事を設定します。"
-      >
-        <BlogSeriesEditor
-          key={editingSeries?.id ?? "new"}
-          series={editingSeries}
-          onSaved={() => setIsEditorOpen(false)}
-        />
-      </ConsoleModal>
+      <Dialog open={isEditorOpen} onOpenChange={setIsEditorOpen}>
+        <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-xl shadow-none sm:max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>
+              {editingSeries ? "シリーズを編集" : "新規シリーズを作成"}
+            </DialogTitle>
+          </DialogHeader>
+          <BlogSeriesEditor
+            key={editingSeries?.id ?? "new"}
+            series={editingSeries}
+            onSaved={() => setIsEditorOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
       <ConsoleConfirmDialog
         open={deletingSeries !== null}
         onOpenChange={(open) => {
           if (!open) setDeletingSeries(null);
         }}
         title="シリーズを削除"
-        description="シリーズを削除します。記事自体は削除されません。"
+        description="シリーズを削除しますか？"
         confirmLabel="削除する"
         confirmingLabel="削除中"
         isConfirming={isDeleting}
