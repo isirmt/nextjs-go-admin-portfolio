@@ -9,8 +9,6 @@ import { BlogTagsProvider } from "@/contexts/blogTagsContext";
 import useConsoleMutation from "@/hooks/useConsoleMutation";
 import backendApi from "@/lib/auth/backendFetch";
 import type { BlogArticle } from "@/types/blogs/common";
-import ConsoleButton from "./consoleButton";
-import ConsoleConfirmDialog from "./consoleConfirmDialog";
 import ConsoleDateTimePicker from "./consoleDateTimePicker";
 import ConsoleFormFeedback from "./consoleFormFeedback";
 import ConsoleSegmentedControl from "./consoleSegmentedControl";
@@ -57,12 +55,6 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
     error: submitError,
     run: runSubmit,
   } = useConsoleMutation();
-  const {
-    isPending: isDeleting,
-    error: deleteError,
-    run: runDelete,
-  } = useConsoleMutation();
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
 
@@ -144,20 +136,6 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
       setSubmitSuccess(articleId ? "更新しました" : "作成しました");
       if (!articleId) router.replace(`/console/blogs/${result.data.id}`);
     }
-  };
-
-  const handleDelete = async () => {
-    if (!articleId) return;
-    setLoadError(null);
-    await runDelete(async () => {
-      const response = await backendApi(`/blogs/${articleId}`, {
-        method: "DELETE",
-      });
-      if (!response.ok)
-        throw new Error((await response.text()) || "記事の削除に失敗しました");
-      await refreshBlogArticles();
-      router.replace("/console/blogs");
-    }, "記事の削除に失敗しました");
   };
 
   return (
@@ -256,7 +234,7 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
         <div className="sticky bottom-0 mt-8 flex flex-col items-center gap-2 bg-white py-2.5">
           <ConsoleFormFeedback
             className="mb-2"
-            error={loadError ?? submitError ?? deleteError}
+            error={loadError ?? submitError}
             success={submitSuccess}
           />
           <Button
@@ -268,29 +246,7 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
             {isSubmitting ? "保存中" : "保存"}
           </Button>
         </div>
-        <div>
-          {articleId ? (
-            <ConsoleButton
-              className="mt-20"
-              disabled={isSubmitting || isDeleting}
-              onClick={() => setIsDeleteDialogOpen(true)}
-              variant="danger"
-            >
-              {isDeleting ? "削除中" : "削除"}
-            </ConsoleButton>
-          ) : null}
-        </div>
       </form>
-      <ConsoleConfirmDialog
-        open={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
-        title="記事を削除"
-        description="この記事を削除します。元に戻すことはできません。"
-        confirmLabel="削除する"
-        confirmingLabel="削除中"
-        isConfirming={isDeleting}
-        onConfirm={handleDelete}
-      />
     </main>
   );
 }
