@@ -80,15 +80,15 @@ const BlogMarkdownEditor = forwardRef<
       });
     });
 
-    const editorNode = bodyEditor.getDomNode();
-    if (!editorNode) return;
+    const handlePaste = (event: ClipboardEvent) => {
+      if (!bodyEditor.hasTextFocus()) return;
 
-    const handlePaste = (event: ClipboardEvent) =>
       handleImagePaste(bodyEditor, event);
+    };
 
-    editorNode.addEventListener("paste", handlePaste, true);
+    window.addEventListener("paste", handlePaste, true);
     bodyEditor.onDidDispose(() => {
-      editorNode.removeEventListener("paste", handlePaste, true);
+      window.removeEventListener("paste", handlePaste, true);
     });
   };
 
