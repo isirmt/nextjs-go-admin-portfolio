@@ -208,12 +208,12 @@ export default function BlogSeriesViewer() {
 
   return (
     <main className="relative w-full space-y-8 px-2.5 py-8 lg:px-16">
-      <div className="flex flex-wrap items-center justify-end gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <h2 className="text-lg font-semibold text-[#7e11d1]">シリーズ一覧</h2>
         <Button type="button" onClick={openCreate}>
           新規シリーズを作成
         </Button>
       </div>
-      <h2 className="font-semibold text-[#7e11d1]">シリーズ一覧</h2>
       <ConsoleFormFeedback error={error} />
       <ConsoleFormFeedback error={deleteError} />
       <Table className="table-fixed">

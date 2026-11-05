@@ -1,37 +1,68 @@
 "use client";
 
+import { LogInIcon, LogOutIcon } from "lucide-react";
 import { signIn, signOut, useSession } from "next-auth/react";
+import { usePathname, useSearchParams } from "next/navigation";
+import { cn } from "cn";
+import { Button } from "@/components/shadcn/ui/button";
 
-export default function SessionButton() {
+type SessionButtonProps = {
+  className?: string;
+  compact?: boolean;
+};
+
+export default function SessionButton({
+  className,
+  compact = false,
+}: SessionButtonProps) {
   const { status } = useSession();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const query = searchParams.toString();
+  const callbackUrl = query ? `${pathname}?${query}` : pathname;
+  const compactLabelClass = compact
+    ? "max-w-48 overflow-hidden whitespace-nowrap transition-[max-width,opacity,transform] duration-200 lg:max-w-0 lg:-translate-x-2 lg:opacity-0"
+    : undefined;
 
   if (status === "loading") {
     return (
-      <button className="cursor-pointer" type="button" disabled>
-        認証確認中
-      </button>
+      <Button
+        type="button"
+        variant="outline"
+        className={className}
+        disabled
+        title={compact ? "認証確認中" : undefined}
+      >
+        <LogInIcon />
+        <span className={compactLabelClass}>認証確認中</span>
+      </Button>
     );
   }
 
   if (status === "authenticated") {
     return (
-      <button
-        className="cursor-pointer"
+      <Button
         type="button"
+        variant="ghost"
+        className={className}
+        title={compact ? "ログアウト" : undefined}
         onClick={() => signOut()}
       >
-        ログアウト
-      </button>
+        <LogOutIcon />
+        <span className={compactLabelClass}>ログアウト</span>
+      </Button>
     );
   }
 
   return (
-    <button
+    <Button
       type="button"
-      className="cursor-pointer"
-      onClick={() => signIn("google", { callbackUrl: "/console/works" })}
+      className={cn(className)}
+      title={compact ? "ログイン" : undefined}
+      onClick={() => signIn("google", { callbackUrl })}
     >
-      ログイン
-    </button>
+      <LogInIcon />
+      <span className={compactLabelClass}>ログイン</span>
+    </Button>
   );
 }

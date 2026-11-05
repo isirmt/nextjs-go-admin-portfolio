@@ -56,12 +56,12 @@ export default function BlogsViewer() {
 
   return (
     <main className="relative w-full space-y-8 px-2.5 py-8 lg:px-16">
-      <div className="flex flex-wrap items-center justify-end gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <h2 className="text-lg font-semibold text-[#7e11d1]">記事一覧</h2>
         <Button asChild>
           <Link href="/console/blogs/new">新規記事を作成</Link>
         </Button>
       </div>
-      <h2 className="font-semibold text-[#7e11d1]">記事一覧</h2>
       {error ? <p className="text-sm text-[#e04787]">{error}</p> : null}
       <ConsoleFormFeedback error={deleteError} />
       <Table className="table-fixed">
