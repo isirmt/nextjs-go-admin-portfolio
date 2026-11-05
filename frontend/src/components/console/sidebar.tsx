@@ -77,7 +77,7 @@ export default function ConsoleSidebar() {
 
   return (
     <aside
-      className={`bg-muted/50 border-border/50 fixed top-12 left-0 z-50 flex h-[calc(100dvh-3rem)] w-72 flex-col border-r px-3 py-4 transition-[transform,width] duration-200 ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"} ${isCollapsed ? "lg:w-16" : "lg:w-72"}`}
+      className={`bg-muted border-border/50 fixed top-12 left-0 z-50 flex h-[calc(100dvh-3rem)] w-72 flex-col border-r px-3 py-4 transition-[transform,width] duration-200 ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"} ${isCollapsed ? "lg:w-16" : "lg:w-72"}`}
     >
       <Button
         type="button"
@@ -106,7 +106,7 @@ export default function ConsoleSidebar() {
                     key={item.href}
                     asChild
                     variant={isActive ? "secondary" : "ghost"}
-                    className={`w-full justify-start overflow-hidden rounded-lg transition-[margin,padding,gap] ${!isCollapsed && item.nested ? "lg:ml-4 lg:w-[calc(100%-1rem)]" : ""} ${isCollapsed ? "lg:w-full lg:gap-0 lg:px-3" : ""}`}
+                    className={`hover:bg-muted-foreground/15 hover:text-foreground w-full justify-start overflow-hidden rounded-lg transition-[margin,padding,gap] ${!isCollapsed && item.nested ? "lg:ml-4 lg:w-[calc(100%-1rem)]" : ""} ${isCollapsed ? "lg:w-full lg:gap-0 lg:px-3" : ""}`}
                   >
                     <Link
                       href={item.href}
