@@ -132,7 +132,7 @@ export default function ConsoleSidebar() {
         />
         <Button
           asChild
-          variant="outline"
+          variant="ghost"
           className={`w-full ${isCollapsed ? "lg:size-9 lg:self-center lg:px-0" : ""}`}
         >
           <Link

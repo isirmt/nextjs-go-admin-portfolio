@@ -43,7 +43,7 @@ export default function SessionButton({
     return (
       <Button
         type="button"
-        variant="outline"
+        variant="ghost"
         className={className}
         title={compact ? "ログアウト" : undefined}
         onClick={() => signOut()}
