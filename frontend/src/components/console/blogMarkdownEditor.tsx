@@ -11,7 +11,9 @@ import {
 } from "react";
 import type { Monaco, OnMount } from "@monaco-editor/react";
 import type { editor, IPosition, languages } from "monaco-editor";
+import { toast } from "sonner";
 import { useImagesContext } from "@/contexts/imagesContext";
+import { uploadImage } from "@/lib/images/upload";
 
 const MonacoEditor = dynamic(() => import("@monaco-editor/react"), {
   ssr: false,
@@ -28,11 +30,39 @@ type BlogMarkdownEditorProps = {
   height?: string;
 };
 
+const supportedClipboardImageTypes = new Set([
+  "image/png",
+  "image/jpeg",
+  "image/gif",
+  "image/webp",
+  "image/avif",
+]);
+
+function getRangeAtOffsets(
+  model: editor.ITextModel,
+  startOffset: number,
+  endOffset: number,
+) {
+  const start = model.getPositionAt(startOffset);
+  const end = model.getPositionAt(endOffset);
+
+  return {
+    startLineNumber: start.lineNumber,
+    startColumn: start.column,
+    endLineNumber: end.lineNumber,
+    endColumn: end.column,
+  };
+}
+
 const BlogMarkdownEditor = forwardRef<
   BlogMarkdownEditorHandle,
   BlogMarkdownEditorProps
 >(function BlogMarkdownEditor({ value, onChange, height = "36rem" }, ref) {
-  const { images, isLoading: areImagesLoading } = useImagesContext();
+  const {
+    images,
+    isLoading: areImagesLoading,
+    refreshImages,
+  } = useImagesContext();
   const bodyEditorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const [monaco, setMonaco] = useState<Monaco | null>(null);
 
@@ -110,6 +140,100 @@ const BlogMarkdownEditor = forwardRef<
       requestAnimationFrame(() => {
         showImageSuggestions(bodyEditor, mountedMonaco, "!");
       });
+    });
+
+    const editorNode = bodyEditor.getDomNode();
+    if (!editorNode) return;
+
+    const handlePaste = (event: ClipboardEvent) => {
+      const clipboardFiles = Array.from(event.clipboardData?.files ?? []);
+      const imageFiles = clipboardFiles.filter((file) =>
+        supportedClipboardImageTypes.has(file.type),
+      );
+      const hasUnsupportedImage = clipboardFiles.some(
+        (file) =>
+          file.type.startsWith("image/") &&
+          !supportedClipboardImageTypes.has(file.type),
+      );
+      if (!imageFiles.length) {
+        if (hasUnsupportedImage) {
+          event.preventDefault();
+          toast.error("PNG・JPEG・GIF・WebP・AVIF 形式の画像のみ対応");
+        }
+        return;
+      }
+
+      event.preventDefault();
+
+      const model = bodyEditor.getModel();
+      const selection = bodyEditor.getSelection();
+      if (!model || !selection) return;
+
+      const placeholder = `<!-- image-upload-${Date.now()}-${Math.random().toString(36).slice(2)} -->`;
+      bodyEditor.executeEdits("clipboard-image-placeholder", [
+        {
+          range: selection,
+          text: placeholder,
+          forceMoveMarkers: true,
+        },
+      ]);
+
+      void (async () => {
+        try {
+          const uploadedImages = await Promise.all(
+            imageFiles.map((file) => uploadImage(file, "clipboard.png")),
+          );
+          await refreshImages();
+
+          const currentModel = bodyEditor.getModel();
+          const placeholderOffset =
+            currentModel?.getValue().indexOf(placeholder) ?? -1;
+          if (!currentModel || placeholderOffset < 0) return;
+
+          const imageMarkdown = uploadedImages
+            .map((image) => `![画像](/api/images/${image.id}/raw)`)
+            .join("\n");
+          bodyEditor.executeEdits("clipboard-image-insert", [
+            {
+              range: getRangeAtOffsets(
+                currentModel,
+                placeholderOffset,
+                placeholderOffset + placeholder.length,
+              ),
+              text: imageMarkdown,
+              forceMoveMarkers: true,
+            },
+          ]);
+          toast.success("画像アップロード完了");
+        } catch (error) {
+          const currentModel = bodyEditor.getModel();
+          const placeholderOffset =
+            currentModel?.getValue().indexOf(placeholder) ?? -1;
+          if (currentModel && placeholderOffset >= 0) {
+            bodyEditor.executeEdits("clipboard-image-remove-placeholder", [
+              {
+                range: getRangeAtOffsets(
+                  currentModel,
+                  placeholderOffset,
+                  placeholderOffset + placeholder.length,
+                ),
+                text: "",
+                forceMoveMarkers: true,
+              },
+            ]);
+          }
+          toast.error(
+            error instanceof Error
+              ? error.message
+              : "アップロードに失敗しました",
+          );
+        }
+      })();
+    };
+
+    editorNode.addEventListener("paste", handlePaste, true);
+    bodyEditor.onDidDispose(() => {
+      editorNode.removeEventListener("paste", handlePaste, true);
     });
   };
 
