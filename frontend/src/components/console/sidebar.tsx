@@ -77,7 +77,7 @@ export default function ConsoleSidebar() {
 
   return (
     <aside
-      className={`bg-muted border-border/50 fixed top-12 left-0 z-50 flex h-[calc(100dvh-3rem)] w-72 flex-col border-r px-3 py-4 transition-[transform,width] duration-200 ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"} ${isCollapsed ? "lg:w-16" : "lg:w-72"}`}
+      className={`bg-muted border-border/50 fixed top-12 left-0 z-50 flex h-[calc(100dvh-3rem)] w-72 flex-col overflow-x-hidden border-r px-3 py-4 transition-[transform,width] duration-200 ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"} ${isCollapsed ? "lg:w-16" : "lg:w-72"}`}
     >
       <Button
         type="button"
@@ -93,7 +93,7 @@ export default function ConsoleSidebar() {
           <PanelLeftCloseIcon className="shrink-0" />
         )}
       </Button>
-      <nav className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto">
+      <nav className="flex min-h-0 flex-1 flex-col gap-5 overflow-x-hidden overflow-y-auto">
         {navigationGroups.map((group) => (
           <div key={group.label} className="flex flex-col gap-1">
             <div className="flex flex-col gap-1">
@@ -127,13 +127,13 @@ export default function ConsoleSidebar() {
       </nav>
       <div className="mt-auto flex flex-col gap-4 pt-4">
         <SessionButton
-          className={`w-full ${isCollapsed ? "lg:size-9 lg:self-center lg:px-0" : ""}`}
+          className={`w-full overflow-hidden ${isCollapsed ? "lg:size-9 lg:gap-0 lg:self-center lg:px-0" : ""}`}
           compact={isCollapsed}
         />
         <Button
           asChild
           variant="ghost"
-          className={`w-full ${isCollapsed ? "lg:size-9 lg:self-center lg:px-0" : ""}`}
+          className={`w-full overflow-hidden ${isCollapsed ? "lg:size-9 lg:gap-0 lg:self-center lg:px-0" : ""}`}
         >
           <Link
             href="/"
