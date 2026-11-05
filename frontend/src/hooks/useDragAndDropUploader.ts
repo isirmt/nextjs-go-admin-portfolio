@@ -1,6 +1,6 @@
 "use client";
 
-import backendApi from "@/lib/auth/backendFetch";
+import { uploadImage } from "@/lib/images/upload";
 import React, { useCallback, useRef, useState } from "react";
 
 export type FileUploadingState = {
@@ -43,18 +43,8 @@ export function useDragAndDropUploader({
         ),
       );
 
-      const formData = new FormData();
-      formData.append("file", file);
-
       try {
-        const response = await backendApi("/images", {
-          method: "POST",
-          body: formData,
-        });
-
-        if (!response.ok) {
-          throw new Error("アップロードに失敗");
-        }
+        await uploadImage(file);
 
         setFileUploadingStates((prev) =>
           prev.map((state) =>
