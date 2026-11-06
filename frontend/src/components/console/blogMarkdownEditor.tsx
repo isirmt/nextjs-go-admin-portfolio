@@ -1,17 +1,12 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-  useState,
-} from "react";
+import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import type { Monaco, OnMount } from "@monaco-editor/react";
-import type { editor, IPosition, languages } from "monaco-editor";
+import type { editor } from "monaco-editor";
 import { useImagesContext } from "@/contexts/imagesContext";
+import useImageCompletion from "@/hooks/blogs/useImageCompletion";
+import useImagePaste from "@/hooks/blogs/useImagePaste";
 
 const MonacoEditor = dynamic(() => import("@monaco-editor/react"), {
   ssr: false,
@@ -32,9 +27,20 @@ const BlogMarkdownEditor = forwardRef<
   BlogMarkdownEditorHandle,
   BlogMarkdownEditorProps
 >(function BlogMarkdownEditor({ value, onChange, height = "36rem" }, ref) {
-  const { images, isLoading: areImagesLoading } = useImagesContext();
+  const {
+    images,
+    isLoading: areImagesLoading,
+    refreshImages,
+  } = useImagesContext();
   const bodyEditorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const [monaco, setMonaco] = useState<Monaco | null>(null);
+  const { showImageSuggestions } = useImageCompletion({
+    images,
+    isImagesLoading: areImagesLoading,
+    monaco,
+    editorRef: bodyEditorRef,
+  });
+  const handleImagePaste = useImagePaste({ refreshImages });
 
   useImperativeHandle(
     ref,
@@ -64,44 +70,6 @@ const BlogMarkdownEditor = forwardRef<
     [value.length],
   );
 
-  const showImageSuggestions = useCallback(
-    (
-      bodyEditor: editor.IStandaloneCodeEditor,
-      monacoInstance: Monaco,
-      triggerCharacter?: string,
-    ) => {
-      bodyEditor.trigger(
-        "blog-image-completion",
-        "editor.action.triggerSuggest",
-        {
-          ...(triggerCharacter
-            ? {
-                triggerKind:
-                  monacoInstance.languages.CompletionTriggerKind
-                    .TriggerCharacter,
-                triggerCharacter,
-              }
-            : {}),
-        },
-      );
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          const isDetailsVisible = bodyEditor
-            .getDomNode()
-            ?.querySelector(".suggest-widget")
-            ?.classList.contains("shows-details");
-          if (isDetailsVisible) return;
-          bodyEditor.trigger(
-            "blog-image-completion",
-            "toggleSuggestionDetails",
-            undefined,
-          );
-        });
-      });
-    },
-    [],
-  );
-
   const handleMount: OnMount = (bodyEditor, mountedMonaco) => {
     bodyEditorRef.current = bodyEditor;
     setMonaco(mountedMonaco);
@@ -111,77 +79,18 @@ const BlogMarkdownEditor = forwardRef<
         showImageSuggestions(bodyEditor, mountedMonaco, "!");
       });
     });
+
+    const handlePaste = (event: ClipboardEvent) => {
+      if (!bodyEditor.hasTextFocus()) return;
+
+      handleImagePaste(bodyEditor, event);
+    };
+
+    window.addEventListener("paste", handlePaste, true);
+    bodyEditor.onDidDispose(() => {
+      window.removeEventListener("paste", handlePaste, true);
+    });
   };
-
-  useEffect(() => {
-    if (!monaco) return;
-
-    const completionProvider = monaco.languages.registerCompletionItemProvider(
-      "markdown",
-      {
-        triggerCharacters: ["!"],
-        provideCompletionItems(
-          model: editor.ITextModel,
-          position: IPosition,
-          context: languages.CompletionContext,
-        ) {
-          const lineBeforeCursor = model
-            .getLineContent(position.lineNumber)
-            .slice(0, position.column - 1);
-          const trigger =
-            lineBeforeCursor.match(/![^\s!]*$/)?.[0] ??
-            (context.triggerCharacter === "!" ? "!" : undefined);
-          if (!trigger) return { suggestions: [] };
-
-          const range = new monaco.Range(
-            position.lineNumber,
-            position.column - trigger.length,
-            position.lineNumber,
-            position.column,
-          );
-          return {
-            suggestions: images.map((image, index) => {
-              const imageURL = `/api/images/${image.id}/raw`;
-              const documentationImageURL = new URL(
-                imageURL,
-                window.location.origin,
-              ).toString();
-              return {
-                label: image.file_name,
-                kind: monaco.languages.CompletionItemKind.File,
-                detail: `画像: ${image.file_name}`,
-                documentation: {
-                  value: `![画像](${documentationImageURL})\n\n\`${image.id}\`\n\n\`![画像](${imageURL})\``,
-                },
-                filterText: `!${image.file_name} ${image.id}`,
-                insertText: `![画像](${imageURL})`,
-                range,
-                sortText: String(index).padStart(6, "0"),
-              };
-            }),
-          };
-        },
-      },
-    );
-
-    return () => completionProvider.dispose();
-  }, [images, monaco]);
-
-  useEffect(() => {
-    if (areImagesLoading || images.length === 0 || !monaco) return;
-
-    const bodyEditor = bodyEditorRef.current;
-    const model = bodyEditor?.getModel();
-    const position = bodyEditor?.getPosition();
-    if (!bodyEditor || !model || !position) return;
-
-    const lineBeforeCursor = model
-      .getLineContent(position.lineNumber)
-      .slice(0, position.column - 1);
-    if (!/![^\s!]*$/.test(lineBeforeCursor)) return;
-
-    showImageSuggestions(bodyEditor, monaco);
-  }, [areImagesLoading, images, monaco, showImageSuggestions]);
 
   return (
     <MonacoEditor
