@@ -24,9 +24,15 @@ async function fetchPublicBlogs<T>(
 
 export async function getPublicBlogArticles(
   limit?: number,
+  revalidate?: number,
 ): Promise<BlogArticleSummary[]> {
   const query = limit === undefined ? "" : `?limit=${limit}`;
-  return (await fetchPublicBlogs<BlogArticleSummary[]>(`/blogs${query}`)) ?? [];
+  return (
+    (await fetchPublicBlogs<BlogArticleSummary[]>(
+      `/blogs${query}`,
+      revalidate,
+    )) ?? []
+  );
 }
 
 export async function getPublicBlogSeriesList(): Promise<BlogSeries[]> {
