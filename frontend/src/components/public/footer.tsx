@@ -59,11 +59,11 @@ export default function Footer() {
               onBlur={handleSpotlightLeave}
             >
               <InformationSite
-                siteUrl="https://blog.isirmt.com"
-                feedUrl="https://blog.isirmt.com/feed"
+                siteUrl="/blogs"
+                feedUrl="/blogs/feed.xml"
                 siteName="isirmt ブログ"
                 siteImagePath="/blog_isirmt_com_ogp.png"
-                siteDescription="「isirmt」名義で技術ブログを運用中"
+                siteDescription="「isirmt」名義でブログを運用中"
               />
             </div>
           </div>

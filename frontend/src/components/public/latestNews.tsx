@@ -19,6 +19,7 @@ type SiteOptions = {
 type FeedData = {
   title: string;
   link: string;
+  isInternal: boolean;
 };
 
 export function LatestNews({ feedUrl }: Options) {
@@ -39,7 +40,15 @@ export function LatestNews({ feedUrl }: Options) {
         const title = firstItem.querySelector("title")?.textContent?.trim();
         const link = firstItem.querySelector("link")?.textContent?.trim();
         if (title && link && isMounted) {
-          setFeedData({ title, link });
+          const feedLink = new URL(link, window.location.origin);
+          const isInternal = feedLink.origin === window.location.origin;
+          setFeedData({
+            title,
+            link: isInternal
+              ? `${feedLink.pathname}${feedLink.search}${feedLink.hash}`
+              : link,
+            isInternal,
+          });
         }
       } catch (error) {
         console.error("Failed to load feed", error);
@@ -58,6 +67,8 @@ export function LatestNews({ feedUrl }: Options) {
       {feedData?.title ? (
         <Link
           className="inline-block max-w-72 truncate border-b border-transparent hover:border-current sm:max-w-96"
+          target={feedData.isInternal ? undefined : "_blank"}
+          rel={feedData.isInternal ? undefined : "noopener"}
           href={feedData.link}
         >
           {feedData.title}
@@ -80,8 +91,8 @@ export function InformationSite({
     <div className="relative mx-auto flex max-w-full min-w-0 flex-col gap-2.5 px-6 lg:mx-0 lg:px-0">
       <Link
         href={siteUrl}
-        target="_blank"
-        rel="noopener"
+        target={siteUrl.startsWith("/") ? undefined : "_blank"}
+        rel={siteUrl.startsWith("/") ? undefined : "noopener"}
         className="group relative flex flex-col gap-2.5"
       >
         <div className="aspect-1200/630 w-72 max-w-full overflow-hidden rounded-lg bg-white sm:w-96">
