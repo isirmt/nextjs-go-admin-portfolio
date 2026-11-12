@@ -126,6 +126,22 @@
   @apply mx-0 rounded-none bg-transparent p-0;
 }
 
+.markdown .post_shiki pre > code {
+  counter-reset: code-line;
+}
+
+.markdown .post_shiki .line::before {
+  counter-increment: code-line;
+  content: counter(code-line);
+  display: inline-block;
+  width: 3ch;
+  margin-right: 1rem;
+  color: #8a91a5;
+  text-align: right;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
 .markdown blockquote {
   @apply my-4 border-l-4 border-[#555] bg-[#f5f5f5] py-0.5 pl-4 text-[#555] transition-colors;
 }
