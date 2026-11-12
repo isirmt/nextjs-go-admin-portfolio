@@ -1,17 +1,30 @@
 "use client";
 
 import { useSineClipPath } from "@/hooks/useSineClipPath";
+import { useShootingStars } from "@/hooks/useShootingStars";
 import type { ReactNode } from "react";
 import Sparkle from "../shapes/sparkle";
 
 type PageContentHeaderProps = {
   children: ReactNode;
   hideSparkles?: boolean;
+  hideShootingStars?: boolean;
 };
+
+function ShootingStarsBackground() {
+  const { canvasRef } = useShootingStars();
+
+  return (
+    <div className="pointer-events-none absolute inset-0 z-0">
+      <canvas ref={canvasRef} aria-hidden="true" className="block size-full" />
+    </div>
+  );
+}
 
 export default function PageContentHeader({
   children,
   hideSparkles = false,
+  hideShootingStars = false,
 }: PageContentHeaderProps) {
   const waveRef = useSineClipPath<HTMLDivElement>({ edge: "bottom" });
 
@@ -20,6 +33,7 @@ export default function PageContentHeader({
       ref={waveRef}
       className="relative mb-16 flex flex-col items-center gap-3.5 bg-[#ecf3fa] px-12 pt-36 pb-32 select-none"
     >
+      {!hideShootingStars && <ShootingStarsBackground />}
       {!hideSparkles && (
         <Sparkle
           className={`animate-up-down-smooth absolute top-[10%] -left-[5%] aspect-3/4 w-40 bg-[#cee1fa] opacity-85 sm:left-[5%] md:left-[10%] md:w-65`}

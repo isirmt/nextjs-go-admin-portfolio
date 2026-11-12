@@ -16,6 +16,10 @@ import Sparkle from "@/components/shapes/sparkle";
 import { Slider } from "@/components/public/slider";
 import MediaPauserIcon from "@/components/public/mediaPauserIcon";
 import MediaLoopIcon from "@/components/public/mediaLoopIcon";
+import {
+  useShootingStars,
+  type ShootingStarsOptions,
+} from "@/hooks/useShootingStars";
 
 const playbackRateList = [0.5, 1, 1.5, 2, 4];
 
@@ -80,6 +84,9 @@ const openingTimelineDefinition = defineTimeline<OpeningTimelineState>({
 });
 
 export default function OpeningHeroPage() {
+  const [shootingStarsOptions] = useState<ShootingStarsOptions>();
+  const { canvasRef: shootingStarsCanvasRef } =
+    useShootingStars(shootingStarsOptions);
   const [colorfulOverride, setColorfulOverride] = useState<boolean | null>(
     null,
   );
@@ -185,7 +192,15 @@ export default function OpeningHeroPage() {
           ref={bind("background")}
           className="absolute top-0 left-0 flex size-full transform-[translateY(-130%)] items-center justify-center"
         >
-          <div className="absolute -top-[85svh] h-[180svh] w-[180dvw] rounded-b-full bg-[linear-gradient(45deg,#d1fafa_40vw,#d1f0ff_140vw)]" />
+          <div className="absolute -top-[85svh] h-[180svh] w-[180dvw] overflow-hidden rounded-b-full bg-[linear-gradient(45deg,#d1fafa_40vw,#d1f0ff_140vw)]">
+            <div className="absolute top-[85svh] left-1/2 h-svh w-dvw -translate-x-1/2">
+              <canvas
+                ref={shootingStarsCanvasRef}
+                aria-hidden="true"
+                className="pointer-events-none block size-full"
+              />
+            </div>
+          </div>
           <div className="animate-up-down-smooth absolute -top-[110svh] h-[120svh] w-[120dvw] translate-x-[30dvw] rounded-b-full bg-[linear-gradient(45deg,#baf8dd_40vw,#cdfefe_140vw)] [animation-delay:0.5s]" />
 
           <div

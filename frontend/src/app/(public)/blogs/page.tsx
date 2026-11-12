@@ -15,7 +15,7 @@ export default async function BlogsPage() {
 
   return (
     <main className="relative w-full pb-40">
-      <PageContentHeader hideSparkles>
+      <PageContentHeader hideSparkles hideShootingStars>
         <video
           src="/blog_header_mov.mp4"
           autoPlay
