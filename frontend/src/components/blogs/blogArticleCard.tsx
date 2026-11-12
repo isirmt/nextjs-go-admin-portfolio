@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
-import { formatJapaneseDateTime } from "@/lib/date";
+import { formatJapaneseLongDate } from "@/lib/date";
 import type { BlogArticleSummary } from "@/types/blogs/common";
 
 type BlogArticleCardProps = {
@@ -23,7 +23,9 @@ export default function BlogArticleCard({ article }: BlogArticleCardProps) {
         </div>
         <div className="mt-2 leading-6">
           <p className="w-full text-sm text-[#777]">
-            {formatJapaneseDateTime(article.published_at)}
+            {article.published_at
+              ? formatJapaneseLongDate(article.published_at)
+              : ""}
           </p>
           <p className="w-full truncate text-lg font-semibold text-[#333c66]">
             {article.title}
