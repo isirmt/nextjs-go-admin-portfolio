@@ -11,6 +11,7 @@ const ORBIT_DURATION = 60;
 
 type ProfileCardProps = {
   age: number;
+  isPrivacy: boolean;
 };
 
 type OrbitState = {
@@ -42,7 +43,7 @@ const getRoundRectPath = (
     "Z",
   ].join(" ");
 
-export default function ProfileCard({ age }: ProfileCardProps) {
+export default function ProfileCard({ age, isPrivacy }: ProfileCardProps) {
   const cardRef = useRef<HTMLDivElement | null>(null);
   const [orbit, setOrbit] = useState<OrbitState | null>(null);
   const { ref: iconRef, isActive: isActiveIcon } =
@@ -118,10 +119,10 @@ export default function ProfileCard({ age }: ProfileCardProps) {
             id="profile"
             className="scroll-mt-30 text-6xl leading-none tracking-wider md:scroll-mt-34"
           >
-            入本聖也
+            {isPrivacy ? "isirmt" : "入本聖也"}
           </h2>
           <div className="text-3xl leading-none font-semibold tracking-wide">
-            seiya irimoto
+            {isPrivacy ? "いずいりもち" : "seiya irimoto"}
           </div>
         </div>
         <div
