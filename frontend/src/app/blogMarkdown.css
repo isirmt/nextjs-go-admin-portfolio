@@ -20,7 +20,7 @@
 
 .markdown iframe,
 .markdown img {
-  @apply mx-auto my-6 aspect-auto max-h-[50dvh] max-w-full shadow-[.5rem_.5rem_0_#eee];
+  @apply mx-auto my-6 aspect-auto max-h-[50dvh] max-w-full;
 }
 
 .markdown p {
