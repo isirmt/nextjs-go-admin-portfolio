@@ -185,8 +185,12 @@ export default function OpeningHeroPage() {
           ref={bind("background")}
           className="absolute top-0 left-0 flex size-full transform-[translateY(-130%)] items-center justify-center"
         >
-          <div className="absolute -top-[85svh] h-[180svh] overflow-hidden w-[180dvw] rounded-b-full bg-[linear-gradient(45deg,#d1fafa_40vw,#d1f0ff_140vw)]">
+          <div className="absolute -top-[85svh] h-[180svh] w-[180dvw] overflow-hidden rounded-b-full bg-[linear-gradient(45deg,#d1fafa_40vw,#d1f0ff_140vw)]">
             <div className="fixed top-0 left-0 h-full w-full">
+              <canvas
+                aria-hidden="true"
+                className="pointer-events-none block size-full"
+              />
             </div>
           </div>
           <div className="animate-up-down-smooth absolute -top-[110svh] h-[120svh] w-[120dvw] translate-x-[30dvw] rounded-b-full bg-[linear-gradient(45deg,#baf8dd_40vw,#cdfefe_140vw)] [animation-delay:0.5s]" />
