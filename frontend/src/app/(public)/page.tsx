@@ -13,7 +13,7 @@ import { LatestBlogArticlesProvider } from "@/contexts/latestBlogArticlesContext
 import LatestArticleSection from "@/components/blogs/latestArticleSection";
 
 export const metadata: Metadata = {
-  title: "isirmt - 色彩と体験 | 入本聖也",
+  title: { absolute: "isirmt - 色彩と体験 | 入本聖也" },
   description: "isirmtのポートフォリオサイト。制作物を掲載しています。",
   openGraph: {
     url: "/",

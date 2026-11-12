@@ -1,6 +1,11 @@
 import PageContentHeader from "@/components/public/pageContentHeader";
+import type { Metadata } from "next";
 import { delaGothicOne } from "@/lib/fonts";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "プライバシーポリシー",
+};
 
 export default async function ClientPage() {
   return (

@@ -5,7 +5,7 @@ import BlogArticlesList from "@/components/blogs/blogArticlesList";
 import { delaGothicOne } from "@/lib/fonts";
 
 export const metadata: Metadata = {
-  title: "ブログ | isirmt",
+  title: "ブログ",
   description: "isirmt のブログ記事一覧です",
   alternates: { canonical: "/blogs" },
 };

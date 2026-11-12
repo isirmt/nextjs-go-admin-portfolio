@@ -4,7 +4,10 @@ import React from "react";
 import Header from "@/components/public/header";
 
 export const metadata: Metadata = {
-  title: "isirmt(入本 聖也)",
+  title: {
+    default: "isirmt(入本 聖也)",
+    template: "%s | isirmt",
+  },
   description: "isirmtのポートフォリオ",
 };
 
