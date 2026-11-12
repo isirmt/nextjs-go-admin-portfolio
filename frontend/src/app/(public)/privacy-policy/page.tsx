@@ -37,7 +37,7 @@ export default async function ClientPage() {
           <Link
             target="_blank"
             rel="noopener"
-            href="https://github.com/isirmt/isirmt_nextjs_portfolio"
+            href="https://github.com/isirmt/nextjs-go-admin-portfolio"
             className="text-blue-600 underline"
           >
             GitHubリポジトリ
