@@ -91,7 +91,7 @@ export default function OpeningHeroPage() {
       x: { min: -2.0, max: 0.8 },
       y: { min: -0.3, max: 0.0 },
     },
-    angle: { min: 25, max: 35 },
+    angle: { min: 25, max: 25 },
     speed: { min: 60, max: 120 },
     trail: {
       length: { min: 70, max: 150 },
