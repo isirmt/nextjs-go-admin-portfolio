@@ -1,31 +1,84 @@
-type MinMaxRange = { min: number; max: number };
+"use client";
 
-type ShootingStarsOptions = {
-  spawnInterval?: MinMaxRange;
-  startArea?: {
-    x: MinMaxRange;
-    y: MinMaxRange;
+import { useEffect, useRef } from "react";
+import {
+  resolveShootingStarsOptions,
+  ShootingStarsScene,
+  type ShootingStar,
+  type ShootingStarsOptions,
+} from "@/sketch/shootingStars";
+
+export type { MinMaxRange, ShootingStarsOptions } from "@/sketch/shootingStars";
+
+const DEFAULT_OPTIONS: ShootingStarsOptions = {};
+
+export function useShootingStars(
+  options: ShootingStarsOptions = DEFAULT_OPTIONS,
+) {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const sceneRef = useRef<ShootingStarsScene | null>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const container = canvas?.parentElement;
+    const context = canvas?.getContext("2d");
+    if (!canvas || !container || !context) return;
+
+    const scene = new ShootingStarsScene(resolveShootingStarsOptions(options));
+    sceneRef.current = scene;
+    let frameId = 0;
+    let lastTime: number | null = null;
+
+    const resize = () => {
+      const { width, height } = container.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
+      context.setTransform(dpr, 0, 0, dpr, 0, 0);
+      scene.resize(width, height);
+      scene.draw(context);
+    };
+
+    const observer = new ResizeObserver(resize);
+    observer.observe(container);
+    resize();
+    scene.prewarm(options.initialElapsed ?? 0);
+    scene.draw(context);
+
+    const frame = (timestamp: number) => {
+      const deltaMs =
+        lastTime === null ? 0 : Math.min(timestamp - lastTime, 50);
+      lastTime = timestamp;
+      scene.update(deltaMs);
+      scene.draw(context);
+      frameId = requestAnimationFrame(frame);
+    };
+
+    const onVisibilityChange = () => {
+      if (document.hidden) {
+        cancelAnimationFrame(frameId);
+        frameId = 0;
+        lastTime = null;
+      } else if (frameId === 0) {
+        frameId = requestAnimationFrame(frame);
+      }
+    };
+
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    if (!document.hidden) frameId = requestAnimationFrame(frame);
+
+    return () => {
+      cancelAnimationFrame(frameId);
+      observer.disconnect();
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      sceneRef.current = null;
+    };
+  }, [options]);
+
+  return {
+    canvasRef,
+    spawn: (): ShootingStar | null => sceneRef.current?.spawn() ?? null,
+    getStar: (id: number): ShootingStar | undefined =>
+      sceneRef.current?.stars.get(id),
   };
-  angle?: MinMaxRange; // deg
-  speed?: MinMaxRange;
-  trail?: {
-    length?: MinMaxRange;
-    width?: MinMaxRange;
-    color?: string;
-  };
-  sparkles?: {
-    count?: MinMaxRange;
-    spread?: number;
-    size?: MinMaxRange;
-    colors?: string[];
-    colorVariation?: number;
-    visibleDuration?: MinMaxRange;
-    hiddenInterval?: MinMaxRange;
-  };
-  ambientStars?: {
-    density?: number; // 1/10,000 px²
-    size?: MinMaxRange;
-    horizontalSpeed?: MinMaxRange;
-    color?: string;
-  };
-};
+}

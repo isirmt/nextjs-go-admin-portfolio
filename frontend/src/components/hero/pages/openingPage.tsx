@@ -16,6 +16,10 @@ import Sparkle from "@/components/shapes/sparkle";
 import { Slider } from "@/components/public/slider";
 import MediaPauserIcon from "@/components/public/mediaPauserIcon";
 import MediaLoopIcon from "@/components/public/mediaLoopIcon";
+import {
+  useShootingStars,
+  type ShootingStarsOptions,
+} from "@/hooks/useShootingStars";
 
 const playbackRateList = [0.5, 1, 1.5, 2, 4];
 
@@ -80,6 +84,37 @@ const openingTimelineDefinition = defineTimeline<OpeningTimelineState>({
 });
 
 export default function OpeningHeroPage() {
+  const [shootingStarsOptions] = useState<ShootingStarsOptions>(() => ({
+    initialElapsed: 30000,
+    spawnInterval: { min: 400, max: 700 },
+    startArea: {
+      x: { min: -0.7, max: 0.8 },
+      y: { min: -0.3, max: 0.0 },
+    },
+    angle: { min: 25, max: 35 },
+    speed: { min: 60, max: 120 },
+    trail: {
+      length: { min: 70, max: 150 },
+      width: { min: 3, max: 6 },
+      color: "#ffffff",
+    },
+    sparkles: {
+      count: { min: 3, max: 7 },
+      spread: 70,
+      size: { min: 7, max: 20 },
+      colors: ["#ffffff", "#ffe6a7", "#ffc6dc", "#bdefff"],
+      visibleDuration: { min: 1000, max: 1700 },
+      hiddenInterval: { min: 1000, max: 2500 },
+    },
+    ambientStars: {
+      density: 5,
+      size: { min: 1, max: 3 },
+      horizontalSpeed: { min: 4, max: 12 },
+      color: "#ffffff",
+    },
+  }));
+  const { canvasRef: shootingStarsCanvasRef } =
+    useShootingStars(shootingStarsOptions);
   const [colorfulOverride, setColorfulOverride] = useState<boolean | null>(
     null,
   );
@@ -188,6 +223,7 @@ export default function OpeningHeroPage() {
           <div className="absolute -top-[85svh] h-[180svh] w-[180dvw] overflow-hidden rounded-b-full bg-[linear-gradient(45deg,#d1fafa_40vw,#d1f0ff_140vw)]">
             <div className="fixed top-0 left-0 h-full w-full">
               <canvas
+                ref={shootingStarsCanvasRef}
                 aria-hidden="true"
                 className="pointer-events-none block size-full"
               />
