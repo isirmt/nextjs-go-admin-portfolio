@@ -65,6 +65,7 @@
     "playwright": "latest",
     "prettier": "^3.4.2",
     "prettier-plugin-tailwindcss": "^0.8.0",
+    "schema-dts": "^2.1.0",
     "storybook": "^10.6.3",
     "tailwindcss": "^4",
     "typescript": "^5",

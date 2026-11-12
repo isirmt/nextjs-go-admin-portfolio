@@ -1,6 +1,6 @@
 name: check build
 
-on: [push, pull_request]
+on: pull_request
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -10,7 +10,42 @@ permissions:
   contents: read
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ steps.filter.outputs.frontend }}
+      backend: ${{ steps.filter.outputs.backend }}
+      migrations: ${{ steps.filter.outputs.migrations }}
+      embedding: ${{ steps.filter.outputs.embedding }}
+      images: ${{ steps.filter.outputs.images }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed files
+        id: filter
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          files=$(git diff --name-only "$BASE_SHA...$HEAD_SHA")
+
+          for area in frontend backend embedding; do
+            if printf '%s\n' "$files" | grep -q "^$area/"; then
+              echo "$area=true" >> "$GITHUB_OUTPUT"
+            fi
+          done
+          images=$(printf '%s\n' "$files" | awk -F/ '$1 == "frontend" { web=1 } $1 == "backend" { backend=1 } $1 == "embedding" { embedding=1 } END { printf "["; sep=""; if (web) { printf "%s\"web\"", sep; sep="," } if (backend) { printf "%s\"backend\"", sep; sep="," } if (embedding) { printf "%s\"embedding\"", sep } printf "]" }')
+          echo "images=$images" >> "$GITHUB_OUTPUT"
+          if printf '%s\n' "$files" | grep -Eq '^(db/|compose\.dev\.yml$)'; then
+            echo 'migrations=true' >> "$GITHUB_OUTPUT"
+          fi
+
   build-frontend:
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -43,12 +78,14 @@ jobs:
       - name: Run build
         working-directory: frontend
         run: pnpm build
-      
+
       - name: Run Storybook build
         working-directory: frontend
         run: pnpm build-storybook
 
   test-backend:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -66,6 +103,8 @@ jobs:
         run: go test ./...
 
   test-migrations:
+    needs: changes
+    if: needs.changes.outputs.migrations == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -84,16 +123,12 @@ jobs:
   build-images:
     name: Build ${{ matrix.service }} image
     runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.images != '[]'
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - service: web
-            context: ./frontend
-          - service: backend
-            context: ./backend
-          - service: embedding
-            context: ./embedding
+        service: ${{ fromJSON(needs.changes.outputs.images) }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -104,8 +139,8 @@ jobs:
       - name: Build image
         uses: docker/build-push-action@v7
         with:
-          context: ${{ matrix.context }}
-          file: ${{ matrix.context }}/Dockerfile
+          context: ./${{ matrix.service == 'web' && 'frontend' || matrix.service }}
+          file: ./${{ matrix.service == 'web' && 'frontend' || matrix.service }}/Dockerfile
           push: false
           secrets: |
             SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}

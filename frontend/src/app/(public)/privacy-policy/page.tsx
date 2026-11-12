@@ -1,6 +1,11 @@
 import PageContentHeader from "@/components/public/pageContentHeader";
+import type { Metadata } from "next";
 import { delaGothicOne } from "@/lib/fonts";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "プライバシーポリシー",
+};
 
 export default async function ClientPage() {
   return (
@@ -32,7 +37,7 @@ export default async function ClientPage() {
           <Link
             target="_blank"
             rel="noopener"
-            href="https://github.com/isirmt/isirmt_nextjs_portfolio"
+            href="https://github.com/isirmt/nextjs-go-admin-portfolio"
             className="text-blue-600 underline"
           >
             GitHubリポジトリ

@@ -177,6 +177,9 @@ export default function SearchWindow() {
       ref={containerRef}
       className={`fixed top-0 left-0 z-100 flex size-full flex-col items-end gap-6 p-6 transition-colors ${isOpen ? "pointer-events-auto bg-black/10 backdrop-blur-sm" : "pointer-events-none bg-transparent"}`}
     >
+      {isOpen && (
+        <div className="pointer-events-auto absolute inset-y-0 right-0 hidden w-[calc(30rem+1.5rem)] bg-[#fafafa] md:block" />
+      )}
       <div
         className={`relative z-10 h-12 max-w-full ${isOpen ? "w-78" : "w-12 md:w-78"}`}
         style={{ marginRight: isOpen ? scrollbarWidth : 0 }}
@@ -186,7 +189,7 @@ export default function SearchWindow() {
           onFocus={() => setIsOpen(true)}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder={isOpen ? "キーワードを入力" : ""}
-          className={`font-noto pointer-events-auto block h-12 w-full rounded-full border border-[#6354EB] bg-white shadow-sm shadow-[#ccc] outline-none hover:border-[#6354EB] focus:border-[#6354EB] active:border-[#6354EB] md:border-[#ccc] md:shadow-md ${isOpen ? "py-1 pr-4 pl-12.5 text-[#333]" : "cursor-pointer p-0 text-transparent select-none md:cursor-auto md:py-1 md:pr-4 md:pl-12.5 md:text-[#333] md:select-auto"}`}
+          className={`font-noto pointer-events-auto block h-12 w-full rounded-full border border-[#6354EB] bg-white shadow-sm shadow-[#ccc] outline-none hover:border-[#6354EB] focus:border-[#6354EB] active:border-[#6354EB] md:border-[#ccc] ${isOpen ? "py-1 pr-4 pl-12.5 text-[#333] md:shadow-none" : "cursor-pointer p-0 text-transparent select-none md:cursor-auto md:py-1 md:pr-4 md:pl-12.5 md:text-[#333] md:shadow-md md:select-auto"}`}
         />
         <div
           className={`absolute top-2.5 z-10 ${isOpen ? "left-3.5" : "left-2 md:left-3.5"}`}
@@ -224,7 +227,7 @@ export default function SearchWindow() {
       </div>
       {isOpen && (
         <div
-          className={`pointer-events-auto relative z-0 max-h-[calc(100vh-8rem)] w-120 max-w-full overflow-y-auto rounded border border-[#ccc] bg-[#fafafa] p-4`}
+          className={`pointer-events-auto relative z-0 max-h-[calc(100vh-8rem)] w-120 max-w-full overflow-y-auto rounded border border-[#ccc] bg-[#fafafa] p-4 md:rounded-none md:border-transparent md:bg-transparent`}
         >
           {searchTerm.trim() === "" ? (
             <React.Fragment>

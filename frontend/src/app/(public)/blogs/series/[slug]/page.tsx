@@ -19,7 +19,7 @@ export async function generateMetadata({
   if (!series) return {};
 
   return {
-    title: `『${series.title}』 | isirmt`,
+    title: `『${series.title}』`,
     description:
       series.description ?? `『${series.title}』のブログのシリーズです`,
     alternates: { canonical: `/blogs/series/${series.slug}` },

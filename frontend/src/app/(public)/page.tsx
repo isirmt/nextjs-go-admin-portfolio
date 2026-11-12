@@ -13,7 +13,7 @@ import { LatestBlogArticlesProvider } from "@/contexts/latestBlogArticlesContext
 import LatestArticleSection from "@/components/blogs/latestArticleSection";
 
 export const metadata: Metadata = {
-  title: "isirmt - 色彩と体験 | 入本聖也",
+  title: { absolute: "isirmt - 色彩と体験 | 入本聖也" },
   description: "isirmtのポートフォリオサイト。制作物を掲載しています。",
   openGraph: {
     url: "/",
@@ -38,7 +38,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ privacy?: string | string[] }>;
+}) {
+  const isPrivacy = "privacy" in (await searchParams);
   const latestArticles = await getPublicBlogArticles(5);
   const birthDate = new Date(2004, 3 - 1, 8);
   const today = new Date();
@@ -65,7 +70,7 @@ export default async function Home() {
                   <HeroSection />
                 </section>
                 <Navigation />
-                <ProfileSection age={age} />
+                <ProfileSection age={age} isPrivacy={isPrivacy} />
                 <LatestArticleSection />
                 <section aria-label="works-display" className="relative w-full">
                   <WorkConveyer />

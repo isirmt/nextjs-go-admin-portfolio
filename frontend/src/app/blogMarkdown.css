@@ -20,7 +20,7 @@
 
 .markdown iframe,
 .markdown img {
-  @apply mx-auto my-6 aspect-auto max-h-[50dvh] max-w-full shadow-[.5rem_.5rem_0_#eee];
+  @apply mx-auto my-6 aspect-auto max-h-[50dvh] max-w-full;
 }
 
 .markdown p {
@@ -63,6 +63,19 @@
 .markdown ul:not(.contains-task-list),
 .markdown ol {
   @apply my-2 ml-8 flex flex-col gap-2.5;
+}
+
+.markdown ul li,
+.markdown ol li {
+  @apply leading-7;
+}
+
+.markdown li > p {
+  @apply my-0 leading-7;
+}
+
+.markdown li > p + p {
+  @apply mt-2;
 }
 
 .markdown ul:not(.contains-task-list) li {
@@ -110,7 +123,23 @@
 }
 
 .markdown pre > code {
-  @apply rounded-none bg-transparent p-0;
+  @apply mx-0 rounded-none bg-transparent p-0;
+}
+
+.markdown .post_shiki pre > code {
+  counter-reset: code-line;
+}
+
+.markdown .post_shiki .line::before {
+  counter-increment: code-line;
+  content: counter(code-line);
+  display: inline-block;
+  width: 3ch;
+  margin-right: 1rem;
+  color: #8a91a5;
+  text-align: right;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .markdown blockquote {

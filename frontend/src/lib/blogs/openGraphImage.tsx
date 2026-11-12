@@ -14,11 +14,6 @@ export const blogOpenGraphImageSize = {
 const fontData = readFile(
   join(process.cwd(), "assets", "NotoSansJP-ExtraBold-Sub.ttf"),
 );
-const backgroundImageData = readFile(
-  join(process.cwd(), "public", "ogp_back.png"),
-  "base64",
-);
-
 async function getThumbnailResponse(imageId: string) {
   const backendBaseUrl = process.env.BACKEND_BASE_URL;
   if (!backendBaseUrl) return null;
@@ -32,7 +27,9 @@ async function getThumbnailResponse(imageId: string) {
 
 export async function createBlogOpenGraphImageResponseFromArticle(
   article: Pick<BlogArticle, "title" | "thumbnail_image_id">,
-  cacheControl = `public, max-age=${blogOpenGraphImageRevalidateSeconds}`,
+  cacheControl = process.env.NODE_ENV === "development"
+    ? "no-store"
+    : `public, max-age=${blogOpenGraphImageRevalidateSeconds}`,
 ) {
   if (article.thumbnail_image_id) {
     const thumbnailResponse = await getThumbnailResponse(
@@ -53,14 +50,14 @@ export async function createBlogOpenGraphImageResponseFromArticle(
 
   const [font, backgroundImage] = await Promise.all([
     fontData,
-    backgroundImageData,
+    readFile(join(process.cwd(), "public", "ogp_back.png"), "base64"),
   ]);
   const response = new ImageResponse(
     <div
       style={{
         width: "100%",
         height: "100%",
-        color: "#222",
+        color: "#333",
         backgroundImage: `url(data:image/png;base64,${backgroundImage})`,
         justifyContent: "center",
         display: "flex",
@@ -73,7 +70,7 @@ export async function createBlogOpenGraphImageResponseFromArticle(
       <div
         style={{
           width: "70%",
-          lineHeight: "1.2",
+          lineHeight: "1.6",
           fontWeight: "bold",
         }}
       >
