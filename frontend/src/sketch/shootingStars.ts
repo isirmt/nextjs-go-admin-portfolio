@@ -137,8 +137,11 @@ export class Sparkle {
     const height = this.size;
     const left = centerX - width / 2;
     const top = centerY - height / 2;
+    context.save();
     context.globalAlpha = opacity;
     context.fillStyle = this.color;
+    context.shadowColor = this.color;
+    context.shadowBlur = this.size * 0.8;
     context.beginPath();
     context.moveTo(left + width * 0.5, top);
     context.bezierCurveTo(
@@ -175,7 +178,7 @@ export class Sparkle {
     );
     context.closePath();
     context.fill();
-    context.globalAlpha = 1;
+    context.restore();
   }
 }
 
@@ -257,7 +260,7 @@ class AmbientStar {
   ) {
     this.x = Math.random() * width;
     this.y = Math.random() * height;
-    this.size = random(options.size);
+    this.size = Math.max(1, Math.round(random(options.size)));
     this.speedX = random(options.horizontalSpeed);
   }
 
@@ -267,16 +270,35 @@ class AmbientStar {
     if (this.x < -this.size) this.x = width + this.size;
   }
 
-  draw(context: CanvasRenderingContext2D): void {
+  draw(context: CanvasRenderingContext2D, sprite: HTMLCanvasElement): void {
+    context.drawImage(
+      sprite,
+      this.x - sprite.width / 2,
+      this.y - sprite.height / 2,
+    );
+  }
+}
+
+function createAmbientSprite(size: number, color: string): HTMLCanvasElement {
+  const sprite = document.createElement("canvas");
+  sprite.width = size + 16;
+  sprite.height = size + 16;
+  const context = sprite.getContext("2d");
+  if (context) {
+    context.fillStyle = color;
+    context.shadowColor = color;
+    context.shadowBlur = 4;
     context.beginPath();
-    context.arc(this.x, this.y, this.size / 2, 0, Math.PI * 2);
+    context.arc(sprite.width / 2, sprite.height / 2, size / 2, 0, Math.PI * 2);
     context.fill();
   }
+  return sprite;
 }
 
 export class ShootingStarsScene {
   readonly stars = new Map<number, ShootingStar>();
   private ambientStars: AmbientStar[] = [];
+  private ambientSprites = new Map<number, HTMLCanvasElement>();
   private nextId = 1;
   private timeUntilSpawn: number;
   private width = 0;
@@ -339,8 +361,17 @@ export class ShootingStarsScene {
 
   draw(context: CanvasRenderingContext2D): void {
     context.clearRect(0, 0, this.width, this.height);
-    context.fillStyle = this.options.ambientStars.color;
-    for (const ambient of this.ambientStars) ambient.draw(context);
+    for (const ambient of this.ambientStars) {
+      let sprite = this.ambientSprites.get(ambient.size);
+      if (!sprite) {
+        sprite = createAmbientSprite(
+          ambient.size,
+          this.options.ambientStars.color,
+        );
+        this.ambientSprites.set(ambient.size, sprite);
+      }
+      ambient.draw(context, sprite);
+    }
     for (const star of this.stars.values()) star.draw(context);
   }
 }
