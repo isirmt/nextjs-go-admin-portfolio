@@ -245,6 +245,16 @@ export class ShootingStar {
       (this.directionY >= 0 ? this.y > height + margin : this.y < -margin)
     );
   }
+
+  isVisible(width: number, height: number, spread: number): boolean {
+    const margin = this.trailLength + spread;
+    return (
+      this.x >= -margin &&
+      this.x <= width + margin &&
+      this.y >= -margin &&
+      this.y <= height + margin
+    );
+  }
 }
 
 class AmbientStar {
@@ -372,6 +382,12 @@ export class ShootingStarsScene {
       }
       ambient.draw(context, sprite);
     }
-    for (const star of this.stars.values()) star.draw(context);
+    for (const star of this.stars.values()) {
+      if (
+        star.isVisible(this.width, this.height, this.options.sparkles.spread)
+      ) {
+        star.draw(context);
+      }
+    }
   }
 }

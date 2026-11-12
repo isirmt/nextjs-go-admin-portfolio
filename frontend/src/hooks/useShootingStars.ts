@@ -26,8 +26,9 @@ export function useShootingStars(
 
     const scene = new ShootingStarsScene(resolveShootingStarsOptions(options));
     sceneRef.current = scene;
-    let frameId = 0;
+    let frameId: number | null = null;
     let lastTime: number | null = null;
+    let isIntersecting = false;
 
     const resize = () => {
       const { width, height } = container.getBoundingClientRect();
@@ -54,22 +55,37 @@ export function useShootingStars(
       frameId = requestAnimationFrame(frame);
     };
 
-    const onVisibilityChange = () => {
-      if (document.hidden) {
+    const syncAnimation = () => {
+      if (isIntersecting && !document.hidden) {
+        if (frameId === null) {
+          lastTime = null;
+          frameId = requestAnimationFrame(frame);
+        }
+      } else if (frameId !== null) {
         cancelAnimationFrame(frameId);
-        frameId = 0;
+        frameId = null;
         lastTime = null;
-      } else if (frameId === 0) {
-        frameId = requestAnimationFrame(frame);
       }
     };
 
+    const intersectionObserver = new IntersectionObserver(([entry]) => {
+      isIntersecting = entry.isIntersecting;
+      syncAnimation();
+    });
+    intersectionObserver.observe(container);
+
+    const onVisibilityChange = () => {
+      syncAnimation();
+    };
+
     document.addEventListener("visibilitychange", onVisibilityChange);
-    if (!document.hidden) frameId = requestAnimationFrame(frame);
 
     return () => {
-      cancelAnimationFrame(frameId);
+      if (frameId !== null) {
+        cancelAnimationFrame(frameId);
+      }
       observer.disconnect();
+      intersectionObserver.disconnect();
       document.removeEventListener("visibilitychange", onVisibilityChange);
       sceneRef.current = null;
     };
