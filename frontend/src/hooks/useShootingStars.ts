@@ -43,7 +43,7 @@ export function useShootingStars(
     const observer = new ResizeObserver(resize);
     observer.observe(container);
     resize();
-    scene.prewarm(options.initialElapsed ?? 0);
+    scene.prewarm(options.initialElapsed ?? 30000);
     scene.draw(context);
 
     const frame = (timestamp: number) => {
