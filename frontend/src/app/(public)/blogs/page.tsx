@@ -25,7 +25,7 @@ export default async function BlogsPage() {
           className="pointer-events-none absolute top-0 left-0 z-0 h-full w-full object-cover opacity-20 select-none"
         />
         <h1
-          className={`${delaGothicOne.className} relative z-1 block w-fit bg-[#12385f] text-center text-4xl font-bold text-white`}
+          className={`${delaGothicOne.className} relative z-1 block w-fit bg-[#12385f] px-4 text-center text-4xl font-bold text-white`}
         >
           ブログ
         </h1>
