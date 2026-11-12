@@ -65,6 +65,19 @@
   @apply my-2 ml-8 flex flex-col gap-2.5;
 }
 
+.markdown ul li,
+.markdown ol li {
+  @apply leading-7;
+}
+
+.markdown li > p {
+  @apply my-0 leading-7;
+}
+
+.markdown li > p + p {
+  @apply mt-2;
+}
+
 .markdown ul:not(.contains-task-list) li {
   @apply list-disc;
 }
