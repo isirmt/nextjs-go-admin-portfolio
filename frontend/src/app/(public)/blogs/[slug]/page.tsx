@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import BlogArticleContent from "@/components/blogs/blogArticleContent";
 import BlogArticleCardSection from "@/components/blogs/blogArticleCardSection";
 import BlogTableOfContents from "@/components/blogs/blogTableOfContents";
+import BlogPostingStructuredData from "@/components/blogs/blogPostingStructuredData";
 import {
   getPublicBlogArticle,
   getPublicRelatedBlogArticles,
@@ -46,6 +47,7 @@ export default async function BlogArticlePage({
 
   return (
     <main className="relative w-full overflow-x-clip">
+      <BlogPostingStructuredData article={article} />
       <section className="grid grid-cols-3">
         <div className="col-span-3 pb-40 lg:col-span-2">
           <BlogArticleContent article={article} />
