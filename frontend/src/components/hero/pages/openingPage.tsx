@@ -221,7 +221,7 @@ export default function OpeningHeroPage() {
           className="absolute top-0 left-0 flex size-full transform-[translateY(-130%)] items-center justify-center"
         >
           <div className="absolute -top-[85svh] h-[180svh] w-[180dvw] overflow-hidden rounded-b-full bg-[linear-gradient(45deg,#d1fafa_40vw,#d1f0ff_140vw)]">
-            <div className="fixed top-0 left-0 h-full w-full">
+            <div className="absolute top-[85svh] left-1/2 h-svh w-dvw -translate-x-1/2">
               <canvas
                 ref={shootingStarsCanvasRef}
                 aria-hidden="true"
