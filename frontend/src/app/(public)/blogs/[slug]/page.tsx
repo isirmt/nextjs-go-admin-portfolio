@@ -45,7 +45,7 @@ export default async function BlogArticlePage({
   if (!article) notFound();
 
   return (
-    <main className="relative w-full">
+    <main className="relative w-full overflow-x-clip">
       <section className="grid grid-cols-3">
         <div className="col-span-3 pb-40 lg:col-span-2">
           <BlogArticleContent article={article} />
