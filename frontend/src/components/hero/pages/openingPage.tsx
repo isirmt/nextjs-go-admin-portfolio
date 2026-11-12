@@ -84,35 +84,7 @@ const openingTimelineDefinition = defineTimeline<OpeningTimelineState>({
 });
 
 export default function OpeningHeroPage() {
-  const [shootingStarsOptions] = useState<ShootingStarsOptions>(() => ({
-    initialElapsed: 30000,
-    spawnInterval: { min: 700, max: 1100 },
-    startArea: {
-      x: { min: -2.0, max: 0.8 },
-      y: { min: -0.3, max: 0.0 },
-    },
-    angle: { min: 25, max: 25 },
-    speed: { min: 60, max: 120 },
-    trail: {
-      length: { min: 70, max: 150 },
-      width: { min: 3, max: 6 },
-      color: "#ffffff",
-    },
-    sparkles: {
-      count: { min: 3, max: 7 },
-      spread: 70,
-      size: { min: 7, max: 20 },
-      colors: ["#ffffff", "#ffe6a7", "#ffc6dc", "#bdefff"],
-      visibleDuration: { min: 1000, max: 1700 },
-      hiddenInterval: { min: 1000, max: 2500 },
-    },
-    ambientStars: {
-      density: 5,
-      size: { min: 1, max: 3 },
-      horizontalSpeed: { min: 4, max: 12 },
-      color: "#ffffff",
-    },
-  }));
+  const [shootingStarsOptions] = useState<ShootingStarsOptions>();
   const { canvasRef: shootingStarsCanvasRef } =
     useShootingStars(shootingStarsOptions);
   const [colorfulOverride, setColorfulOverride] = useState<boolean | null>(
