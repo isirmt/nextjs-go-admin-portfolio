@@ -133,14 +133,46 @@ export class Sparkle {
     );
     const centerX = x + this.offsetX;
     const centerY = y + this.offsetY;
-    const radius = this.size / 2;
+    const width = this.size * 0.65;
+    const height = this.size;
+    const left = centerX - width / 2;
+    const top = centerY - height / 2;
     context.globalAlpha = opacity;
     context.fillStyle = this.color;
     context.beginPath();
-    context.moveTo(centerX, centerY - radius);
-    context.lineTo(centerX + radius * 0.65, centerY);
-    context.lineTo(centerX, centerY + radius);
-    context.lineTo(centerX - radius * 0.65, centerY);
+    context.moveTo(left + width * 0.5, top);
+    context.bezierCurveTo(
+      left + width * 0.525,
+      top + height * 0.275,
+      left + width * 0.625,
+      top + height * 0.425,
+      left + width,
+      top + height * 0.5,
+    );
+    context.bezierCurveTo(
+      left + width * 0.625,
+      top + height * 0.575,
+      left + width * 0.525,
+      top + height * 0.725,
+      left + width * 0.5,
+      top + height,
+    );
+    context.bezierCurveTo(
+      left + width * 0.475,
+      top + height * 0.725,
+      left + width * 0.375,
+      top + height * 0.575,
+      left,
+      top + height * 0.5,
+    );
+    context.bezierCurveTo(
+      left + width * 0.375,
+      top + height * 0.425,
+      left + width * 0.475,
+      top + height * 0.275,
+      left + width * 0.5,
+      top,
+    );
     context.closePath();
     context.fill();
     context.globalAlpha = 1;
@@ -206,10 +238,8 @@ export class ShootingStar {
   isOutside(width: number, height: number, spread: number): boolean {
     const margin = this.trailLength + spread;
     return (
-      this.x < -margin ||
-      this.x > width + margin ||
-      this.y < -margin ||
-      this.y > height + margin
+      (this.directionX >= 0 ? this.x > width + margin : this.x < -margin) ||
+      (this.directionY >= 0 ? this.y > height + margin : this.y < -margin)
     );
   }
 }

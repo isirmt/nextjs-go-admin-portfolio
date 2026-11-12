@@ -86,9 +86,9 @@ const openingTimelineDefinition = defineTimeline<OpeningTimelineState>({
 export default function OpeningHeroPage() {
   const [shootingStarsOptions] = useState<ShootingStarsOptions>(() => ({
     initialElapsed: 30000,
-    spawnInterval: { min: 400, max: 700 },
+    spawnInterval: { min: 700, max: 1100 },
     startArea: {
-      x: { min: -0.7, max: 0.8 },
+      x: { min: -2.0, max: 0.8 },
       y: { min: -0.3, max: 0.0 },
     },
     angle: { min: 25, max: 35 },
