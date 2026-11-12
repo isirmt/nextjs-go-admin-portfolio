@@ -123,7 +123,7 @@
 }
 
 .markdown pre > code {
-  @apply rounded-none bg-transparent p-0;
+  @apply mx-0 rounded-none bg-transparent p-0;
 }
 
 .markdown blockquote {
