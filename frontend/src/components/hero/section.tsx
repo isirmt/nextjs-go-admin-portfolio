@@ -9,6 +9,8 @@ function HeroPageControlButton() {
 
   return (
     <button
+      type="button"
+      aria-label={autoPagination ? "ページ送りを一時停止" : "ページ送りを再開"}
       className={`ease-over absolute bottom-16 left-0 z-50 m-6 flex size-10 cursor-pointer items-center justify-center rounded-full border-2 border-[#F43F5E] bg-white text-[#F43F5E] shadow transition-all duration-400 hover:scale-110 active:scale-95`}
       onClick={() => setAutoPagination(!autoPagination)}
     >
