@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { Maximize2Icon, XIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ImagesProvider } from "@/contexts/imagesContext";
 import { useBlogArticlesContext } from "@/contexts/blogArticlesContext";
 import { BlogTagsProvider } from "@/contexts/blogTagsContext";
 import useConsoleMutation from "@/hooks/useConsoleMutation";
 import backendApi from "@/lib/auth/backendFetch";
+import { getNextBlogSlug } from "@/lib/blogs/slug";
 import type { BlogArticle } from "@/types/blogs/common";
 import ConsoleDateTimePicker from "./consoleDateTimePicker";
 import ConsoleFormFeedback from "./consoleFormFeedback";
@@ -38,7 +39,7 @@ type BlogArticleEditorProps = { articleId?: string };
 
 function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
   const router = useRouter();
-  const { refreshBlogArticles } = useBlogArticlesContext();
+  const { articles, isLoading, refreshBlogArticles } = useBlogArticlesContext();
   const [status, setStatus] = useState<"draft" | "published">("draft");
   const title = useConsoleTextField();
   const slug = useConsoleTextField();
@@ -50,6 +51,7 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
   const { reset: resetSlug } = slug;
   const { reset: resetPublishedAt } = publishedAt;
   const { reset: resetBodyMarkdown } = bodyMarkdown;
+  const hasInitializedNewSlug = useRef(false);
   const [bodyView, setBodyView] = useState<"edit" | "preview">("edit");
   const [isBodyEditorExpanded, setIsBodyEditorExpanded] = useState(false);
   const {
@@ -59,6 +61,15 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
   } = useConsoleMutation();
   const [loadError, setLoadError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (articleId || isLoading || hasInitializedNewSlug.current) return;
+
+    hasInitializedNewSlug.current = true;
+    if (slug.value.trim() === "") {
+      resetSlug(getNextBlogSlug(articles));
+    }
+  }, [articleId, articles, isLoading, resetSlug, slug.value]);
 
   useEffect(() => {
     if (!articleId) return;
