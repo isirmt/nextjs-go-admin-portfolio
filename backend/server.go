@@ -17,6 +17,7 @@ type server struct {
 	adminSecret          string
 	embeddingBaseURL     string
 	searchEmbeddingModel string
+	indexNowEnabled      bool
 	httpClient           *http.Client
 	clickLimiter         *clickLimiter
 	wsHub                *wsHub
