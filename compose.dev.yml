@@ -52,6 +52,7 @@ services:
       UPLOAD_DIR: /uploads
       EMBEDDING_BASE_URL: http://embedding:8000
       SEARCH_EMBEDDING_MODEL: intfloat/multilingual-e5-small
+      INDEXNOW_ENABLED: "false"
     volumes:
       - ./backend:/app
       - go_mod_cache:/go/pkg/mod

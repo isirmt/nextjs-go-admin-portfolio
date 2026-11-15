@@ -12,21 +12,22 @@ const TableNameBlogArticle = "blog_articles"
 
 // BlogArticle mapped from table <blog_articles>
 type BlogArticle struct {
-	ID               *string                   `gorm:"column:id;type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
-	Status           *string                   `gorm:"column:status;type:text;not null;default:draft" json:"status"`
-	Title            string                    `gorm:"column:title;type:text;not null" json:"title"`
-	Slug             string                    `gorm:"column:slug;type:text;not null" json:"slug"`
-	BodyMarkdown     string                    `gorm:"column:body_markdown;type:text;not null" json:"body_markdown"`
-	ThumbnailImageID *string                   `gorm:"column:thumbnail_image_id;type:uuid" json:"thumbnail_image_id"`
-	CreatedAt        *time.Time                `gorm:"column:created_at;type:timestamp with time zone;not null;default:now()" json:"created_at"`
-	PublishedAt      *time.Time                `gorm:"column:published_at;type:timestamp with time zone;index:idx_blog_articles_published_at,priority:1" json:"published_at"`
-	UpdatedAt        *time.Time                `gorm:"column:updated_at;type:timestamp with time zone;not null;default:now()" json:"updated_at"`
-	Excerpt          string                    `gorm:"column:excerpt;type:text;not null" json:"excerpt"`
-	PreviewLinks     []*BlogArticlePreviewLink `gorm:"foreignKey:ArticleID;references:ID" json:"-"`
-	Tags             []*BlogTag                `gorm:"joinForeignKey:ArticleID;joinReferences:TagID;many2many:blog_article_tags" json:"tags"`
-	BodyImages       []*BlogArticleImage       `gorm:"foreignKey:ArticleID;references:ID" json:"-"`
-	ThumbnailImage   *CommonImage              `gorm:"foreignKey:ThumbnailImageID;references:ID" json:"thumbnail_image"`
-	SeriesEntries    []*BlogSeriesArticle      `gorm:"foreignKey:ArticleID;references:ID" json:"-"`
+	ID                 *string                   `gorm:"column:id;type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
+	Status             *string                   `gorm:"column:status;type:text;not null;default:draft" json:"status"`
+	Title              string                    `gorm:"column:title;type:text;not null" json:"title"`
+	Slug               string                    `gorm:"column:slug;type:text;not null" json:"slug"`
+	BodyMarkdown       string                    `gorm:"column:body_markdown;type:text;not null" json:"body_markdown"`
+	ThumbnailImageID   *string                   `gorm:"column:thumbnail_image_id;type:uuid" json:"thumbnail_image_id"`
+	CreatedAt          *time.Time                `gorm:"column:created_at;type:timestamp with time zone;not null;default:now()" json:"created_at"`
+	PublishedAt        *time.Time                `gorm:"column:published_at;type:timestamp with time zone;index:idx_blog_articles_published_at,priority:1" json:"published_at"`
+	UpdatedAt          *time.Time                `gorm:"column:updated_at;type:timestamp with time zone;not null;default:now()" json:"updated_at"`
+	Excerpt            string                    `gorm:"column:excerpt;type:text;not null" json:"excerpt"`
+	IndexnowNotifiedAt *time.Time                `gorm:"column:indexnow_notified_at;type:timestamp with time zone" json:"indexnow_notified_at"`
+	PreviewLinks       []*BlogArticlePreviewLink `gorm:"foreignKey:ArticleID;references:ID" json:"-"`
+	Tags               []*BlogTag                `gorm:"joinForeignKey:ArticleID;joinReferences:TagID;many2many:blog_article_tags" json:"tags"`
+	BodyImages         []*BlogArticleImage       `gorm:"foreignKey:ArticleID;references:ID" json:"-"`
+	ThumbnailImage     *CommonImage              `gorm:"foreignKey:ThumbnailImageID;references:ID" json:"thumbnail_image"`
+	SeriesEntries      []*BlogSeriesArticle      `gorm:"foreignKey:ArticleID;references:ID" json:"-"`
 }
 
 // TableName BlogArticle's table name

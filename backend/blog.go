@@ -167,6 +167,10 @@ func (pSrv *server) respondBlogArticle(c *echo.Context, statusCode int, article 
 	return c.JSON(statusCode, blogArticleDetail(article, includeStatus))
 }
 
+func blogArticleURL(article *model.BlogArticle) string {
+	return "https://" + indexNowHost + "/blogs/" + article.Slug
+}
+
 func (pSrv *server) withBlogArticleRelations(articleQuery query.IBlogArticleDo) query.IBlogArticleDo {
 	return pSrv.withBlogArticleTags(articleQuery).
 		Preload(pSrv.q.BlogArticle.BodyImages).
@@ -591,6 +595,9 @@ func (pSrv *server) handleCreateBlogArticle(c *echo.Context) error {
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "failed to fetch created blog article")
 	}
+	if isPublicBlogArticle(createdArticle, time.Now()) {
+		pSrv.enqueueIndexNowNotification(*createdArticle.ID, []string{blogArticleURL(createdArticle)})
+	}
 	return pSrv.respondBlogArticle(c, http.StatusCreated, createdArticle, true)
 }
 
@@ -608,8 +615,9 @@ func (pSrv *server) handleUpdateBlogArticle(c *echo.Context) error {
 	if err != nil {
 		return c.String(http.StatusBadRequest, err.Error())
 	}
-	if _, err := pSrv.q.BlogArticle.WithContext(c.Request().Context()).
-		Where(pSrv.q.BlogArticle.ID.Eq(articleID)).First(); err != nil {
+	previousArticle, err := pSrv.q.BlogArticle.WithContext(c.Request().Context()).
+		Where(pSrv.q.BlogArticle.ID.Eq(articleID)).First()
+	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return c.String(http.StatusNotFound, "blog article not found")
 		}
@@ -628,13 +636,14 @@ func (pSrv *server) handleUpdateBlogArticle(c *echo.Context) error {
 	if err := pSrv.q.Transaction(func(tx *query.Query) error {
 		if _, err := tx.BlogArticle.WithContext(c.Request().Context()).
 			Where(tx.BlogArticle.ID.Eq(articleID)).Updates(map[string]interface{}{
-			"status":             input.status,
-			"title":              input.title,
-			"slug":               input.slug,
-			"body_markdown":      input.bodyMarkdown,
-			"excerpt":            input.excerpt,
-			"thumbnail_image_id": input.thumbnailImageID,
-			"published_at":       input.publishedAt,
+			"status":               input.status,
+			"title":                input.title,
+			"slug":                 input.slug,
+			"body_markdown":        input.bodyMarkdown,
+			"excerpt":              input.excerpt,
+			"thumbnail_image_id":   input.thumbnailImageID,
+			"published_at":         input.publishedAt,
+			"indexnow_notified_at": nil,
 		}); err != nil {
 			return err
 		}
@@ -651,6 +660,21 @@ func (pSrv *server) handleUpdateBlogArticle(c *echo.Context) error {
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "failed to fetch updated blog article")
 	}
+	now := time.Now()
+	wasPublic := isPublicBlogArticle(previousArticle, now)
+	isPublic := isPublicBlogArticle(updatedArticle, now)
+	urls := make([]string, 0, 2)
+	if wasPublic && (!isPublic || previousArticle.Slug != updatedArticle.Slug) {
+		urls = append(urls, blogArticleURL(previousArticle))
+	}
+	if isPublic {
+		urls = append(urls, blogArticleURL(updatedArticle))
+	}
+	if isPublic {
+		pSrv.enqueueIndexNowNotification(articleID, urls)
+	} else {
+		pSrv.enqueueIndexNowNotification("", urls)
+	}
 	return pSrv.respondBlogArticle(c, http.StatusOK, updatedArticle, true)
 }
 
@@ -659,6 +683,14 @@ func (pSrv *server) handleDeleteBlogArticle(c *echo.Context) error {
 	if articleID == "" {
 		return c.String(http.StatusBadRequest, "article id is required")
 	}
+	article, err := pSrv.q.BlogArticle.WithContext(c.Request().Context()).
+		Where(pSrv.q.BlogArticle.ID.Eq(articleID)).First()
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return c.String(http.StatusNotFound, "blog article not found")
+		}
+		return c.String(http.StatusInternalServerError, "failed to fetch blog article")
+	}
 	result, err := pSrv.q.BlogArticle.WithContext(c.Request().Context()).
 		Where(pSrv.q.BlogArticle.ID.Eq(articleID)).Delete()
 	if err != nil {
@@ -666,6 +698,9 @@ func (pSrv *server) handleDeleteBlogArticle(c *echo.Context) error {
 	}
 	if result.RowsAffected == 0 {
 		return c.String(http.StatusNotFound, "blog article not found")
+	}
+	if isPublicBlogArticle(article, time.Now()) {
+		pSrv.enqueueIndexNowNotification("", []string{blogArticleURL(article)})
 	}
 	return c.NoContent(http.StatusNoContent)
 }

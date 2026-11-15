@@ -78,10 +78,12 @@ func main() {
 		adminSecret:          adminSecret,
 		embeddingBaseURL:     strings.TrimRight(os.Getenv("EMBEDDING_BASE_URL"), "/"),
 		searchEmbeddingModel: getEnv("SEARCH_EMBEDDING_MODEL", "intfloat/multilingual-e5-small"),
+		indexNowEnabled:      strings.EqualFold(getEnv("INDEXNOW_ENABLED", "false"), "true"),
 		httpClient:           &http.Client{Timeout: 60 * time.Second},
 		clickLimiter:         createClickLimiter(2*time.Second, 10000, time.Minute),
 		wsHub:                createWsHub(),
 	}
+	pSrv.startIndexNowNotifier(ctx)
 
 	router := echo.New()
 	router.Use(middleware.RequestLogger())
