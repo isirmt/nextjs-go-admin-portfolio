@@ -20,6 +20,9 @@ const (
 	indexNowHost     = "isirmt.com"
 	indexNowKey      = "7b9d02af1a0e46c68c3796230a74f222"
 	indexNowKeyURL   = "https://isirmt.com/7b9d02af1a0e46c68c3796230a74f222.txt"
+
+	indexNowNotificationInterval  = 5 * time.Minute
+	indexNowNotificationBatchSize = 20
 )
 
 type indexNowRequest struct {
@@ -85,27 +88,75 @@ func (pSrv *server) enqueueIndexNowNotification(articleID string, urls []string)
 	}
 
 	go func() {
-		if err := pSrv.submitIndexNow(context.Background(), urls); err != nil {
-			log.Printf("failed to submit IndexNow notification: %v", err)
-			return
-		}
-		if articleID == "" {
-			return
-		}
+		pSrv.sendIndexNowNotification(context.Background(), articleID, urls)
+	}()
+}
 
-		notifiedAt := time.Now().UTC()
-		err := pSrv.db.WithContext(context.Background()).Transaction(func(tx *gorm.DB) error {
-			if err := tx.Exec("SET LOCAL isirmt.skip_blog_article_updated_at = 'true'").Error; err != nil {
-				return err
+func (pSrv *server) startIndexNowNotifier(ctx context.Context) {
+	if !pSrv.indexNowEnabled {
+		return
+	}
+
+	go func() {
+		pSrv.notifyPendingIndexNow(ctx)
+
+		ticker := time.NewTicker(indexNowNotificationInterval)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				pSrv.notifyPendingIndexNow(ctx)
 			}
-			return tx.Table("blog_articles").
-				Where("id = ?", articleID).
-				Update("indexnow_notified_at", notifiedAt).Error
-		})
-		if err != nil {
-			log.Printf("failed to record IndexNow notification: %v", err)
 		}
 	}()
+}
+
+func (pSrv *server) notifyPendingIndexNow(ctx context.Context) {
+	articles, err := pSrv.q.BlogArticle.WithContext(ctx).
+		Where(
+			pSrv.q.BlogArticle.Status.Eq(blogArticleStatusPublished),
+			pSrv.q.BlogArticle.PublishedAt.Lte(time.Now()),
+			pSrv.q.BlogArticle.IndexnowNotifiedAt.IsNull(),
+		).
+		Order(pSrv.q.BlogArticle.PublishedAt.Asc()).
+		Limit(indexNowNotificationBatchSize).
+		Find()
+	if err != nil {
+		log.Printf("failed to find pending IndexNow notifications: %v", err)
+		return
+	}
+
+	for _, article := range articles {
+		if article.ID == nil {
+			continue
+		}
+		pSrv.sendIndexNowNotification(ctx, *article.ID, []string{blogArticleURL(article)})
+	}
+}
+
+func (pSrv *server) sendIndexNowNotification(ctx context.Context, articleID string, urls []string) {
+	if err := pSrv.submitIndexNow(ctx, urls); err != nil {
+		log.Printf("failed to submit IndexNow notification: %v", err)
+		return
+	}
+	if articleID == "" {
+		return
+	}
+
+	notifiedAt := time.Now().UTC()
+	err := pSrv.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if err := tx.Exec("SET LOCAL isirmt.skip_blog_article_updated_at = 'true'").Error; err != nil {
+			return err
+		}
+		return tx.Table("blog_articles").
+			Where("id = ?", articleID).
+			Update("indexnow_notified_at", notifiedAt).Error
+	})
+	if err != nil {
+		log.Printf("failed to record IndexNow notification: %v", err)
+	}
 }
 
 func normalizeIndexNowURLs(urls []string) ([]string, error) {

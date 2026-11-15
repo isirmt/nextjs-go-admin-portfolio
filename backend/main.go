@@ -83,6 +83,7 @@ func main() {
 		clickLimiter:         createClickLimiter(2*time.Second, 10000, time.Minute),
 		wsHub:                createWsHub(),
 	}
+	pSrv.startIndexNowNotifier(ctx)
 
 	router := echo.New()
 	router.Use(middleware.RequestLogger())
