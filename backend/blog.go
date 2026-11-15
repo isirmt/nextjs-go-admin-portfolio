@@ -167,6 +167,10 @@ func (pSrv *server) respondBlogArticle(c *echo.Context, statusCode int, article 
 	return c.JSON(statusCode, blogArticleDetail(article, includeStatus))
 }
 
+func blogArticleURL(article *model.BlogArticle) string {
+	return "https://" + indexNowHost + "/blogs/" + article.Slug
+}
+
 func (pSrv *server) withBlogArticleRelations(articleQuery query.IBlogArticleDo) query.IBlogArticleDo {
 	return pSrv.withBlogArticleTags(articleQuery).
 		Preload(pSrv.q.BlogArticle.BodyImages).
