@@ -6,10 +6,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 const (
@@ -74,6 +77,35 @@ func (pSrv *server) submitIndexNow(ctx context.Context, urls []string) error {
 	}
 
 	return nil
+}
+
+func (pSrv *server) enqueueIndexNowNotification(articleID string, urls []string) {
+	if !pSrv.indexNowEnabled || len(urls) == 0 {
+		return
+	}
+
+	go func() {
+		if err := pSrv.submitIndexNow(context.Background(), urls); err != nil {
+			log.Printf("failed to submit IndexNow notification: %v", err)
+			return
+		}
+		if articleID == "" {
+			return
+		}
+
+		notifiedAt := time.Now().UTC()
+		err := pSrv.db.WithContext(context.Background()).Transaction(func(tx *gorm.DB) error {
+			if err := tx.Exec("SET LOCAL isirmt.skip_blog_article_updated_at = 'true'").Error; err != nil {
+				return err
+			}
+			return tx.Table("blog_articles").
+				Where("id = ?", articleID).
+				Update("indexnow_notified_at", notifiedAt).Error
+		})
+		if err != nil {
+			log.Printf("failed to record IndexNow notification: %v", err)
+		}
+	}()
 }
 
 func normalizeIndexNowURLs(urls []string) ([]string, error) {
