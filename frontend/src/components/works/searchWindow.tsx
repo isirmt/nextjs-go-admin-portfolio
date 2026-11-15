@@ -185,6 +185,7 @@ export default function SearchWindow() {
         style={{ marginRight: isOpen ? scrollbarWidth : 0 }}
       >
         <input
+          aria-label="作品を検索"
           value={searchTerm}
           onFocus={() => setIsOpen(true)}
           onChange={(e) => setSearchTerm(e.target.value)}
