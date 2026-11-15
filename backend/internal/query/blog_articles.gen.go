@@ -38,6 +38,7 @@ func newBlogArticle(db *gorm.DB, opts ...gen.DOOption) blogArticle {
 	_blogArticle.PublishedAt = field.NewTime(tableName, "published_at")
 	_blogArticle.UpdatedAt = field.NewTime(tableName, "updated_at")
 	_blogArticle.Excerpt = field.NewString(tableName, "excerpt")
+	_blogArticle.IndexnowNotifiedAt = field.NewTime(tableName, "indexnow_notified_at")
 	_blogArticle.PreviewLinks = blogArticleHasManyPreviewLinks{
 		db: db.Session(&gorm.Session{}),
 
@@ -99,18 +100,19 @@ func newBlogArticle(db *gorm.DB, opts ...gen.DOOption) blogArticle {
 type blogArticle struct {
 	blogArticleDo blogArticleDo
 
-	ALL              field.Asterisk
-	ID               field.String
-	Status           field.String
-	Title            field.String
-	Slug             field.String
-	BodyMarkdown     field.String
-	ThumbnailImageID field.String
-	CreatedAt        field.Time
-	PublishedAt      field.Time
-	UpdatedAt        field.Time
-	Excerpt          field.String
-	PreviewLinks     blogArticleHasManyPreviewLinks
+	ALL                field.Asterisk
+	ID                 field.String
+	Status             field.String
+	Title              field.String
+	Slug               field.String
+	BodyMarkdown       field.String
+	ThumbnailImageID   field.String
+	CreatedAt          field.Time
+	PublishedAt        field.Time
+	UpdatedAt          field.Time
+	Excerpt            field.String
+	IndexnowNotifiedAt field.Time
+	PreviewLinks       blogArticleHasManyPreviewLinks
 
 	Tags blogArticleManyToManyTags
 
@@ -145,6 +147,7 @@ func (b *blogArticle) updateTableName(table string) *blogArticle {
 	b.PublishedAt = field.NewTime(table, "published_at")
 	b.UpdatedAt = field.NewTime(table, "updated_at")
 	b.Excerpt = field.NewString(table, "excerpt")
+	b.IndexnowNotifiedAt = field.NewTime(table, "indexnow_notified_at")
 
 	b.fillFieldMap()
 
@@ -171,7 +174,7 @@ func (b *blogArticle) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (b *blogArticle) fillFieldMap() {
-	b.fieldMap = make(map[string]field.Expr, 15)
+	b.fieldMap = make(map[string]field.Expr, 16)
 	b.fieldMap["id"] = b.ID
 	b.fieldMap["status"] = b.Status
 	b.fieldMap["title"] = b.Title
@@ -182,6 +185,7 @@ func (b *blogArticle) fillFieldMap() {
 	b.fieldMap["published_at"] = b.PublishedAt
 	b.fieldMap["updated_at"] = b.UpdatedAt
 	b.fieldMap["excerpt"] = b.Excerpt
+	b.fieldMap["indexnow_notified_at"] = b.IndexnowNotifiedAt
 
 }
 
