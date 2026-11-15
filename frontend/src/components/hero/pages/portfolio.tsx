@@ -56,6 +56,7 @@ export default function PortfolioHeroPage() {
       <div className="absolute bottom-0 left-0 h-6 w-full border-t-2 border-dotted border-[#888]" />
       <Link
         className="group absolute right-0 bottom-6 z-10 bg-[#f43f5e] transition-all [clip-path:polygon(100%_0%,100%_100%,0%_100%)] hover:bg-[#ff5a75]"
+        aria-label="井筒ミリのホームページを開く"
         style={{
           width: mq("md") ? "300px" : "200px",
           height: mq("md") ? "300px" : "200px",
