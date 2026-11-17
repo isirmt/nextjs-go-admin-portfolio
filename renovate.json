@@ -2,9 +2,10 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended"],
   "prConcurrentLimit": 3,
+  "separateMinorPatch": true,
   "dependencyDashboard": true,
   "prCreation": "not-pending",
-  "minimumReleaseAge": "7 days",
+  "minimumReleaseAge": "14 days",
   "packageRules": [
     {
       "matchUpdateTypes": ["major"],
@@ -13,6 +14,11 @@
     {
       "matchUpdateTypes": ["minor"],
       "minimumReleaseAge": "14 days"
+    },
+    {
+      "matchUpdateTypes": ["patch"],
+      "automerge": true,
+      "prConcurrentLimit": 0
     }
   ]
 }
