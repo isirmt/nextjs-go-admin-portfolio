@@ -8,6 +8,40 @@ const WAVE_MIN_LENGTH = 120;
 const WAVE_LENGTH_RATIO = 0.4;
 const WAVE_STEPS_PER_LENGTH = 20;
 
+export const createSineWavePoints = (
+  width: number,
+  height: number,
+  phase = 0,
+) => {
+  const waveOffset = Math.min(
+    WAVE_MAX_OFFSET,
+    Math.max(WAVE_MIN_OFFSET, Math.floor(height * WAVE_OFFSET_RATIO)),
+  );
+  const waveHeight = waveOffset * 0.6;
+  const waveLength = Math.max(
+    WAVE_MIN_LENGTH,
+    Math.floor(width * WAVE_LENGTH_RATIO),
+  );
+  const step = Math.max(8, Math.floor(waveLength / WAVE_STEPS_PER_LENGTH));
+  const points: Array<{ x: number; y: number }> = [];
+  for (let x = 0; x < width; x += step) {
+    points.push({
+      x,
+      y:
+        waveOffset +
+        Math.sin((x / waveLength) * SINE_WAVE_FULL_PHASE + phase) * waveHeight,
+    });
+  }
+  points.push({
+    x: width,
+    y:
+      waveOffset +
+      Math.sin((width / waveLength) * SINE_WAVE_FULL_PHASE + phase) *
+        waveHeight,
+  });
+  return points;
+};
+
 export type SineClipPathEdge = "top" | "bottom" | "both";
 
 export type SineClipPathOptions = {
