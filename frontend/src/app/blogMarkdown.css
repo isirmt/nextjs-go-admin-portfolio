@@ -48,7 +48,7 @@
 }
 
 .markdown section.footnotes {
-  @apply rounded bg-gray-100 py-1;
+  @apply mt-10 rounded bg-gray-100 py-1;
 }
 
 .markdown section.footnotes li[id],
