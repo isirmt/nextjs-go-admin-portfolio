@@ -2,6 +2,7 @@
 
 import { useSelectingCubeContext } from "@/contexts/selectingCubeContext";
 import { useWorksContext } from "@/contexts/worksContext";
+import { useHeroDeck, useHeroScene } from "@/components/hero/deck";
 import { useCustomMediaQuery } from "@/hooks/useCustomMediaQuery";
 import { lightenHex } from "@/lib/sketch/colorChanger";
 import { useTexture } from "@react-three/drei";
@@ -162,7 +163,13 @@ function FallingBoxBody({
   );
 }
 
-function WorkClickPhysics({ onSpawnEnded }: { onSpawnEnded?: () => void }) {
+function WorkClickPhysics({
+  onSpawnEnded,
+  active,
+}: {
+  onSpawnEnded?: () => void;
+  active: boolean;
+}) {
   const { works } = useWorksContext();
   const { viewport, size } = useThree();
   const [boxes, setBoxes] = useState<FallingBox[]>([]);
@@ -173,6 +180,7 @@ function WorkClickPhysics({ onSpawnEnded }: { onSpawnEnded?: () => void }) {
   const wsRef = useRef<WebSocket | null>(null);
   const shouldReconnectRef = useRef(true);
   const autoSpawnStartedRef = useRef(false);
+  const spawnBoxRef = useRef<(workId: string) => void>(() => {});
   const boxSize = useMemo(() => {
     const base = viewport.width > 0 ? viewport.width / 10 : 1;
     return Math.min(1, Math.max(0.5, base));
@@ -263,6 +271,9 @@ function WorkClickPhysics({ onSpawnEnded }: { onSpawnEnded?: () => void }) {
     },
     [boxSize, spawnX, spawnY],
   );
+  useEffect(() => {
+    spawnBoxRef.current = spawnBox;
+  }, [spawnBox]);
 
   useEffect(() => {
     let disposed = false;
@@ -286,7 +297,7 @@ function WorkClickPhysics({ onSpawnEnded }: { onSpawnEnded?: () => void }) {
           const seq = Number(parsed.seq);
           if (!Number.isFinite(seq) || seq <= lastSeqRef.current) return;
           lastSeqRef.current = seq;
-          spawnBox(parsed.workId);
+          spawnBoxRef.current(parsed.workId);
         } catch {
           // do nothing
         }
@@ -314,7 +325,7 @@ function WorkClickPhysics({ onSpawnEnded }: { onSpawnEnded?: () => void }) {
       }
       wsRef.current?.close();
     };
-  }, [spawnBox]);
+  }, []);
 
   useEffect(() => {
     if (boxes.length < MAX_BOXES) return;
@@ -348,7 +359,7 @@ function WorkClickPhysics({ onSpawnEnded }: { onSpawnEnded?: () => void }) {
   }, [spawnBox, works]);
 
   return (
-    <Physics gravity={[0, -4.9, 0]} timeStep={1 / 60}>
+    <Physics gravity={[0, -4.9, 0]} timeStep={1 / 60} paused={!active}>
       <RigidBody type="fixed" colliders={false} friction={0} restitution={0.7}>
         <CuboidCollider
           args={[viewport.width / 2, wallThickness / 2, wallDepth / 2]}
@@ -386,9 +397,34 @@ function WorkClickPhysics({ onSpawnEnded }: { onSpawnEnded?: () => void }) {
 }
 
 export default function RealtimeWorld() {
+  const { isCurrent } = useHeroScene();
+  const { isTransitioning } = useHeroDeck();
   const searchParams = useSearchParams();
   const isLock = searchParams.get("lock") === "true";
   const [isSpawnEnded, setIsSpawnEnded] = useState<boolean>(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const [isDocumentVisible, setIsDocumentVisible] = useState(true);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const isActive =
+    isVisible && isDocumentVisible && (isCurrent || isTransitioning);
+
+  useEffect(() => {
+    const updateVisibility = () => setIsDocumentVisible(!document.hidden);
+    updateVisibility();
+    document.addEventListener("visibilitychange", updateVisibility);
+    return () =>
+      document.removeEventListener("visibilitychange", updateVisibility);
+  }, []);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      setIsVisible(entry.isIntersecting);
+    });
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     if (!isLock) {
@@ -413,8 +449,9 @@ export default function RealtimeWorld() {
 
   return (
     <React.Fragment>
-      <div className="absolute top-0 left-0 size-full">
+      <div ref={containerRef} className="absolute top-0 left-0 size-full">
         <Canvas
+          frameloop={isActive ? "always" : "demand"}
           onContextMenu={(e) => e.preventDefault()}
           orthographic
           camera={{ position: [0, 0, 10], zoom: 80 }}
@@ -424,7 +461,10 @@ export default function RealtimeWorld() {
         >
           <ambientLight intensity={1.5} />
           <directionalLight position={[3, 4, 5]} intensity={1} />
-          <WorkClickPhysics onSpawnEnded={() => setIsSpawnEnded(true)} />
+          <WorkClickPhysics
+            active={isActive}
+            onSpawnEnded={() => setIsSpawnEnded(true)}
+          />
         </Canvas>
       </div>
       <div className="absolute top-24 right-6 hidden flex-row-reverse gap-4 md:flex">
