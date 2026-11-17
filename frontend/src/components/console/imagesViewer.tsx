@@ -60,12 +60,12 @@ export default function ImagesViewer() {
               </ConsoleButton>
               <Link
                 className="relative block size-48 bg-white"
-                href={`/api/images/${image.id}/raw`}
+                href={`/image-source/${image.id}`}
                 target="_blank"
                 rel="noopener"
               >
                 <img
-                  src={`/api/images/${image.id}/raw`}
+                  src={`/image-source/${image.id}`}
                   alt={image.file_name}
                   className="size-full object-contain"
                 />

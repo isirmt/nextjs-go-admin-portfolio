@@ -94,7 +94,7 @@ export default function ImageSelectingBox({
               </div>
               <img
                 className="pointer-events-none relative size-24 object-contain"
-                src={`/api/images/${image.id}/raw`}
+                src={`/image-source/${image.id}`}
                 alt={image.file_name}
               />
             </button>

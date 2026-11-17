@@ -14,13 +14,15 @@ export const blogOpenGraphImageSize = {
 const fontData = readFile(
   join(process.cwd(), "assets", "NotoSansJP-ExtraBold-Sub.ttf"),
 );
-async function getThumbnailResponse(imageId: string) {
+async function getThumbnailResponse(imageId: string, adminSecret?: string) {
   const backendBaseUrl = process.env.BACKEND_BASE_URL;
   if (!backendBaseUrl) return null;
 
   const response = await fetch(
     new URL(`/images/${encodeURIComponent(imageId)}/raw`, backendBaseUrl),
-    { next: { revalidate: blogOpenGraphImageRevalidateSeconds } },
+    adminSecret
+      ? { headers: { "X-Admin-Secret": adminSecret }, cache: "no-store" }
+      : { next: { revalidate: blogOpenGraphImageRevalidateSeconds } },
   );
   return response.ok && response.body ? response : null;
 }
@@ -30,10 +32,12 @@ export async function createBlogOpenGraphImageResponseFromArticle(
   cacheControl = process.env.NODE_ENV === "development"
     ? "no-store"
     : `public, max-age=${blogOpenGraphImageRevalidateSeconds}`,
+  adminSecret?: string,
 ) {
   if (article.thumbnail_image_id) {
     const thumbnailResponse = await getThumbnailResponse(
       article.thumbnail_image_id,
+      adminSecret,
     );
     if (thumbnailResponse) {
       const headers = new Headers({
