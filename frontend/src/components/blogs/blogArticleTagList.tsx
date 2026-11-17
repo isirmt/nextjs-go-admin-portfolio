@@ -3,18 +3,22 @@ import type { BlogTag } from "@/types/blogs/common";
 type BlogArticleTagListProps = {
   tags: BlogTag[];
   maxVisibleTags?: number;
+  fullWidth?: boolean;
 };
 
 export default function BlogArticleTagList({
   tags,
   maxVisibleTags,
+  fullWidth = false,
 }: BlogArticleTagListProps) {
   const visibleTags =
     maxVisibleTags === undefined ? tags : tags.slice(0, maxVisibleTags);
   const remainingCount = tags.length - visibleTags.length;
 
   return (
-    <div className="flex w-84 flex-wrap justify-start gap-3">
+    <div
+      className={`flex flex-wrap justify-start gap-3 ${fullWidth ? "w-full" : "w-84"}`}
+    >
       {visibleTags.map((tag) => (
         <div
           key={tag.id}

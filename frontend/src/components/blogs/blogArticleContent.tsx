@@ -42,7 +42,7 @@ export default function BlogArticleContent({
             {article.title}
           </h1>
           {article.tags.length ? (
-            <BlogArticleTagList tags={article.tags} />
+            <BlogArticleTagList tags={article.tags} fullWidth />
           ) : null}
         </div>
       </PageContentHeader>
