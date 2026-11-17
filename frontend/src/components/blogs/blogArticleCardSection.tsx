@@ -21,7 +21,7 @@ export default function BlogArticleCardSection({
       >
         {title}
       </h2>
-      <div className="flex flex-wrap justify-center gap-8 px-4">
+      <div className="flex flex-wrap justify-center gap-8 px-12">
         {articles.map((article) => (
           <div className="flex shrink-0 flex-col gap-2.5" key={article.id}>
             <BlogArticleCard article={article} />

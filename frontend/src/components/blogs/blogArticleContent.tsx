@@ -29,7 +29,7 @@ export default function BlogArticleContent({
             <div className="absolute top-0 right-0 z-1 hidden aspect-1200/630 h-full bg-linear-to-r from-[#ecf3fa] to-transparent xl:block" />
           </>
         )}
-        <div className="relative z-2 flex size-full flex-col gap-3.5">
+        <div className="relative z-3 flex size-full flex-col gap-3.5">
           {article.status === "draft" && (
             <span className="mr-1 w-fit rounded bg-[#53ceff] px-1 py-0.5 font-bold text-[#0b303f]">
               下書き
@@ -71,6 +71,14 @@ export default function BlogArticleContent({
           </Link>
         ))}
         <BlogMarkdownPreview content={article.body_markdown} />
+      </div>
+      <div className="mx-auto mt-10 flex w-full max-w-[960px] flex-col px-4">
+        <Link
+          href={`/console/blogs/${article.id}`}
+          className="font-noto flex w-fit items-center justify-center rounded-full border border-[#555] px-4 py-3 pt-1.5 text-lg leading-none font-semibold text-[#555] transition select-none hover:bg-[#f0f0f0]"
+        >
+          記事の編集
+        </Link>
       </div>
     </article>
   );

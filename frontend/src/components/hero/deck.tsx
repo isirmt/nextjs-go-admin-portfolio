@@ -82,32 +82,28 @@ const HERO_FRAME_KEYFRAMES: Keyframe[] = [
   {
     borderRadius: "0",
     transform: "scale3d(1, 1, 1)",
-    borderColor: "transparent",
-    borderWidth: "0",
+    boxShadow: "0 0 0 0 transparent",
     offset: 0,
     easing: "linear",
   },
   {
     borderRadius: "4rem",
     transform: "scale3d(0.9, 0.9, 1)",
-    borderColor: "#525eeb",
-    borderWidth: "4px",
+    boxShadow: "0 0 0 4px #525eeb",
     offset: HERO_FRAME_SHRINK_END_OFFSET,
     easing: "linear",
   },
   {
     borderRadius: "4rem",
     transform: "scale3d(0.9, 0.9, 1)",
-    borderColor: "#525eeb",
-    borderWidth: "4px",
+    boxShadow: "0 0 0 4px #525eeb",
     offset: HERO_FRAME_RESTORE_START_OFFSET,
     easing: "linear",
   },
   {
     borderRadius: "0",
     transform: "scale3d(1, 1, 1)",
-    borderColor: "#c6f4ff00",
-    borderWidth: "0",
+    boxShadow: "0 0 0 0 transparent",
     offset: 1,
   },
 ];
@@ -399,7 +395,7 @@ export default function HeroDeck({
                       frameRefs.current.delete(page.id);
                     }
                   }}
-                  className="relative box-content size-full origin-center overflow-hidden border-0 border-transparent will-change-transform"
+                  className="relative size-full origin-center overflow-hidden will-change-transform"
                 >
                   <div
                     ref={(element) => {

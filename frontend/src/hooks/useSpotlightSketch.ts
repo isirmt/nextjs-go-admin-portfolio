@@ -496,7 +496,10 @@ export function useSpotlightSketch() {
       const nextHeight = Math.max(0, Math.floor(height));
 
       const canvas = canvasRef.current;
-      if (canvas) {
+      if (
+        canvas &&
+        (canvas.width !== nextWidth || canvas.height !== nextHeight)
+      ) {
         canvas.width = nextWidth;
         canvas.height = nextHeight;
       }
