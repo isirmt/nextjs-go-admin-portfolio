@@ -4,16 +4,11 @@
   "prConcurrentLimit": 3,
   "separateMinorPatch": true,
   "dependencyDashboard": true,
-  "prCreation": "not-pending",
   "minimumReleaseAge": "14 days",
   "packageRules": [
     {
       "matchUpdateTypes": ["major"],
       "minimumReleaseAge": "30 days"
-    },
-    {
-      "matchUpdateTypes": ["minor"],
-      "minimumReleaseAge": "14 days"
     },
     {
       "matchUpdateTypes": ["patch"],
