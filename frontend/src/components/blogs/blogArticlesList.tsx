@@ -97,7 +97,7 @@ export default function BlogArticlesList({
           {visibleArticles.map((article) => (
             <div className="flex shrink-0 flex-col gap-2.5" key={article.id}>
               <BlogArticleCard article={article} />
-              <BlogArticleTagList tags={article.tags} />
+              <BlogArticleTagList tags={article.tags} maxVisibleTags={4} />
             </div>
           ))}
         </div>
