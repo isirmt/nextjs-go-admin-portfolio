@@ -74,6 +74,15 @@ func (pSrv *server) handleGetImage(c *echo.Context) error {
 		}
 		return c.String(500, "failed to fetch image")
 	}
+	if !pSrv.isAdminRequest(c) {
+		isPublic, err := pSrv.isPublicImage(ctx, imageID)
+		if err != nil {
+			return c.String(500, "failed to check image visibility")
+		}
+		if !isPublic {
+			return c.String(404, "image not found")
+		}
+	}
 
 	return c.JSON(200, image)
 }
@@ -154,12 +163,40 @@ func (pSrv *server) handleServeImage(c *echo.Context) error {
 		}
 		return c.String(500, "failed to fetch image")
 	}
+	if !pSrv.isAdminRequest(c) {
+		isPublic, err := pSrv.isPublicImage(ctx, imageID)
+		if err != nil {
+			return c.String(500, "failed to check image visibility")
+		}
+		if !isPublic {
+			return c.String(404, "image not found")
+		}
+	}
 
 	return pSrv.serveImageContent(c, image)
 }
 
 func (pSrv *server) fetchImageByID(ctx context.Context, imageID string) (*model.CommonImage, error) {
 	return pSrv.q.CommonImage.WithContext(ctx).Where(pSrv.q.CommonImage.ID.Eq(imageID)).First()
+}
+
+func (pSrv *server) isPublicImage(ctx context.Context, imageID string) (bool, error) {
+	var isPublic bool
+	err := pSrv.db.WithContext(ctx).Raw(`
+		SELECT EXISTS (
+			SELECT 1 FROM isirmt_works WHERE thumbnail_image_id = ?
+			UNION ALL
+			SELECT 1 FROM isirmt_work_images WHERE image_id = ?
+			UNION ALL
+			SELECT 1 FROM blog_articles
+			WHERE thumbnail_image_id = ? AND status = 'published' AND published_at <= NOW()
+			UNION ALL
+			SELECT 1 FROM blog_article_images AS images
+			INNER JOIN blog_articles AS articles ON articles.id = images.article_id
+			WHERE images.image_id = ? AND articles.status = 'published' AND articles.published_at <= NOW()
+		)
+	`, imageID, imageID, imageID, imageID).Scan(&isPublic).Error
+	return isPublic, err
 }
 
 func (pSrv *server) serveImageContent(c *echo.Context, image *model.CommonImage) error {
@@ -180,7 +217,7 @@ func (pSrv *server) serveImageContent(c *echo.Context, image *model.CommonImage)
 
 	c.Response().Header().Set(echo.HeaderContentType, image.MimeType)
 	c.Response().Header().Set(echo.HeaderContentLength, strconv.FormatInt(image.FileSize, 10))
-	c.Response().Header().Set(echo.HeaderCacheControl, "public, max-age=31536000")
+	c.Response().Header().Set(echo.HeaderCacheControl, "no-store")
 
 	http.ServeContent(c.Response(), c.Request(), image.FileName, fileInfo.ModTime(), file)
 	return nil
