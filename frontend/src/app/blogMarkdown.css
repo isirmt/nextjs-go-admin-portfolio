@@ -51,11 +51,21 @@
   @apply rounded bg-gray-100 py-1;
 }
 
-.markdown section.footnotes .data-footnote-backref {
-  @apply relative text-[0];
+.markdown section.footnotes li[id],
+.markdown sup a[data-footnote-ref] {
+  @apply scroll-mt-36;
 }
 
-.markdown section.footnotes .data-footnote-backref::after {
+.markdown section.footnotes [data-footnote-backref] {
+  @apply relative;
+  font-size: 0;
+}
+
+.markdown section.footnotes [data-footnote-backref] sup {
+  display: none;
+}
+
+.markdown section.footnotes [data-footnote-backref]::after {
   content: "ref";
   @apply relative inline-block rounded bg-blue-100 px-1 py-0.5 text-xs font-normal text-blue-800 transition-colors hover:bg-blue-200;
 }

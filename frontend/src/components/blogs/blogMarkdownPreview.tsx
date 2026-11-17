@@ -66,11 +66,17 @@ function BlogCodeBlock({
 
 const components: Components = {
   h2: ({ node, children, ...props }) => {
-    const id = getHeadingId(children);
+    const id = props.id ?? getHeadingId(children);
+    const isFootnoteLabel = id === "footnote-label";
     return (
       <div className="mt-3 mb-4 border-b-2 border-blue-200 px-2.5 text-blue-700 transition-colors">
-        <h2 {...props} data-blog-heading-id={id} id={id}>
-          {children}
+        <h2
+          {...props}
+          className={isFootnoteLabel ? undefined : props.className}
+          data-blog-heading-id={isFootnoteLabel ? undefined : id}
+          id={id}
+        >
+          {isFootnoteLabel ? "脚注" : children}
         </h2>
       </div>
     );
