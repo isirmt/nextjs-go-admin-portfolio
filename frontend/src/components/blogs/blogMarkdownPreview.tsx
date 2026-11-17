@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars, @next/next/no-img-element */
 "use client";
 
 import ReactMarkdown, { type Components } from "react-markdown";
@@ -9,6 +9,7 @@ import { getHeadingId } from "@/lib/blogs/headings";
 
 type BlogMarkdownPreviewProps = {
   content: string;
+  adminImageAccess?: boolean;
 };
 
 const shikiTheme = "catppuccin-latte";
@@ -118,13 +119,33 @@ const components: Components = {
 
 export default function BlogMarkdownPreview({
   content,
+  adminImageAccess = false,
 }: BlogMarkdownPreviewProps) {
   if (!content.trim()) return null;
 
   return (
     <div className="markdown font-noto w-full min-w-0">
       <ReactMarkdown
-        components={components}
+        components={
+          adminImageAccess
+            ? {
+                ...components,
+                img: ({ node, src, alt, ...props }) => {
+                  const match =
+                    typeof src === "string"
+                      ? src.match(/^\/api\/images\/([0-9a-f-]{36})\/raw$/i)
+                      : null;
+                  return (
+                    <img
+                      src={match ? `/image-source/${match[1]}` : src}
+                      alt={alt ?? ""}
+                      {...props}
+                    />
+                  );
+                },
+              }
+            : components
+        }
         disallowedElements={["h1"]}
         remarkPlugins={[remarkGfm]}
       >

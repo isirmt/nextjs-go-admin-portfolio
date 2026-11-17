@@ -37,5 +37,6 @@ export async function GET(
   return createBlogOpenGraphImageResponseFromArticle(
     article,
     "private, no-store",
+    adminSecret,
   );
 }

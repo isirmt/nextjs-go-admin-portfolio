@@ -254,7 +254,10 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
                   <div className="min-h-64 border border-[#c68ef0] bg-white py-3 text-[#222]">
                     <div className="mx-auto w-full max-w-240 px-4">
                       {bodyMarkdown.value.trim() ? (
-                        <BlogMarkdownPreview content={bodyMarkdown.value} />
+                        <BlogMarkdownPreview
+                          content={bodyMarkdown.value}
+                          adminImageAccess
+                        />
                       ) : (
                         <p className="text-sm text-[#7e11d1]">
                           本文がありません
@@ -289,7 +292,10 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
               <div className="border-border/50 min-h-0 overflow-y-auto rounded-xl border py-3 text-[#222]">
                 <div className="mx-auto w-full max-w-240 px-4">
                   {bodyMarkdown.value.trim() ? (
-                    <BlogMarkdownPreview content={bodyMarkdown.value} />
+                    <BlogMarkdownPreview
+                      content={bodyMarkdown.value}
+                      adminImageAccess
+                    />
                   ) : (
                     <p className="text-muted-foreground text-sm">
                       本文がありません

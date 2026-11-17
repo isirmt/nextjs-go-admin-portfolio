@@ -43,7 +43,7 @@ function SortableSelectedImage({ imageId, index }: SortableSelectedImageProps) {
       className={`bg-muted relative aspect-square cursor-grab touch-none overflow-hidden rounded-lg active:cursor-grabbing ${isDragging ? "opacity-50" : ""}`}
     >
       <img
-        src={`/api/images/${imageId}/raw`}
+        src={`/image-source/${imageId}`}
         alt=""
         className="pointer-events-none size-full object-contain select-none"
       />
@@ -106,7 +106,7 @@ export default function ConsoleImagePicker({
         {hasSelection ? (
           isSingle ? (
             <img
-              src={`/api/images/${selectedIds[0]}/raw`}
+              src={`/image-source/${selectedIds[0]}`}
               alt=""
               className="bg-muted aspect-square w-full max-w-81 rounded-lg object-contain"
             />
