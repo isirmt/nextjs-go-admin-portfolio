@@ -72,6 +72,14 @@ export default function BlogArticleContent({
         ))}
         <BlogMarkdownPreview content={article.body_markdown} />
       </div>
+      <div className="mx-auto mt-10 flex w-full max-w-[960px] flex-col px-4">
+        <Link
+          href={`/console/blogs/${article.id}`}
+          className="font-noto flex w-fit items-center justify-center rounded-full border border-[#555] px-4 py-3 pt-1.5 text-lg leading-none font-semibold text-[#555] transition select-none hover:bg-[#f0f0f0]"
+        >
+          記事の編集
+        </Link>
+      </div>
     </article>
   );
 }
