@@ -9,6 +9,11 @@ import {
 import { useTransitionState } from "./useTransitionState";
 import type { ColorRGB, Vertex2D } from "@/types/sketch/common";
 import { Snowflake } from "@/sketch/snowflake";
+import {
+  createSineWavePoints,
+  DEFAULT_SINE_WAVE_LOOP_DURATION_MS,
+  SINE_WAVE_FULL_PHASE,
+} from "@/lib/createSineClipPath";
 
 const toNormalizedColor = (color: ColorRGB) =>
   color.map((channel) => channel / 255) as [number, number, number];
@@ -88,6 +93,7 @@ type WebGLResources = {
   program: WebGLProgram;
   vertexBuffer: WebGLBuffer;
   snowflakeBuffer: WebGLBuffer;
+  waveBuffer: WebGLBuffer;
   positionLocation: number;
   colorLocation: WebGLUniformLocation | null;
   canvas: HTMLCanvasElement;
@@ -226,9 +232,10 @@ export function useSpotlightSketch() {
     canvasRef.current = canvas;
 
     const gl = canvas.getContext("webgl2", {
-      alpha: false,
+      alpha: true,
       antialias: true,
       premultipliedAlpha: false,
+      stencil: true,
     }) as WebGL2RenderingContext | null;
 
     if (!gl) {
@@ -252,14 +259,16 @@ export function useSpotlightSketch() {
 
     const vertexBuffer = gl.createBuffer();
     const snowflakeBuffer = gl.createBuffer();
+    const waveBuffer = gl.createBuffer();
 
-    if (!vertexBuffer || !snowflakeBuffer) {
+    if (!vertexBuffer || !snowflakeBuffer || !waveBuffer) {
       if (vertexBuffer) {
         gl.deleteBuffer(vertexBuffer);
       }
       if (snowflakeBuffer) {
         gl.deleteBuffer(snowflakeBuffer);
       }
+      if (waveBuffer) gl.deleteBuffer(waveBuffer);
       gl.deleteProgram(program);
       canvas.remove();
       canvasRef.current = null;
@@ -290,6 +299,7 @@ export function useSpotlightSketch() {
       program,
       vertexBuffer,
       snowflakeBuffer,
+      waveBuffer,
       positionLocation,
       colorLocation,
       canvas,
@@ -312,6 +322,7 @@ export function useSpotlightSketch() {
     colorTransition.jumpTo([...BG_IDLE]);
     activeSpotlightRef.current = "none";
     gl.viewport(0, 0, initialWidth, initialHeight);
+    let wavePhase = 0;
 
     const render = (timestamp: number) => {
       if (!isMounted) {
@@ -354,22 +365,92 @@ export function useSpotlightSketch() {
       }
 
       const safeDelta = Math.max(0, deltaTime);
+      wavePhase =
+        (wavePhase +
+          (safeDelta / DEFAULT_SINE_WAVE_LOOP_DURATION_MS) *
+            SINE_WAVE_FULL_PHASE) %
+        SINE_WAVE_FULL_PHASE;
       const interpolatedVertices = vertexTransition.step(safeDelta);
       const interpolatedColor = colorTransition.step(safeDelta);
       const isAnimating =
         vertexTransition.getProgress() < 1 || colorTransition.getProgress() < 1;
 
       currentGl.viewport(0, 0, currentCanvas.width, currentCanvas.height);
-      currentGl.clearColor(
-        interpolatedColor[0] / 255,
-        interpolatedColor[1] / 255,
-        interpolatedColor[2] / 255,
-        1,
+      currentGl.clearColor(0, 0, 0, 0);
+      currentGl.clearStencil(0);
+      currentGl.stencilMask(0xff);
+      currentGl.clear(
+        currentGl.COLOR_BUFFER_BIT | currentGl.STENCIL_BUFFER_BIT,
       );
-      currentGl.clear(currentGl.COLOR_BUFFER_BIT);
 
       currentGl.useProgram(resources.program);
       currentGl.enableVertexAttribArray(resources.positionLocation);
+      currentGl.disable(currentGl.BLEND);
+
+      const wavePoints = createSineWavePoints(
+        currentCanvas.width,
+        currentCanvas.height,
+        wavePhase,
+      );
+      const waveVertices = convertVerticesToClipSpace(
+        [
+          { x: 0, y: currentCanvas.height },
+          ...wavePoints,
+          { x: currentCanvas.width, y: currentCanvas.height },
+        ],
+        currentCanvas.width,
+        currentCanvas.height,
+      );
+      currentGl.enable(currentGl.STENCIL_TEST);
+      currentGl.stencilMask(0xff);
+      currentGl.stencilFunc(currentGl.ALWAYS, 1, 0xff);
+      currentGl.stencilOp(currentGl.KEEP, currentGl.KEEP, currentGl.REPLACE);
+      currentGl.colorMask(false, false, false, false);
+      currentGl.bindBuffer(currentGl.ARRAY_BUFFER, resources.waveBuffer);
+      currentGl.bufferData(
+        currentGl.ARRAY_BUFFER,
+        new Float32Array(waveVertices),
+        currentGl.STREAM_DRAW,
+      );
+      currentGl.vertexAttribPointer(
+        resources.positionLocation,
+        2,
+        currentGl.FLOAT,
+        false,
+        0,
+        0,
+      );
+      currentGl.drawArrays(currentGl.TRIANGLE_FAN, 0, waveVertices.length / 2);
+      currentGl.colorMask(true, true, true, true);
+      currentGl.stencilMask(0);
+      currentGl.stencilFunc(currentGl.EQUAL, 1, 0xff);
+      currentGl.stencilOp(currentGl.KEEP, currentGl.KEEP, currentGl.KEEP);
+
+      const backgroundVertices = new Float32Array([-1, -1, -1, 1, 1, -1, 1, 1]);
+      currentGl.bindBuffer(currentGl.ARRAY_BUFFER, resources.waveBuffer);
+      currentGl.bufferData(
+        currentGl.ARRAY_BUFFER,
+        backgroundVertices,
+        currentGl.STREAM_DRAW,
+      );
+      currentGl.vertexAttribPointer(
+        resources.positionLocation,
+        2,
+        currentGl.FLOAT,
+        false,
+        0,
+        0,
+      );
+      if (resources.colorLocation) {
+        currentGl.uniform4f(
+          resources.colorLocation,
+          interpolatedColor[0] / 255,
+          interpolatedColor[1] / 255,
+          interpolatedColor[2] / 255,
+          1,
+        );
+      }
+      currentGl.drawArrays(currentGl.TRIANGLE_STRIP, 0, 4);
 
       const shouldRenderSpotlight =
         (targetSide !== "none" || isAnimating) &&
@@ -407,7 +488,6 @@ export function useSpotlightSketch() {
             1,
           );
         }
-        gl.disable(gl.BLEND);
         currentGl.drawArrays(
           currentGl.TRIANGLE_FAN,
           0,
@@ -435,6 +515,7 @@ export function useSpotlightSketch() {
           });
         });
       }
+      currentGl.disable(currentGl.STENCIL_TEST);
 
       animationFrameRef.current = requestAnimationFrame(render);
     };
@@ -474,6 +555,7 @@ export function useSpotlightSketch() {
       if (resources) {
         resources.gl.deleteBuffer(resources.vertexBuffer);
         resources.gl.deleteBuffer(resources.snowflakeBuffer);
+        resources.gl.deleteBuffer(resources.waveBuffer);
         resources.gl.deleteProgram(resources.program);
       }
       webglResourcesRef.current = null;
