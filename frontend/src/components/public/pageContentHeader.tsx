@@ -15,7 +15,7 @@ function ShootingStarsBackground() {
   const { canvasRef } = useShootingStars();
 
   return (
-    <div className="pointer-events-none absolute inset-0 z-0">
+    <div className="pointer-events-none absolute inset-0 z-2">
       <canvas ref={canvasRef} aria-hidden="true" className="block size-full" />
     </div>
   );
