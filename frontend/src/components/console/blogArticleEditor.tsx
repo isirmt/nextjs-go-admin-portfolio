@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { Maximize2Icon, XIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -8,7 +9,7 @@ import { ImagesProvider } from "@/contexts/imagesContext";
 import { useBlogArticlesContext } from "@/contexts/blogArticlesContext";
 import { BlogTagsProvider } from "@/contexts/blogTagsContext";
 import useConsoleMutation from "@/hooks/useConsoleMutation";
-import backendApi from "@/lib/auth/backendFetch";
+import backendApi, { fetchAdminOrPublic } from "@/lib/auth/backendFetch";
 import { getNextBlogSlug } from "@/lib/blogs/slug";
 import type { BlogArticle } from "@/types/blogs/common";
 import ConsoleDateTimePicker from "./consoleDateTimePicker";
@@ -39,6 +40,8 @@ type BlogArticleEditorProps = { articleId?: string };
 
 function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
   const router = useRouter();
+  const { data: session } = useSession();
+  const canEdit = session?.user?.role === "admin";
   const { articles, isLoading, refreshBlogArticles } = useBlogArticlesContext();
   const [status, setStatus] = useState<"draft" | "published">("draft");
   const title = useConsoleTextField();
@@ -76,7 +79,10 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
     let isCurrent = true;
     (async () => {
       try {
-        const response = await backendApi(`/blogs/${articleId}`);
+        const response = await fetchAdminOrPublic(
+          `/blogs/${encodeURIComponent(articleId)}`,
+          `/api/blogs/${encodeURIComponent(articleId)}`,
+        );
         if (!response.ok)
           throw new Error(
             (await response.text()) || "記事の取得に失敗しました",
@@ -304,9 +310,9 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
             type="submit"
             size="lg"
             className="w-full max-w-sm"
-            disabled={isSubmitting}
+            disabled={isSubmitting || !canEdit}
           >
-            {isSubmitting ? "保存中" : "保存"}
+            {isSubmitting ? "保存中" : canEdit ? "保存" : "保存不可"}
           </Button>
         </div>
       </form>
