@@ -45,14 +45,6 @@ export default async function Home({
 }) {
   const isPrivacy = "privacy" in (await searchParams);
   const latestArticles = await getPublicBlogArticles(5);
-  const birthDate = new Date(2004, 3 - 1, 8);
-  const today = new Date();
-  const hasHadBirthday =
-    today.getMonth() > birthDate.getMonth() ||
-    (today.getMonth() === birthDate.getMonth() &&
-      today.getDate() >= birthDate.getDate());
-  const age =
-    today.getFullYear() - birthDate.getFullYear() - (hasHadBirthday ? 0 : 1);
 
   return (
     <main>
@@ -70,7 +62,7 @@ export default async function Home({
                   <HeroSection />
                 </section>
                 <Navigation />
-                <ProfileSection age={age} isPrivacy={isPrivacy} />
+                <ProfileSection isPrivacy={isPrivacy} />
                 <LatestArticleSection />
                 <section aria-label="works-display" className="relative w-full">
                   <WorkConveyer />

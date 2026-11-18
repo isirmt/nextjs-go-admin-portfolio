@@ -10,8 +10,20 @@ const ORBIT_COUNT = 20;
 const ORBIT_DURATION = 60;
 
 type ProfileCardProps = {
-  age: number;
   isPrivacy: boolean;
+};
+
+const getAgeInJapan = () => {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Tokyo",
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+  }).formatToParts(new Date());
+  const year = Number(parts.find((part) => part.type === "year")?.value);
+  const month = Number(parts.find((part) => part.type === "month")?.value);
+  const day = Number(parts.find((part) => part.type === "day")?.value);
+  return year - 2004 - (month < 3 || (month === 3 && day < 8) ? 1 : 0);
 };
 
 type OrbitState = {
@@ -43,11 +55,20 @@ const getRoundRectPath = (
     "Z",
   ].join(" ");
 
-export default function ProfileCard({ age, isPrivacy }: ProfileCardProps) {
+export default function ProfileCard({ isPrivacy }: ProfileCardProps) {
   const cardRef = useRef<HTMLDivElement | null>(null);
+  const [age, setAge] = useState<number | null>(null);
   const [orbit, setOrbit] = useState<OrbitState | null>(null);
   const { ref: iconRef, isActive: isActiveIcon } =
     useInViewAnimation<HTMLAnchorElement>({ threshold: 1, delayMs: 300 });
+
+  useEffect(() => {
+    if (isPrivacy) return;
+    const updateAge = () => setAge(getAgeInJapan());
+    updateAge();
+    const interval = window.setInterval(updateAge, 60_000);
+    return () => window.clearInterval(interval);
+  }, [isPrivacy]);
 
   useEffect(() => {
     const element = cardRef.current;
@@ -167,7 +188,7 @@ export default function ProfileCard({ age, isPrivacy }: ProfileCardProps) {
                     <div>兵庫県神戸市出身</div>
                     <div>
                       2004年 3月 8日生の&nbsp;
-                      {age}&nbsp;歳
+                      {age === null ? "" : `${age}\u00a0歳`}
                     </div>
                   </div>
                 )}
