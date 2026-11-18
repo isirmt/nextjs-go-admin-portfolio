@@ -76,6 +76,12 @@ export default function Footer() {
             className={`absolute bottom-2 left-2 z-10 flex flex-row-reverse gap-2 text-xs leading-none font-semibold text-black lg:flex-col`}
           >
             <Link
+              href="https://status.isirmt.com"
+              className="block border-b border-transparent hover:border-black"
+            >
+              ステータス
+            </Link>
+            <Link
               href="/privacy-policy"
               className="block border-b border-transparent hover:border-black"
             >
