@@ -10,6 +10,7 @@ const nextConfig: NextConfig = {
     qualities: [75, 100],
   },
   experimental: {
+    agentUpgrade: "security",
     authInterrupts: true,
     turbopackFileSystemCacheForDev: false,
   },
