@@ -54,13 +54,7 @@ const DetailBox = ({ label, array, isApplyingEtc }: DetailBoxProps) => (
   </div>
 );
 
-export default function ProfileSection({
-  age,
-  isPrivacy,
-}: {
-  age: number;
-  isPrivacy: boolean;
-}) {
+export default function ProfileSection({ isPrivacy }: { isPrivacy: boolean }) {
   const waveRef = useSineClipPath<HTMLDivElement>({ edge: "both" });
 
   return (
@@ -81,7 +75,7 @@ export default function ProfileSection({
             井筒&nbsp;ミリ
           </span>
         </div>
-        <ProfileCard age={age} isPrivacy={isPrivacy} />
+        <ProfileCard isPrivacy={isPrivacy} />
       </div>
       <div
         ref={waveRef}
