@@ -55,6 +55,8 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
   const { reset: resetPublishedAt } = publishedAt;
   const { reset: resetBodyMarkdown } = bodyMarkdown;
   const hasInitializedNewSlug = useRef(false);
+  const formRef = useRef<HTMLFormElement>(null);
+  const isSavingRef = useRef(false);
   const [bodyView, setBodyView] = useState<"edit" | "preview">("edit");
   const [isBodyEditorExpanded, setIsBodyEditorExpanded] = useState(false);
   const {
@@ -123,39 +125,81 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
 
   const handleSubmit = async (event: React.SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (!canEdit || isSavingRef.current) return;
+    isSavingRef.current = true;
     setLoadError(null);
     setSubmitSuccess(null);
-    const result = await runSubmit(async () => {
-      const response = await backendApi(
-        articleId ? `/blogs/${articleId}` : "/blogs",
-        {
-          method: articleId ? "PUT" : "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            status,
-            title: title.value.trim(),
-            slug: slug.value.trim(),
-            body_markdown: bodyMarkdown.value.trim(),
-            thumbnail_image_id: thumbnailImageIds[0] ?? null,
-            tag_ids: tagIds,
-            published_at: publishedAt.value
-              ? new Date(publishedAt.value).toISOString()
-              : null,
-          }),
-        },
-      );
-      if (!response.ok)
-        throw new Error((await response.text()) || "記事の保存に失敗しました");
-      const saved = (await response.json()) as BlogArticle;
-      await refreshBlogArticles();
-      return saved;
-    }, "記事の保存に失敗しました");
+    try {
+      const result = await runSubmit(async () => {
+        const response = await backendApi(
+          articleId ? `/blogs/${articleId}` : "/blogs",
+          {
+            method: articleId ? "PUT" : "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              status,
+              title: title.value.trim(),
+              slug: slug.value.trim(),
+              body_markdown: bodyMarkdown.value.trim(),
+              thumbnail_image_id: thumbnailImageIds[0] ?? null,
+              tag_ids: tagIds,
+              published_at: publishedAt.value
+                ? new Date(publishedAt.value).toISOString()
+                : null,
+            }),
+          },
+        );
+        if (!response.ok)
+          throw new Error(
+            (await response.text()) || "記事の保存に失敗しました",
+          );
+        const saved = (await response.json()) as BlogArticle;
+        await refreshBlogArticles();
+        return saved;
+      }, "記事の保存に失敗しました");
 
-    if (result.ok) {
-      setSubmitSuccess(articleId ? "更新しました" : "作成しました");
-      if (!articleId) router.replace(`/console/blogs/${result.data.id}`);
+      if (result.ok) {
+        setSubmitSuccess(articleId ? "更新しました" : "作成しました");
+        if (!articleId) router.replace(`/console/blogs/${result.data.id}`);
+      }
+    } finally {
+      isSavingRef.current = false;
     }
   };
+
+  useEffect(() => {
+    const handleShortcut = (event: KeyboardEvent) => {
+      if (event.isComposing || event.key === "Process") return;
+
+      if (
+        event.key.toLowerCase() === "s" &&
+        (event.ctrlKey || event.metaKey) &&
+        !event.altKey &&
+        !event.shiftKey
+      ) {
+        event.preventDefault();
+        if (!event.repeat && canEdit && !isSavingRef.current) {
+          formRef.current?.requestSubmit();
+        }
+      } else if (
+        event.key.toLowerCase() === "p" &&
+        (event.ctrlKey || event.metaKey) &&
+        event.shiftKey &&
+        !event.altKey
+      ) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (!event.repeat && !isBodyEditorExpanded) {
+          setBodyView((current) => (current === "edit" ? "preview" : "edit"));
+        }
+      } else if (event.key === "Escape" && isBodyEditorExpanded) {
+        setIsBodyEditorExpanded(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleShortcut, true);
+    return () => window.removeEventListener("keydown", handleShortcut, true);
+  }, [canEdit, isBodyEditorExpanded]);
 
   return (
     <main className="relative w-full space-y-8 px-2.5 py-8 lg:px-16">
@@ -170,7 +214,7 @@ function BlogArticleEditorForm({ articleId }: BlogArticleEditorProps) {
           記事一覧へ戻る
         </Link>
       </header>
-      <form onSubmit={handleSubmit}>
+      <form ref={formRef} onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <FieldSet className="gap-3">
             <FieldLegend variant="label">
