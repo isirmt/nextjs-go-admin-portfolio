@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useCallback, useState } from "react";
-import { EllipsisIcon, PencilIcon, Trash2Icon } from "lucide-react";
+import { EllipsisIcon, LinkIcon, PencilIcon, Trash2Icon } from "lucide-react";
+import { toast } from "sonner";
 import { useBlogArticlesContext } from "@/contexts/blogArticlesContext";
 import backendApi from "@/lib/auth/backendFetch";
 import { formatJapaneseDateTime } from "@/lib/date";
@@ -53,6 +54,19 @@ export default function BlogsViewer() {
 
     if (result.ok) setDeletingArticle(null);
   }, [deletingArticle, refreshBlogArticles, runDelete]);
+
+  const copyPublicLink = async (slug: string) => {
+    try {
+      const url = new URL(
+        `/blogs/${encodeURIComponent(slug)}`,
+        window.location.origin,
+      );
+      await navigator.clipboard.writeText(url.toString());
+      toast.success("公開リンクをコピーしました");
+    } catch {
+      toast.error("公開リンクのコピーに失敗しました");
+    }
+  };
 
   return (
     <main className="relative w-full space-y-8 px-2.5 py-8 lg:px-16">
@@ -130,6 +144,14 @@ export default function BlogsViewer() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
+                    {article.status === "published" ? (
+                      <DropdownMenuItem
+                        onSelect={() => void copyPublicLink(article.slug)}
+                      >
+                        <LinkIcon />
+                        公開リンクをコピー
+                      </DropdownMenuItem>
+                    ) : null}
                     <DropdownMenuItem asChild>
                       <Link href={`/console/blogs/${article.id}`}>
                         <PencilIcon />
