@@ -3,13 +3,21 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { EllipsisIcon, LinkIcon, PencilIcon, Trash2Icon } from "lucide-react";
+import {
+  ChevronsUpDownIcon,
+  EllipsisIcon,
+  LinkIcon,
+  PencilIcon,
+  Trash2Icon,
+  TriangleIcon,
+} from "lucide-react";
 import { toast } from "sonner";
 import { useBlogArticlesContext } from "@/contexts/blogArticlesContext";
 import backendApi from "@/lib/auth/backendFetch";
 import { formatJapaneseDateTime } from "@/lib/date";
 import type { BlogArticleSummary } from "@/types/blogs/common";
 import useConsoleMutation from "@/hooks/useConsoleMutation";
+import useDateSort from "@/hooks/useDateSort";
 import ConsoleConfirmDialog from "./consoleConfirmDialog";
 import ConsoleFormFeedback from "./consoleFormFeedback";
 import { Badge } from "@/components/shadcn/ui/badge";
@@ -29,6 +37,8 @@ import {
   TableRow,
 } from "@/components/shadcn/ui/table";
 
+type SortKey = "published_at" | "updated_at";
+
 export default function BlogsViewer() {
   const router = useRouter();
   const { articles, error, isLoading, refreshBlogArticles } =
@@ -36,6 +46,15 @@ export default function BlogsViewer() {
   const [deletingArticle, setDeletingArticle] =
     useState<BlogArticleSummary | null>(null);
   const [currentTime, setCurrentTime] = useState<number | null>(null);
+  const {
+    sort,
+    toggleSort,
+    sortedItems: sortedArticles,
+  } = useDateSort<BlogArticleSummary, SortKey>(
+    articles,
+    "published_at",
+    "desc",
+  );
   const {
     isPending: isDeleting,
     error: deleteError,
@@ -93,12 +112,31 @@ export default function BlogsViewer() {
           <TableRow>
             <TableHead>タイトル</TableHead>
             <TableHead className="w-24">状態</TableHead>
-            <TableHead className="hidden w-36 md:table-cell">
-              公開日時
-            </TableHead>
-            <TableHead className="hidden w-36 md:table-cell">
-              更新日時
-            </TableHead>
+            {(["published_at", "updated_at"] as const).map((key) => {
+              const label = key === "published_at" ? "公開日時" : "更新日時";
+              return (
+                <TableHead key={key} className="hidden w-36 md:table-cell">
+                  <button
+                    type="button"
+                    onClick={() => toggleSort(key)}
+                    className="hover:text-foreground focus-visible:outline-ring -m-3 flex h-12 w-[calc(100%+1.5rem)] cursor-pointer items-center gap-1 rounded px-3 text-left focus-visible:outline-2"
+                  >
+                    {label}
+                    {sort?.key === key ? (
+                      <TriangleIcon
+                        aria-hidden="true"
+                        className={`fill-muted-foreground text-muted-foreground size-3 ${sort.direction === "desc" ? "rotate-180" : ""}`}
+                      />
+                    ) : (
+                      <ChevronsUpDownIcon
+                        aria-hidden="true"
+                        className="text-muted-foreground size-3.5"
+                      />
+                    )}
+                  </button>
+                </TableHead>
+              );
+            })}
             <TableHead className="w-12" />
           </TableRow>
         </TableHeader>
@@ -123,7 +161,7 @@ export default function BlogsViewer() {
               </TableCell>
             </TableRow>
           ) : null}
-          {articles.map((article) => (
+          {sortedArticles.map((article) => (
             <TableRow key={article.id}>
               <TableCell
                 className="min-w-0 cursor-pointer"
