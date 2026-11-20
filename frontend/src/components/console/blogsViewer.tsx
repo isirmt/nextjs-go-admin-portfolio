@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { EllipsisIcon, LinkIcon, PencilIcon, Trash2Icon } from "lucide-react";
 import { toast } from "sonner";
@@ -29,6 +30,7 @@ import {
 } from "@/components/shadcn/ui/table";
 
 export default function BlogsViewer() {
+  const router = useRouter();
   const { articles, error, isLoading, refreshBlogArticles } =
     useBlogArticlesContext();
   const [deletingArticle, setDeletingArticle] =
@@ -123,13 +125,28 @@ export default function BlogsViewer() {
           ) : null}
           {articles.map((article) => (
             <TableRow key={article.id}>
-              <TableCell className="min-w-0">
-                <p className="truncate font-medium">{article.title}</p>
-                <p className="text-muted-foreground truncate text-xs">
-                  /{article.slug}
-                </p>
+              <TableCell
+                className="min-w-0 cursor-pointer"
+                onClick={(event) => {
+                  if (!(event.target as HTMLElement).closest("a")) {
+                    router.push(`/console/blogs/${article.id}`);
+                  }
+                }}
+              >
+                <Link
+                  href={`/console/blogs/${article.id}`}
+                  className="block min-w-0"
+                >
+                  <p className="truncate font-medium">{article.title}</p>
+                  <p className="text-muted-foreground truncate text-xs">
+                    /{article.slug}
+                  </p>
+                </Link>
               </TableCell>
-              <TableCell>
+              <TableCell
+                className="cursor-pointer"
+                onClick={() => router.push(`/console/blogs/${article.id}`)}
+              >
                 <Badge
                   variant={
                     article.status === "published" ? "secondary" : "default"
@@ -144,10 +161,16 @@ export default function BlogsViewer() {
                       : "公開"}
                 </Badge>
               </TableCell>
-              <TableCell className="hidden md:table-cell">
+              <TableCell
+                className="hidden cursor-pointer md:table-cell"
+                onClick={() => router.push(`/console/blogs/${article.id}`)}
+              >
                 {formatJapaneseDateTime(article.published_at, "未公開")}
               </TableCell>
-              <TableCell className="hidden md:table-cell">
+              <TableCell
+                className="hidden cursor-pointer md:table-cell"
+                onClick={() => router.push(`/console/blogs/${article.id}`)}
+              >
                 {formatJapaneseDateTime(article.updated_at)}
               </TableCell>
               <TableCell>
