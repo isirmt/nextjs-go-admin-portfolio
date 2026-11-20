@@ -8,6 +8,7 @@ import PageContentHeader from "../public/pageContentHeader";
 import Link from "next/link";
 import Arrow from "../shapes/arrow";
 import BlogArticleTagList from "./blogArticleTagList";
+import BlogArticleShare from "./blogArticleShare";
 
 type BlogArticleContentProps = {
   article: BlogArticle;
@@ -79,6 +80,9 @@ export default function BlogArticleContent({
         >
           記事の編集
         </Link>
+        <div className="lg:hidden">
+          <BlogArticleShare title={article.title} />
+        </div>
       </div>
     </article>
   );

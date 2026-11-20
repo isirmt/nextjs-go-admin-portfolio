@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import BlogArticleContent from "@/components/blogs/blogArticleContent";
 import BlogArticleCardSection from "@/components/blogs/blogArticleCardSection";
+import BlogArticleShare from "@/components/blogs/blogArticleShare";
 import BlogTableOfContents from "@/components/blogs/blogTableOfContents";
 import BlogPostingStructuredData from "@/components/blogs/blogPostingStructuredData";
 import {
@@ -58,6 +59,7 @@ export default async function BlogArticlePage({
               content={article.body_markdown}
               title={article.title}
             />
+            <BlogArticleShare title={article.title} />
           </div>
         </aside>
       </section>
