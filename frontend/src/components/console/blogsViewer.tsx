@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { EllipsisIcon, LinkIcon, PencilIcon, Trash2Icon } from "lucide-react";
 import { toast } from "sonner";
 import { useBlogArticlesContext } from "@/contexts/blogArticlesContext";
@@ -33,11 +33,19 @@ export default function BlogsViewer() {
     useBlogArticlesContext();
   const [deletingArticle, setDeletingArticle] =
     useState<BlogArticleSummary | null>(null);
+  const [currentTime, setCurrentTime] = useState<number | null>(null);
   const {
     isPending: isDeleting,
     error: deleteError,
     run: runDelete,
   } = useConsoleMutation();
+
+  useEffect(() => {
+    const updateCurrentTime = () => setCurrentTime(Date.now());
+    updateCurrentTime();
+    const interval = window.setInterval(updateCurrentTime, 60_000);
+    return () => window.clearInterval(interval);
+  }, []);
 
   const handleDelete = useCallback(async () => {
     if (!deletingArticle) return;
@@ -82,7 +90,7 @@ export default function BlogsViewer() {
         <TableHeader>
           <TableRow>
             <TableHead>タイトル</TableHead>
-            <TableHead className="w-20">状態</TableHead>
+            <TableHead className="w-24">状態</TableHead>
             <TableHead className="hidden w-36 md:table-cell">
               公開日時
             </TableHead>
@@ -127,7 +135,13 @@ export default function BlogsViewer() {
                     article.status === "published" ? "secondary" : "default"
                   }
                 >
-                  {article.status === "published" ? "公開" : "下書き"}
+                  {article.status === "draft"
+                    ? "下書き"
+                    : article.published_at &&
+                        currentTime !== null &&
+                        new Date(article.published_at).getTime() > currentTime
+                      ? "公開予定"
+                      : "公開"}
                 </Badge>
               </TableCell>
               <TableCell className="hidden md:table-cell">
