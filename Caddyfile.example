@@ -1,4 +1,16 @@
 example.com {
+  handle_errors {
+    @upstream_error expression `{err.status_code} == 502 || {err.status_code} == 503 || {err.status_code} == 504`
+    handle @upstream_error {
+      root * /srv/maintenance
+      rewrite * /index.html
+      header Retry-After "60"
+      file_server {
+        status 503
+      }
+    }
+  }
+
   @nextauth path /api/auth*
   handle @nextauth {
     reverse_proxy web:3000
