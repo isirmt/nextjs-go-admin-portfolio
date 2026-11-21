@@ -9,6 +9,8 @@ type NavigationMenuItemProps = {
   label?: string;
   subLabel?: string;
   thumbnail: string;
+  itemClassName?: string;
+  hidden?: boolean;
 };
 
 export default function NavigationMenuItem({
@@ -16,6 +18,8 @@ export default function NavigationMenuItem({
   label,
   subLabel,
   thumbnail,
+  itemClassName,
+  hidden = false,
 }: NavigationMenuItemProps) {
   const router = useRouter();
 
@@ -31,7 +35,7 @@ export default function NavigationMenuItem({
   };
 
   return (
-    <li>
+    <li className={itemClassName} inert={hidden}>
       <Link
         href={href}
         onClick={handleClick}

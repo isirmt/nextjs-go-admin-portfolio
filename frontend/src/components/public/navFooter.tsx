@@ -7,6 +7,7 @@ import NavigationMenuItem from "./navigationMenuItem";
 
 export default function NavFooter() {
   const pathname = usePathname();
+  const isHome = pathname === "/";
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -40,15 +41,17 @@ export default function NavFooter() {
   return (
     <nav
       inert={!visible}
-      className={`font-dot fixed bottom-[calc(env(safe-area-inset-bottom)+0.75rem)] left-1/2 z-100 max-w-[calc(100vw-1.5rem)] -translate-x-1/2 rounded-full border border-[#95cad6] bg-[#f8feff] px-10 py-1 shadow-[0_2px_0_#95cad6] transition-transform duration-300 ${visible ? "translate-y-0" : "translate-y-[calc(100%+env(safe-area-inset-bottom)+0.75rem)]"}`}
+      className={`font-dot fixed bottom-[calc(env(safe-area-inset-bottom)+0.75rem)] left-1/2 z-100 max-w-[calc(100vw-1.5rem)] -translate-x-1/2 rounded-full border border-[#95cad6] bg-[#f8feff] px-7 py-0.5 shadow-[0_2px_0_#95cad6] transition-transform duration-300 ${visible ? "translate-y-0" : "translate-y-[calc(100%+env(safe-area-inset-bottom)+0.75rem)]"}`}
     >
-      <ul className="flex items-center gap-6">
+      <ul className="flex items-center">
         {publicLinks.map(({ href, label, thumbnail }) => (
           <NavigationMenuItem
             key={href}
             href={href}
             subLabel={label}
             thumbnail={thumbnail}
+            hidden={!isHome && href !== "/blogs"}
+            itemClassName={`overflow-hidden whitespace-nowrap transition-[max-width,margin,opacity] duration-300 ease-in-out ${href === "/blogs" ? "max-w-24" : isHome ? "mr-6 max-w-24 opacity-100" : "mr-0 max-w-0 opacity-0"}`}
           />
         ))}
       </ul>
