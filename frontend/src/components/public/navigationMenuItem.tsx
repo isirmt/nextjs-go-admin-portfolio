@@ -6,8 +6,8 @@ import type { MouseEvent } from "react";
 
 type NavigationMenuItemProps = {
   href: string;
-  label: string;
-  subLabel: string;
+  label?: string;
+  subLabel?: string;
   thumbnail: string;
 };
 
@@ -41,8 +41,8 @@ export default function NavigationMenuItem({
           className="h-12 w-12 bg-cover bg-center"
           style={{ backgroundImage: `url(${thumbnail})` }}
         />
-        <div className="text-2xl leading-none">{label}</div>
-        <div className="text-xs leading-none">{subLabel}</div>
+        {label && <div className="text-2xl leading-none">{label}</div>}
+        {subLabel && <div className="text-xs leading-none">{subLabel}</div>}
       </Link>
     </li>
   );
