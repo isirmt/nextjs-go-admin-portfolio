@@ -23,9 +23,15 @@
 at root dir,
 
 ```bash
-docker compose -f compose.dev.yml up -d db
-docker compose -f compose.dev.yml run --rm migrate
-docker compose -f compose.dev.yml up -d backend web caddy adminer embedding --force-recreate
+docker compose up -d
+```
+
+for initial setup or after adding database migrations, run:
+
+```bash
+docker compose up -d db
+docker compose run --rm migrate
+docker compose up -d
 ```
 
 you'll be able to access at `http://localhost:3000`.
@@ -55,25 +61,25 @@ REINDEX_INTERVAL_SECONDS= /* NOT required, default 600 */
 if you want checking logs... (realtime)
 
 ```bash
-docker compose -f compose.dev.yml logs --follow backend web
+docker compose logs --follow backend web
 ```
 
 if you modified golang packages, run this
 
 ```bash
-docker compose -f compose.dev.yml run --rm backend bash -c "go mod tidy"
+docker compose run --rm backend bash -c "go mod tidy"
 ```
 
 if you update sql scheme, add a migration under `db/migrations`, then run this
 
 ```bash
-docker compose -f compose.dev.yml run --rm migrate
+docker compose run --rm migrate
 ```
 
 if you update gorm generated query files, run this
 
 ```bash
-docker compose -f compose.dev.yml run --rm --user $(id -u):$(id -g) --env GOCACHE=/tmp/go-build --env GOMODCACHE=/tmp/go-mod-cache backend bash -c "mkdir -p /tmp/go-build /tmp/go-mod-cache && go mod download && go run ./cmd/gen/main.go"
+docker compose run --rm --user $(id -u):$(id -g) --env GOCACHE=/tmp/go-build --env GOMODCACHE=/tmp/go-mod-cache backend bash -c "mkdir -p /tmp/go-build /tmp/go-mod-cache && go mod download && go run ./cmd/gen/main.go"
 ```
 
 ## for prod (on Virtual Machine e.g. Amazon lightsail)

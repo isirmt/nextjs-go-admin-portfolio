@@ -1,50 +1,101 @@
 services:
   db:
-    image: postgres:16-alpine
+    image: pgvector/pgvector:pg16
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app_password
+      POSTGRES_DB: appdb
+    ports:
+      - "5432:5432"
     volumes:
-      - pg_prod:/var/lib/postgresql/data
-      - ./db/init:/docker-entrypoint-initdb.d:ro
+      - pg_dev:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB" ]
+      test: [ "CMD-SHELL", "pg_isready -U app -d appdb" ]
       interval: 5s
       timeout: 5s
       retries: 20
-    restart: unless-stopped
 
   web:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     environment:
-      NODE_ENV: production
-      PORT: "3000"
+      NODE_ENV: development
       HOSTNAME: "0.0.0.0"
-      BACKEND_BASE_URL: ${BACKEND_BASE_URL}
-      NEXTAUTH_URL: ${NEXTAUTH_URL}
+      PORT: "3000"
+      NODE_OPTIONS: "--max-old-space-size=6144"
+      BACKEND_BASE_URL: http://backend:4000
+      NEXTAUTH_URL: http://localhost:3000
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       ADMIN_ALLOWED_EMAILS: ${ADMIN_ALLOWED_EMAILS}
       ADMIN_SECRET: ${ADMIN_SECRET}
+      AUTH_TRUST_HOST: true
       GOOGLE_TAG_MANAGER_ID: ${GOOGLE_TAG_MANAGER_ID}
+    volumes:
+      - ./frontend:/app
+      - node_modules_dev:/app/node_modules
     depends_on:
       db:
         condition: service_healthy
     restart: unless-stopped
 
   backend:
+    image: golang:1.27-bookworm
+    working_dir: /app
+    command: [ "bash", "-c", "go mod download && go install github.com/air-verse/air@v1.52.3 && air -c .air.toml" ]
+    environment:
+      DATABASE_URL: "postgres://app:app_password@db:5432/appdb"
+      ALLOWED_ORIGIN: "http://localhost:3000"
+      ADMIN_SECRET: ${ADMIN_SECRET}
+      UPLOAD_DIR: /uploads
+      EMBEDDING_BASE_URL: http://embedding:8000
+      SEARCH_EMBEDDING_MODEL: intfloat/multilingual-e5-small
+      INDEXNOW_ENABLED: "false"
+    volumes:
+      - ./backend:/app
+      - go_mod_cache:/go/pkg/mod
+      - ./uploads:/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+
+  embedding:
     build:
-      context: ./backend
+      context: ./embedding
       dockerfile: Dockerfile
     environment:
-      DATABASE_URL: ${DATABASE_URL}
-      ALLOWED_ORIGIN: ${ALLOWED_ORIGIN}
-      ADMIN_SECRET: ${ADMIN_SECRET}
+      DATABASE_URL: "postgres://app:app_password@db:5432/appdb"
+      EMBEDDING_MODEL: intfloat/multilingual-e5-small
+      HF_TOKEN: ${HF_TOKEN}
+      HF_HOME: /hf-cache
+      REINDEX_INTERVAL_SECONDS: ${REINDEX_INTERVAL_SECONDS:-600}
+    volumes:
+      - hf_cache_dev:/hf-cache
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
     restart: unless-stopped
+
+  migrate:
+    image: migrate/migrate:4
+    command: ["-path", "/migrations", "-database", "postgres://app:app_password@db:5432/appdb?sslmode=disable", "up"]
+    volumes:
+      - ./db/migrations:/migrations:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  adminer:
+    image: adminer:6
+    ports:
+      - "8080:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: db
     depends_on:
       db:
         condition: service_healthy
@@ -52,13 +103,9 @@ services:
   caddy:
     image: caddy:2
     ports:
-      - "80:80"
-      - "443:443"
+      - "3000:3000"
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data
-      - caddy_config:/config
-    restart: unless-stopped
+      - ./Caddyfile.dev:/etc/caddy/Caddyfile:ro
     depends_on:
       web:
         condition: service_started
@@ -66,6 +113,7 @@ services:
         condition: service_started
 
 volumes:
-  pg_prod:
-  caddy_data:
-  caddy_config:
+  pg_dev:
+  node_modules_dev:
+  go_mod_cache:
+  hf_cache_dev:
