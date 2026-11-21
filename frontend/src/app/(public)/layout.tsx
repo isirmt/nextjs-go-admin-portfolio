@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Footer from "@/components/public/footer";
 import React from "react";
 import Header from "@/components/public/header";
+import NavFooter from "@/components/public/navFooter";
 
 export const metadata: Metadata = {
   title: {
@@ -21,6 +22,7 @@ export default function RootLayout({
       <Header />
       {children}
       <Footer />
+      <NavFooter />
     </React.Fragment>
   );
 }
