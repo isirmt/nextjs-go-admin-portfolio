@@ -41,7 +41,7 @@ export default function NavFooter() {
   return (
     <nav
       inert={!visible}
-      className={`font-dot fixed bottom-[calc(env(safe-area-inset-bottom)+0.75rem)] left-1/2 z-100 max-w-[calc(100vw-1.5rem)] -translate-x-1/2 rounded-full border border-[#95cad6] bg-[#f8feff] px-7 py-0.5 shadow-[0_2px_0_#95cad6] transition-transform duration-300 ${visible ? "translate-y-0" : "translate-y-[calc(100%+env(safe-area-inset-bottom)+0.75rem)]"}`}
+      className={`font-dot fixed bottom-[calc(env(safe-area-inset-bottom)+0.75rem)] left-1/2 z-90 max-w-[calc(100vw-1.5rem)] -translate-x-1/2 rounded-full border border-[#95cad6] bg-[#f8feff] px-7 py-0.5 shadow-[0_2px_0_#95cad6] transition-transform duration-300 ${visible ? "translate-y-0" : "translate-y-[calc(100%+env(safe-area-inset-bottom)+0.75rem)]"}`}
     >
       <ul className="flex items-center">
         {publicLinks.map(({ href, label, thumbnail }) => (
