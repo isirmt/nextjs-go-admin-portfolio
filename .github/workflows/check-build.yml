@@ -111,14 +111,14 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Start database
-        run: docker compose -f compose.dev.yml up -d db
+        run: docker compose up -d db
 
       - name: Run migrations
-        run: docker compose -f compose.dev.yml run --rm migrate
+        run: docker compose run --rm migrate
 
       - name: Stop database
         if: always()
-        run: docker compose -f compose.dev.yml down -v
+        run: docker compose down -v
 
   build-images:
     name: Build ${{ matrix.service }} image
