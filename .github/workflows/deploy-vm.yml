@@ -7,6 +7,11 @@ on:
     branches: [master]
 
   workflow_dispatch:
+    inputs:
+      update_caddy:
+        description: "Recreate Caddy to apply its configuration or mount changes"
+        type: boolean
+        default: false
 
 concurrency:
   group: deploy-vm
@@ -110,10 +115,33 @@ jobs:
             COMPOSE_FILES="$COMPOSE_FILES -f compose.vm.local.yml"
           fi
 
-          APP_SERVICES=$(docker compose $COMPOSE_FILES config --services | grep -Ev '^(db|migrate)$')
+          APP_SERVICES=$(docker compose $COMPOSE_FILES config --services | grep -Ev '^(db|migrate|caddy)$')
           docker compose $COMPOSE_FILES up -d --force-recreate --no-deps $APP_SERVICES
           docker compose $COMPOSE_FILES ps
           docker compose $COMPOSE_FILES images
+          SCRIPT
+
+      - name: Update Caddy
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.update_caddy }}
+        env:
+          VM_HOST: ${{ secrets.VM_HOST }}
+          VM_USER: ${{ secrets.VM_USER }}
+          VM_APP_DIR: ${{ secrets.VM_APP_DIR }}
+        run: |
+          ssh "$VM_USER@$VM_HOST" "VM_APP_DIR='$VM_APP_DIR' bash -s" <<'SCRIPT'
+          set -euo pipefail
+
+          cd "$VM_APP_DIR"
+
+          COMPOSE_FILES="-f compose.vm.yml"
+
+          if [ -f compose.vm.local.yml ]; then
+            COMPOSE_FILES="$COMPOSE_FILES -f compose.vm.local.yml"
+          fi
+
+          docker compose $COMPOSE_FILES run --rm --no-deps --entrypoint caddy caddy validate --config /etc/caddy/Caddyfile
+          docker compose $COMPOSE_FILES up -d --no-deps --force-recreate caddy
+          docker compose $COMPOSE_FILES ps caddy
           SCRIPT
 
       - name: Prune Docker
