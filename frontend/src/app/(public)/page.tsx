@@ -6,7 +6,7 @@ import Navigation from "@/components/public/navigation";
 import HeroSection from "@/components/hero/section";
 import { SelectingCubeContextProvider } from "@/contexts/selectingCubeContext";
 import { Metadata } from "next";
-import SearchWindow from "@/components/works/searchWindow";
+import HomeSearchWindow from "@/components/works/homeSearchWindow";
 import ProfileSection from "@/components/profile/section";
 import { getPublicBlogArticles } from "@/lib/blogs/publicApi";
 import { LatestBlogArticlesProvider } from "@/contexts/latestBlogArticlesContext";
@@ -41,9 +41,15 @@ export const metadata: Metadata = {
 export default async function Home({
   searchParams,
 }: {
-  searchParams: Promise<{ privacy?: string | string[] }>;
+  searchParams: Promise<{
+    privacy?: string | string[];
+    work?: string | string[];
+  }>;
 }) {
-  const isPrivacy = "privacy" in (await searchParams);
+  const params = await searchParams;
+  const isPrivacy = "privacy" in params;
+  const initialWorkId =
+    typeof params.work === "string" ? params.work : undefined;
   const latestArticles = await getPublicBlogArticles(5);
 
   return (
@@ -53,7 +59,7 @@ export default async function Home({
           <TechsProvider>
             <SelectingCubeContextProvider>
               <LatestBlogArticlesProvider articles={latestArticles}>
-                <SearchWindow />
+                <HomeSearchWindow initialWorkId={initialWorkId} />
                 <section
                   aria-label="top-view"
                   className="relative h-svh w-full overflow-hidden bg-[repeating-linear-gradient(0deg,#c6f4ff,#c6f4ff_4rem,#d8f6fe_4rem,#d8f6fe_8rem)]"
@@ -64,7 +70,11 @@ export default async function Home({
                 <Navigation />
                 <ProfileSection isPrivacy={isPrivacy} />
                 <LatestArticleSection />
-                <section aria-label="works-display" className="relative w-full">
+                <section
+                  id="works-display"
+                  aria-label="works-display"
+                  className="relative w-full"
+                >
                   <WorkConveyer />
                 </section>
               </LatestBlogArticlesProvider>

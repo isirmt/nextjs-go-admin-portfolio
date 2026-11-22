@@ -31,8 +31,21 @@ type searchWorkHit struct {
 }
 
 type searchMatch struct {
-	ChunkKind string `json:"chunk_kind"`
-	Content   string `json:"content"`
+	Label   string `json:"label"`
+	Content string `json:"content"`
+}
+
+func workSearchLabel(chunkKind string) string {
+	switch chunkKind {
+	case "summary":
+		return "概要"
+	case "description":
+		return "説明"
+	case "tech_stacks":
+		return "使用技術"
+	default:
+		return chunkKind
+	}
 }
 
 func (pSrv *server) embedQuery(ctx context.Context, queryText string) ([]float64, error) {
@@ -144,7 +157,7 @@ func (pSrv *server) handleSearchWorks(c *echo.Context) error {
 	for _, hit := range hits {
 		if work := workByID[hit.WorkID]; work != nil {
 			orderedWorks = append(orderedWorks, work)
-			matches[hit.WorkID] = searchMatch{ChunkKind: hit.ChunkKind, Content: hit.Content}
+			matches[hit.WorkID] = searchMatch{Label: workSearchLabel(hit.ChunkKind), Content: hit.Content}
 		}
 	}
 
@@ -184,10 +197,10 @@ func (pSrv *server) searchWorkIDs(ctx context.Context, vector []float64, limit i
 	var rows []row
 	err := pSrv.db.WithContext(ctx).Raw(
 		`
-		SELECT work_id, distance, chunk_kind, content
+		SELECT work_id, distance, chunk_kind, display_content AS content
 		FROM (
 			SELECT DISTINCT ON (work_id)
-				work_id, embedding <=> ?::vector AS distance, chunk_kind, content
+				work_id, embedding <=> ?::vector AS distance, chunk_kind, display_content
 			FROM isirmt_work_search_chunks
 			WHERE embedding_model = ?
 			ORDER BY work_id, distance ASC, chunk_kind ASC
