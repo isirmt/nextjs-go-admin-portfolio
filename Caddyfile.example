@@ -1,4 +1,9 @@
 example.com {
+  log {
+    output stdout
+    format json
+  }
+
   handle_errors {
     @upstream_error expression `{err.status_code} == 502 || {err.status_code} == 503 || {err.status_code} == 504`
     handle @upstream_error {
