@@ -245,12 +245,12 @@ export default function OpeningHeroPage() {
         <div className="flex flex-col items-center justify-center gap-6">
           <div className="animate-up-down-smooth flex flex-row items-center justify-center gap-12">
             <div className="relative flex size-26 items-center justify-center">
-              <div className="flex size-full items-center justify-center bg-[#f09ba9] text-8xl leading-none text-white">
+              <div className="flex size-full items-center justify-center rounded-md bg-[#f09ba9] text-8xl leading-none text-white">
                 色
               </div>
             </div>
             <div className="relative flex size-26 items-center justify-center">
-              <div className="flex size-full items-center justify-center bg-[#f4a18f] text-8xl leading-none text-white">
+              <div className="flex size-full items-center justify-center rounded-md bg-[#f4a18f] text-8xl leading-none text-white">
                 彩
               </div>
             </div>
@@ -258,7 +258,7 @@ export default function OpeningHeroPage() {
           <div className="flex flex-row items-center justify-center gap-12">
             <div className="group relative flex size-20 items-center justify-center">
               <button
-                className={`animate-up-down-smooth ease-over pointer-events-auto z-20 flex size-full cursor-pointer items-center justify-center bg-[#f8d16e] text-7xl leading-none text-white transition-[scale,background-color] delay-[0ms,800ms] duration-[350ms,1000ms] hover:scale-90 active:scale-80`}
+                className={`animate-up-down-smooth ease-over pointer-events-auto z-20 flex size-full cursor-pointer items-center justify-center rounded-md bg-[#f8d16e] text-7xl leading-none text-white transition-[scale,background-color] delay-[0ms,800ms] duration-[350ms,1000ms] hover:scale-90 active:scale-80`}
                 onClick={() =>
                   setColorfulOverride(
                     (current) => !(current ?? snapshot.state.isColorful),
@@ -271,12 +271,12 @@ export default function OpeningHeroPage() {
           </div>
           <div className="animate-up-down-smooth flex flex-row items-center justify-center gap-12">
             <div className="relative flex size-26 items-center justify-center">
-              <div className="flex size-full items-center justify-center bg-[#d9aeeb] text-8xl leading-none text-white">
+              <div className="flex size-full items-center justify-center rounded-md bg-[#d9aeeb] text-8xl leading-none text-white">
                 体
               </div>
             </div>
             <div className="relative flex size-26 items-center justify-center">
-              <div className="flex size-full items-center justify-center bg-[#9bd1a4] text-8xl leading-none text-white">
+              <div className="flex size-full items-center justify-center rounded-md bg-[#9bd1a4] text-8xl leading-none text-white">
                 験
               </div>
             </div>

@@ -99,7 +99,7 @@ export default function WorkCard({
             fill
             sizes="288px"
             quality={100}
-            className={`pointer-events-none object-cover transition-all duration-200 ease-out ${isSelected ? "skew-x-1 brightness-120 duration-100" : "group-hover:scale-110 group-hover:skew-x-1 group-hover:brightness-110"}`}
+            className={`pointer-events-none object-cover transition-all duration-200 ease-out ${isSelected ? "brightness-120 duration-100" : "group-hover:scale-110 group-hover:brightness-110"}`}
           />
         </div>
         <div
@@ -126,9 +126,9 @@ export default function WorkCard({
         {techsInfo.map((stack, techIdx) => (
           <div
             key={techIdx}
-            className={`relative flex scale-y-110 items-center gap-3 overflow-hidden bg-[#2a7186] px-2 py-px tracking-[.1rem] shadow-[.125rem_.125rem_0_0_#67c8e6] transition-all duration-150`}
+            className={`relative flex scale-y-110 items-center gap-3 overflow-hidden rounded-sm bg-[#307f97] px-2 py-px tracking-[.1rem] shadow-[.125rem_.125rem_0_0_#67c8e6] transition-all duration-150`}
           >
-            <span className="font-dot text-lg leading-none text-[#98e3fa]">
+            <span className="font-zen text-sm leading-none font-bold text-[#98e3fa]">
               {stack.name}
             </span>
           </div>

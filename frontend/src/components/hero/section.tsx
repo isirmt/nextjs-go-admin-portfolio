@@ -49,7 +49,7 @@ function HeroPageNavigation() {
                   y="2"
                   width="48"
                   height="48"
-                  rx="6"
+                  rx="8"
                   strokeDasharray="182"
                   strokeDashoffset="182"
                   style={{
@@ -62,7 +62,7 @@ function HeroPageNavigation() {
             <button
               type="button"
               onClick={() => goTo(page.id)}
-              className={`font-dot relative z-10 flex size-10 items-center justify-center rounded border-2 border-[#F43F5E] text-xl font-bold shadow transition-all select-none ${isCurrent ? "pointer-events-none rotate-45 bg-[#F43F5E] text-white" : "ease-over cursor-pointer bg-white text-[#F43F5E] duration-400 hover:scale-110 active:scale-95"}`}
+              className={`font-zen relative z-10 flex size-10 items-center justify-center rounded-md border-2 border-[#F43F5E] text-xl font-bold shadow transition-all select-none ${isCurrent ? "pointer-events-none rotate-45 bg-[#F43F5E] text-white" : "ease-over cursor-pointer bg-white text-[#F43F5E] duration-400 hover:scale-110 active:scale-95"}`}
             >
               <span
                 className={`transition-all ${isCurrent ? "-rotate-45" : ""}`}

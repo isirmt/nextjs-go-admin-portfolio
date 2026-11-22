@@ -1,7 +1,6 @@
 "use client";
 
 import { useInViewAnimation } from "@/hooks/useInViewAnimation";
-import { kiwiMaru } from "@/lib/fonts";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useRef, useState, type CSSProperties } from "react";
@@ -135,7 +134,7 @@ export default function ProfileCard({ isPrivacy }: ProfileCardProps) {
           alt="profile_text"
           className="pointer-events-none absolute hidden aspect-299/1059 h-full w-auto opacity-60 mix-blend-soft-light select-none lg:block"
         />
-        <div className="font-dot absolute -top-10 left-12 flex flex-col items-center justify-center select-none lg:left-24">
+        <div className="font-zen absolute -top-10 left-12 flex flex-col items-center justify-center font-medium text-[#5c3718] select-none lg:left-24">
           <h2
             id="profile"
             className="scroll-mt-30 text-6xl leading-none tracking-wider md:scroll-mt-34"
@@ -180,7 +179,7 @@ export default function ProfileCard({ isPrivacy }: ProfileCardProps) {
                 </Link>
               </div>
               <div
-                className={`${kiwiMaru.className} flex w-fit flex-col gap-3.5 text-base tracking-wide text-[#61230b]`}
+                className={`font-zen flex w-fit flex-col gap-3.5 text-base font-medium tracking-wide text-[#61230b]`}
               >
                 <div>a.k.a. irimoti / isirmt / itomiri</div>
                 {!isPrivacy && (

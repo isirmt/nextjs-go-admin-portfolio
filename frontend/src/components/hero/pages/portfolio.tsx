@@ -6,7 +6,6 @@ import { Suspense, useMemo } from "react";
 import { useWorksContext } from "@/contexts/worksContext";
 import Link from "next/link";
 import MarqueeText from "../../public/marqueeText";
-import { kiwiMaru } from "@/lib/fonts";
 import HeroPageFrame from "../pageFrame";
 import { useCustomMediaQuery } from "@/hooks/useCustomMediaQuery";
 
@@ -31,7 +30,7 @@ export default function PortfolioHeroPage() {
         {selectingWork ? (
           <div className="absolute flex w-full flex-col gap-2 px-10 text-center lg:px-20">
             <div
-              className={`${kiwiMaru.className} relative max-w-full text-6xl font-medium whitespace-nowrap text-[#751aab] md:text-8xl`}
+              className={`font-zen relative max-w-full text-6xl font-bold whitespace-nowrap text-[#751aab] md:text-8xl`}
             >
               <MarqueeText
                 speedFactor={120}
