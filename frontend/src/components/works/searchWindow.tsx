@@ -46,14 +46,17 @@ function WorkSearchResultItem({
           loading="lazy"
           decoding="async"
         />
-        <span className="min-w-0 flex-1">
-          <span className="block w-full truncate font-medium">
-            {work.title}
-          </span>
-          <span className="block w-full truncate text-[#888]">
-            {work.search_match?.content ?? work.description}
-          </span>
-        </span>
+        <div className="min-w-0 flex-1">
+          <div className="block w-full truncate font-medium">{work.title}</div>
+          <div className="mt-0.5 flex w-full items-center gap-2 text-[#888]">
+            <span className="bg-[#888] px-1 py-0.5 text-xs leading-none text-white">
+              {work.search_match?.label}
+            </span>
+            <span className="flex-1 truncate leading-none">
+              {work.search_match?.content ?? work.description}
+            </span>
+          </div>
+        </div>
         <span
           className="absolute top-0 right-0 size-6 [clip-path:polygon(0_0,100%_0,100%_100%)]"
           style={{ backgroundColor: work.accent_color }}
@@ -84,14 +87,21 @@ function BlogSearchResultItem({
           loading="lazy"
           decoding="async"
         />
-        <span className="min-w-0 flex-1">
-          <span className="block w-full truncate font-medium">
+        <div className="min-w-0 flex-1">
+          <div className="block w-full truncate font-medium">
             {article.title}
-          </span>
-          <span className="block w-full truncate text-[#888]">
-            {article.search_match?.content ?? article.excerpt}
-          </span>
-        </span>
+          </div>
+          <div className="mt-0.5 flex w-full items-center gap-2 text-[#888]">
+            {article.search_match?.label && (
+              <span className="bg-[#888] px-1 py-0.5 text-xs leading-none text-white">
+                {article.search_match.label}
+              </span>
+            )}
+            <span className="min-w-0 flex-1 truncate leading-none">
+              {article.search_match?.content ?? article.excerpt}
+            </span>
+          </div>
+        </div>
       </Link>
     </li>
   );
