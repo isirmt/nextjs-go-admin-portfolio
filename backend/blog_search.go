@@ -8,14 +8,9 @@ import (
 	"github.com/labstack/echo/v5"
 )
 
-type blogSearchMatch struct {
-	Heading string `json:"heading"`
-	Content string `json:"content"`
-}
-
 type blogSearchResponse struct {
 	blogArticleSummaryResponse
-	SearchMatch blogSearchMatch `json:"search_match"`
+	SearchMatch searchMatch `json:"search_match"`
 }
 
 func (pSrv *server) handleSearchBlogs(c *echo.Context) error {
@@ -79,7 +74,7 @@ func (pSrv *server) handleSearchBlogs(c *echo.Context) error {
 		if article := byID[item.ArticleID]; article != nil {
 			responses = append(responses, blogSearchResponse{
 				blogArticleSummaryResponse: blogArticleSummary(article, false),
-				SearchMatch:                blogSearchMatch{Heading: item.Heading, Content: item.Content},
+				SearchMatch:                searchMatch{Label: item.Heading, Content: item.Content},
 			})
 		}
 	}

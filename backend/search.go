@@ -31,8 +31,8 @@ type searchWorkHit struct {
 }
 
 type searchMatch struct {
-	ChunkKind string `json:"chunk_kind"`
-	Content   string `json:"content"`
+	Label   string `json:"label"`
+	Content string `json:"content"`
 }
 
 func (pSrv *server) embedQuery(ctx context.Context, queryText string) ([]float64, error) {
@@ -144,7 +144,7 @@ func (pSrv *server) handleSearchWorks(c *echo.Context) error {
 	for _, hit := range hits {
 		if work := workByID[hit.WorkID]; work != nil {
 			orderedWorks = append(orderedWorks, work)
-			matches[hit.WorkID] = searchMatch{ChunkKind: hit.ChunkKind, Content: hit.Content}
+			matches[hit.WorkID] = searchMatch{Label: hit.ChunkKind, Content: hit.Content}
 		}
 	}
 
