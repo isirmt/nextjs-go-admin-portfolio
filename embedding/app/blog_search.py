@@ -67,10 +67,34 @@ def build_blog_chunks(title: str, markdown: str) -> list[BlogChunk]:
     def token_count(value: str) -> int:
         return len(tokenizer.encode(f"passage: {value}", add_special_tokens=True))
 
-    chunks = [BlogChunk("タイトル", title, title)]
+    def longest_fitting_prefix(value: str, prefix: str, limit: int) -> str:
+        if token_count(prefix + value) <= limit:
+            return value
+        lower, upper = 0, len(value)
+        while lower < upper:
+            middle = (lower + upper + 1) // 2
+            if token_count(prefix + value[:middle]) <= limit:
+                lower = middle
+            else:
+                upper = middle - 1
+        return value[:lower]
+
+    title_for_search = longest_fitting_prefix(title, "", MAX_TOKENS)
+    context_title = longest_fitting_prefix(title, "", 64)
+    chunks = [BlogChunk("タイトル", title_for_search, title)]
     for heading, paragraphs in sections(markdown):
-        prefix = f"{title} / {heading}: "
+        context_heading = longest_fitting_prefix(heading, "", 64)
+        prefix = f"{context_title} / {context_heading}: "
         current = ""
+
+        def append_fitting(value: str) -> None:
+            nonlocal current
+            candidate = f"{current} {value}".strip()
+            if token_count(prefix + candidate) <= MAX_TOKENS:
+                current = candidate
+            else:
+                chunks.append(BlogChunk(heading, prefix + current, current))
+                current = value
 
         def append_text(value: str) -> None:
             nonlocal current
@@ -88,14 +112,15 @@ def build_blog_chunks(title: str, markdown: str) -> list[BlogChunk]:
                 if not sentence:
                     continue
                 if token_count(prefix + sentence) <= MAX_TOKENS:
-                    append_text(sentence)
+                    append_fitting(sentence)
                     continue
-                ids = tokenizer.encode(sentence, add_special_tokens=False)
-                budget = max(1, MAX_TOKENS - token_count(prefix) - 2)
-                for start in range(0, len(ids), budget):
-                    piece = tokenizer.decode(ids[start : start + budget]).strip()
-                    if piece:
-                        append_text(piece)
+                remaining = sentence
+                while remaining:
+                    piece = longest_fitting_prefix(remaining, prefix, MAX_TOKENS)
+                    if not piece:
+                        raise ValueError("blog search prefix leaves no room for content")
+                    append_fitting(piece)
+                    remaining = remaining[len(piece) :].lstrip()
 
         for paragraph in paragraphs:
             append_text(paragraph)
