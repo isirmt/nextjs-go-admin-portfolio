@@ -26,7 +26,7 @@ function WorkSearchResultItem({
   return (
     <li
       key={work.id}
-      className="relative flex cursor-pointer items-center gap-4 overflow-hidden rounded p-2 hover:bg-[#eee]/85 hover:backdrop-blur-2xl"
+      className="relative flex cursor-pointer items-center gap-4 overflow-hidden rounded p-2 select-none hover:bg-[#eee]/85 hover:backdrop-blur-2xl"
       onClick={() => {
         emitCubeClick(work.id);
         setIsOpen(false);
@@ -41,7 +41,9 @@ function WorkSearchResultItem({
       />
       <div className="min-w-0 flex-1">
         <div className="text w-full truncate font-medium">{work.title}</div>
-        <div className="w-full truncate">{work.description}</div>
+        <div className="w-full truncate text-[#888]">
+          {work.search_match?.content ?? work.description}
+        </div>
       </div>
       <div
         className="absolute top-0 right-0 size-6 [clip-path:polygon(0_0,100%_0,100%_100%)]"

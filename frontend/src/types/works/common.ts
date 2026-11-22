@@ -22,6 +22,10 @@ export type Work = {
   created_at: string;
   accent_color: string;
   description: string | null;
+  search_match?: {
+    chunk_kind: string;
+    content: string;
+  };
   thumbnail_image_id: string | null;
   images: WorkImage[];
   urls: WorkUrl[];
