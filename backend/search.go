@@ -24,8 +24,15 @@ type embedResponse struct {
 }
 
 type searchWorkHit struct {
-	WorkID   string
-	Distance float64
+	WorkID    string
+	Distance  float64
+	ChunkKind string
+	Content   string
+}
+
+type searchMatch struct {
+	ChunkKind string `json:"chunk_kind"`
+	Content   string `json:"content"`
 }
 
 func (pSrv *server) embedQuery(ctx context.Context, queryText string) ([]float64, error) {
@@ -133,13 +140,20 @@ func (pSrv *server) handleSearchWorks(c *echo.Context) error {
 	}
 
 	orderedWorks := make([]*model.IsirmtWork, 0, len(hits))
+	matches := make(map[string]searchMatch, len(hits))
 	for _, hit := range hits {
 		if work := workByID[hit.WorkID]; work != nil {
 			orderedWorks = append(orderedWorks, work)
+			matches[hit.WorkID] = searchMatch{ChunkKind: hit.ChunkKind, Content: hit.Content}
 		}
 	}
 
-	return pSrv.respondWorks(c, orderedWorks)
+	responses := buildWorkResponses(orderedWorks)
+	for i := range responses {
+		match := matches[responses[i].ID]
+		responses[i].SearchMatch = &match
+	}
+	return c.JSON(http.StatusOK, responses)
 }
 
 func formatVector(vector []float64) string {
@@ -161,20 +175,24 @@ func (pSrv *server) searchWorkIDs(ctx context.Context, vector []float64, limit i
 	vectorText := formatVector(vector)
 
 	type row struct {
-		WorkID   string  `gorm:"column:work_id"`
-		Distance float64 `gorm:"column:distance"`
+		WorkID    string  `gorm:"column:work_id"`
+		Distance  float64 `gorm:"column:distance"`
+		ChunkKind string  `gorm:"column:chunk_kind"`
+		Content   string  `gorm:"column:content"`
 	}
 
 	var rows []row
 	err := pSrv.db.WithContext(ctx).Raw(
 		`
-		SELECT
-			work_id,
-			MIN(embedding <=> ?::vector) AS distance
-		FROM isirmt_work_search_chunks
-		WHERE embedding_model = ?
-		GROUP BY work_id
-		ORDER BY distance ASC
+		SELECT work_id, distance, chunk_kind, content
+		FROM (
+			SELECT DISTINCT ON (work_id)
+				work_id, embedding <=> ?::vector AS distance, chunk_kind, content
+			FROM isirmt_work_search_chunks
+			WHERE embedding_model = ?
+			ORDER BY work_id, distance ASC, chunk_kind ASC
+		) AS closest_chunks
+		ORDER BY distance ASC, work_id ASC
 		LIMIT ?
 		`,
 		vectorText,
@@ -188,8 +206,10 @@ func (pSrv *server) searchWorkIDs(ctx context.Context, vector []float64, limit i
 	hits := make([]searchWorkHit, 0, len(rows))
 	for _, row := range rows {
 		hits = append(hits, searchWorkHit{
-			WorkID:   row.WorkID,
-			Distance: row.Distance,
+			WorkID:    row.WorkID,
+			Distance:  row.Distance,
+			ChunkKind: row.ChunkKind,
+			Content:   row.Content,
 		})
 	}
 

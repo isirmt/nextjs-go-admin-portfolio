@@ -22,6 +22,7 @@ type workResponse struct {
 	Images           []*model.IsirmtWorkImage `json:"images"`
 	Urls             []*model.IsirmtWorkURL   `json:"urls"`
 	TechStacks       []*model.CommonTechStack `json:"tech_stacks"`
+	SearchMatch      *searchMatch             `json:"search_match,omitempty"`
 }
 
 func (pSrv *server) withWorkRelations(workQuery query.IIsirmtWorkDo) query.IIsirmtWorkDo {
@@ -33,6 +34,10 @@ func (pSrv *server) withWorkRelations(workQuery query.IIsirmtWorkDo) query.IIsir
 }
 
 func (pSrv *server) respondWorks(c *echo.Context, works []*model.IsirmtWork) error {
+	return c.JSON(http.StatusOK, buildWorkResponses(works))
+}
+
+func buildWorkResponses(works []*model.IsirmtWork) []workResponse {
 	responses := make([]workResponse, 0, len(works))
 	for _, work := range works {
 		if work.ID == nil {
@@ -74,7 +79,7 @@ func (pSrv *server) respondWorks(c *echo.Context, works []*model.IsirmtWork) err
 		})
 	}
 
-	return c.JSON(http.StatusOK, responses)
+	return responses
 }
 
 func (pSrv *server) handleGetWorks(c *echo.Context) error {
