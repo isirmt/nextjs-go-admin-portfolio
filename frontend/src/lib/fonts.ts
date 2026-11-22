@@ -8,6 +8,7 @@ import {
   Smooch_Sans,
   Kiwi_Maru,
   LINE_Seed_JP,
+  Zen_Maru_Gothic,
 } from "next/font/google";
 
 // 既定のフォント
@@ -53,6 +54,13 @@ export const kiwiMaru = Kiwi_Maru({
 });
 
 export const lineSeedJp = LINE_Seed_JP({
+  weight: ["400", "700"],
+  subsets: ["latin"],
+  adjustFontFallback: false,
+  fallback: ["sans-serif"],
+});
+
+export const zenMaruGothic = Zen_Maru_Gothic({
   weight: ["400", "700"],
   subsets: ["latin"],
   adjustFontFallback: false,

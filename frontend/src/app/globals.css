@@ -8,6 +8,7 @@
   --color-foreground: var(--foreground);
   --font-noto: var(--font-noto-sans);
   --font-dot: Pixelify Sans, DotGothic16;
+  --font-zen: Zen Maru Gothic, sans-serif;
   --ease-over: cubic-bezier(0.34, 1.56, 0.64, 1);
   --animate-jump: jump 1s cubic-bezier(0, 0.5, 0.02, 1.69) 1;
   --animate-up-down: up-down 2s steps(10, jump-none) infinite alternate;

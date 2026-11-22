@@ -39,13 +39,15 @@ export default function NavigationMenuItem({
       <Link
         href={href}
         onClick={handleClick}
-        className="pointer-events-auto inline-flex flex-col items-center justify-center text-[#333] transition-all duration-200 hover:scale-105 hover:text-[#6354EB]"
+        className="pointer-events-auto inline-flex flex-col items-center justify-center text-[#555] transition-all duration-200 hover:scale-105 hover:text-[#6354EB]"
       >
         <div
           className="h-12 w-12 bg-cover bg-center"
           style={{ backgroundImage: `url(${thumbnail})` }}
         />
-        {label && <div className="text-2xl leading-none">{label}</div>}
+        {label && (
+          <div className="text-2xl leading-tight font-bold">{label}</div>
+        )}
         {subLabel && <div className="text-xs leading-none">{subLabel}</div>}
       </Link>
     </li>

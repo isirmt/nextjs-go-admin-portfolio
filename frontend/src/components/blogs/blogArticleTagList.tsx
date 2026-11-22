@@ -22,16 +22,16 @@ export default function BlogArticleTagList({
       {visibleTags.map((tag) => (
         <div
           key={tag.id}
-          className="relative flex scale-y-110 items-center gap-3 overflow-hidden bg-[#2a7186] px-2 py-px tracking-[.1rem] shadow-[.125rem_.125rem_0_0_#67c8e6] transition-all duration-150"
+          className="relative flex scale-y-110 items-center gap-3 overflow-hidden rounded-sm bg-[#307f97] px-2 py-px tracking-[.1rem] shadow-[.125rem_.125rem_0_0_#67c8e6] transition-all duration-150"
         >
-          <span className="font-dot text-lg leading-none text-[#98e3fa]">
+          <span className="font-zen text-sm leading-none font-bold text-[#98e3fa]">
             {tag.name}
           </span>
         </div>
       ))}
       {remainingCount > 0 && (
-        <div className="relative flex scale-y-110 items-center gap-3 overflow-hidden bg-[#2a7186] px-2 py-px tracking-[.1rem] shadow-[.125rem_.125rem_0_0_#67c8e6]">
-          <span className="font-dot text-lg leading-none text-[#98e3fa]">
+        <div className="relative flex scale-y-110 items-center gap-3 overflow-hidden bg-[#307f97] px-2 py-px tracking-[.1rem] shadow-[.125rem_.125rem_0_0_#67c8e6]">
+          <span className="font-zen text-sm leading-none font-bold text-[#98e3fa]">
             +{remainingCount}
           </span>
         </div>
