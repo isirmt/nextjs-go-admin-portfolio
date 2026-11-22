@@ -297,7 +297,7 @@ export default function SearchWindow({
         </div>
       </div>
       {isOpen && (
-        <div className="pointer-events-auto relative z-0 max-h-[calc(100vh-11rem)] w-128 max-w-full overflow-y-auto rounded border border-[#ccc] bg-[#fafafa] p-4 md:max-h-[calc(100vh-8rem)] md:rounded-none md:border-transparent md:bg-transparent">
+        <div className="pointer-events-auto relative z-0 max-h-[calc(100vh-11rem)] w-128 max-w-full overflow-y-auto rounded border border-[#ccc] bg-[#fafafa] p-4 select-none md:max-h-[calc(100vh-8rem)] md:rounded-none md:border-transparent md:bg-transparent">
           {!query && (
             <p className="font-dot my-2 text-center text-xl font-bold select-none">
               Featured
