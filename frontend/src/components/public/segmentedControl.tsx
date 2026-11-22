@@ -39,7 +39,7 @@ export default function SegmentedControl<T extends string>({
         return (
           <label
             key={option.value}
-            className={`group relative z-10 flex cursor-pointer items-center justify-center rounded-full px-2 py-1 text-sm transition-colors select-none ${selected ? "text-white" : "text-[#6354EB]"}`}
+            className={`group relative z-10 flex cursor-pointer items-center justify-center rounded-full px-2 py-1 text-sm transition-colors select-none ${selected ? "pointer-events-none text-white" : "text-[#6354EB]"}`}
           >
             <span
               className={`absolute h-[calc(100%-0.25rem)] w-9/10 rounded-full bg-transparent transition-all group-hover:bg-[#e4e0ff] ${selected ? "hidden" : "block"}`}
