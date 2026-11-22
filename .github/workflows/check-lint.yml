@@ -10,6 +10,18 @@ permissions:
   contents: read
 
 jobs:
+  lint-caddy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Validate Caddyfile example
+        run: |
+          docker run --rm \
+            --mount "type=bind,src=$PWD/Caddyfile.example,dst=/etc/caddy/Caddyfile,readonly" \
+            caddy:2 caddy validate --config /etc/caddy/Caddyfile
+
   lint-frontend:
     runs-on: ubuntu-latest
     steps:
