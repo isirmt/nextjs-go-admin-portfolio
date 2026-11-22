@@ -130,6 +130,7 @@ func main() {
 
 	epBlogs := router.Group("/blogs")
 	epBlogs.GET("", pSrv.handleGetBlogArticles)
+	epBlogs.GET("/search", pSrv.handleSearchBlogs)
 	epBlogs.POST("", pSrv.requireAdmin(pSrv.handleCreateBlogArticle))
 	epBlogs.GET("/previews/:token", pSrv.handleGetBlogPreview)
 	epBlogs.GET("/:identifier/related", pSrv.handleGetRelatedBlogArticles)
