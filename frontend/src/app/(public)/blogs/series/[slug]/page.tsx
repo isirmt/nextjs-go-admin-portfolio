@@ -6,6 +6,7 @@ import { delaGothicOne } from "@/lib/fonts";
 import { getPublicBlogSeries } from "@/lib/blogs/publicApi";
 import Link from "next/link";
 import Arrow from "@/components/shapes/arrow";
+import BlogSearchWindow from "@/components/works/blogSearchWindow";
 
 type BlogSeriesPageProps = {
   params: Promise<{ slug: string }>;
@@ -33,6 +34,7 @@ export default async function BlogSeriesPage({ params }: BlogSeriesPageProps) {
 
   return (
     <main className="relative w-full pb-40">
+      <BlogSearchWindow />
       <PageContentHeader>
         <h1
           className={`${delaGothicOne.className} relative z-3 text-center text-4xl font-bold text-[#12385f]`}

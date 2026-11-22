@@ -3,6 +3,7 @@ import { getPublicBlogArticles } from "@/lib/blogs/publicApi";
 import PageContentHeader from "@/components/public/pageContentHeader";
 import BlogArticlesList from "@/components/blogs/blogArticlesList";
 import { delaGothicOne } from "@/lib/fonts";
+import BlogSearchWindow from "@/components/works/blogSearchWindow";
 
 export const metadata: Metadata = {
   title: "ブログ",
@@ -15,6 +16,7 @@ export default async function BlogsPage() {
 
   return (
     <main className="relative w-full pb-40">
+      <BlogSearchWindow />
       <PageContentHeader hideSparkles hideShootingStars>
         <video
           src="/blog_header_mov.mp4"
