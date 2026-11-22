@@ -39,9 +39,9 @@ func (pSrv *server) handleSearchBlogs(c *echo.Context) error {
 	}
 	var hits []hit
 	err = pSrv.db.WithContext(ctx).Raw(`
-		SELECT article_id, heading, content FROM (
+		SELECT article_id, heading, display_content AS content FROM (
 			SELECT DISTINCT ON (chunks.article_id)
-				chunks.article_id, chunks.heading, chunks.content,
+				chunks.article_id, chunks.heading, chunks.display_content,
 				chunks.embedding <=> ?::vector AS distance
 			FROM blog_search_chunks AS chunks
 			JOIN blog_articles AS articles ON articles.id = chunks.article_id

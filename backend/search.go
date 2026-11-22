@@ -184,10 +184,10 @@ func (pSrv *server) searchWorkIDs(ctx context.Context, vector []float64, limit i
 	var rows []row
 	err := pSrv.db.WithContext(ctx).Raw(
 		`
-		SELECT work_id, distance, chunk_kind, content
+		SELECT work_id, distance, chunk_kind, display_content AS content
 		FROM (
 			SELECT DISTINCT ON (work_id)
-				work_id, embedding <=> ?::vector AS distance, chunk_kind, content
+				work_id, embedding <=> ?::vector AS distance, chunk_kind, display_content
 			FROM isirmt_work_search_chunks
 			WHERE embedding_model = ?
 			ORDER BY work_id, distance ASC, chunk_kind ASC
