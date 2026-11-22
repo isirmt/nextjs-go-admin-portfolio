@@ -8,6 +8,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel, Field
 
 from app.embedder import embed_passages, embed_queries, get_model
+from app.blog_search import reindex_blogs
 from app.reindex import main as run_reindex
 
 logger = logging.getLogger(__name__)
@@ -32,7 +33,11 @@ async def reindex_periodically() -> None:
         try:
             await asyncio.to_thread(run_reindex)
         except Exception:
-            logger.exception("failed to reindex search embeddings")
+            logger.exception("failed to reindex work embeddings")
+        try:
+            await asyncio.to_thread(reindex_blogs)
+        except Exception:
+            logger.exception("failed to reindex blog embeddings")
 
         await asyncio.sleep(reindex_interval_seconds)
 
