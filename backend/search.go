@@ -35,6 +35,19 @@ type searchMatch struct {
 	Content string `json:"content"`
 }
 
+func workSearchLabel(chunkKind string) string {
+	switch chunkKind {
+	case "summary":
+		return "概要"
+	case "description":
+		return "説明"
+	case "tech_stacks":
+		return "使用技術"
+	default:
+		return chunkKind
+	}
+}
+
 func (pSrv *server) embedQuery(ctx context.Context, queryText string) ([]float64, error) {
 	if pSrv.embeddingBaseURL == "" {
 		return nil, errors.New("embedding base url is not configured")
@@ -144,7 +157,7 @@ func (pSrv *server) handleSearchWorks(c *echo.Context) error {
 	for _, hit := range hits {
 		if work := workByID[hit.WorkID]; work != nil {
 			orderedWorks = append(orderedWorks, work)
-			matches[hit.WorkID] = searchMatch{Label: hit.ChunkKind, Content: hit.Content}
+			matches[hit.WorkID] = searchMatch{Label: workSearchLabel(hit.ChunkKind), Content: hit.Content}
 		}
 	}
 
