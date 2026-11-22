@@ -49,9 +49,11 @@ function WorkSearchResultItem({
         <div className="min-w-0 flex-1">
           <div className="block w-full truncate font-medium">{work.title}</div>
           <div className="mt-0.5 flex w-full items-center gap-2 text-[#888]">
-            <span className="bg-[#888] px-1 py-0.5 text-xs leading-none text-white">
-              {work.search_match?.label}
-            </span>
+            {work.search_match?.label && (
+              <span className="bg-[#888] px-1 py-0.5 text-xs leading-none text-white">
+                {work.search_match?.label}
+              </span>
+            )}
             <span className="flex-1 truncate leading-none">
               {work.search_match?.content ?? work.description}
             </span>
