@@ -31,7 +31,7 @@ export default function PortfolioHeroPage() {
         {selectingWork ? (
           <div className="absolute flex w-full flex-col gap-2 px-10 text-center lg:px-20">
             <div
-              className={`${kiwiMaru.className} relative max-w-full text-6xl font-medium whitespace-nowrap text-[#751aab] md:text-8xl`}
+              className={`font-zen relative max-w-full text-6xl font-bold whitespace-nowrap text-[#751aab] md:text-8xl`}
             >
               <MarqueeText
                 speedFactor={120}

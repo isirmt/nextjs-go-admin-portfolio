@@ -99,7 +99,7 @@ export default function WorkCard({
             fill
             sizes="288px"
             quality={100}
-            className={`pointer-events-none object-cover transition-all duration-200 ease-out ${isSelected ? "skew-x-1 brightness-120 duration-100" : "group-hover:scale-110 group-hover:skew-x-1 group-hover:brightness-110"}`}
+            className={`pointer-events-none object-cover transition-all duration-200 ease-out ${isSelected ? "brightness-120 duration-100" : "group-hover:scale-110 group-hover:brightness-110"}`}
           />
         </div>
         <div

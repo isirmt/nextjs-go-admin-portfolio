@@ -82,7 +82,7 @@ export default function LatestArticleSection() {
         href="/blogs"
         className={`font-noto relative z-10 overflow-hidden rounded-full bg-[#4f89a3] px-6 py-3 text-xl font-bold text-[#e7f3ff] filter-[drop-shadow(0.2rem_0.2rem_0_#c5dbec)] transition-colors select-none before:pointer-events-none before:absolute before:inset-y-0 before:-left-[75%] before:w-1/3 before:-skew-x-20 before:bg-white/50 before:transition-transform before:duration-400 hover:bg-[#649ac0] hover:before:translate-x-[450%]`}
       >
-        <span className="relative z-10 tracking-wide">投稿一覧</span>
+        <span className="relative z-10 tracking-wider">投稿一覧</span>
       </Link>
     </div>
   );

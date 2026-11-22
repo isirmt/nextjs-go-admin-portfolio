@@ -468,7 +468,7 @@ export default function RealtimeWorld() {
         </Canvas>
       </div>
       <div className="absolute top-24 right-6 hidden flex-row-reverse gap-4 md:flex">
-        <div className="font-dot relative flex items-center gap-2 rounded-full border border-[#ccc] bg-white px-4 py-1 text-xl leading-none text-[#333] shadow-[0_2px_0_#ccc] drop-shadow-sm backdrop-blur-2xl select-none">
+        <div className="font-zen relative flex items-center gap-2 rounded-full border border-[#ccc] bg-white px-4 py-1 text-xl leading-none text-[#555] shadow-[0_2px_0_#ccc] drop-shadow-sm backdrop-blur-2xl select-none">
           <span
             className={`size-3 rounded-full ${isSpawnEnded ? "bg-[#777]" : "animate-pulse bg-[#f06363]"}`}
           />
