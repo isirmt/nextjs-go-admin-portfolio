@@ -89,11 +89,11 @@
 }
 
 .markdown ul:not(.contains-task-list) li {
-  @apply list-disc;
+  @apply list-disc marker:text-blue-800;
 }
 
 .markdown ol li {
-  @apply list-decimal;
+  @apply list-decimal marker:text-blue-800;
 }
 
 .markdown table {
