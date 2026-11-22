@@ -264,7 +264,7 @@ export default function SearchWindow({
               onFocus={() => setIsOpen(true)}
               onChange={(event) => setSearchTerm(event.target.value)}
               placeholder={isOpen ? "キーワードを入力" : ""}
-              className={`font-noto pointer-events-auto block h-12 w-full rounded-full border border-[#6354EB] bg-white shadow-sm shadow-[#ccc] outline-none hover:border-[#6354EB] focus:border-[#6354EB] active:border-[#6354EB] md:border-[#ccc] ${isOpen ? "py-1 pr-4 pl-12.5 text-[#333] md:shadow-none" : "cursor-pointer p-0 text-transparent select-none md:cursor-auto md:py-1 md:pr-4 md:pl-12.5 md:text-[#333] md:shadow-md md:select-auto"}`}
+              className={`font-noto pointer-events-auto block h-12 w-full rounded-full border border-[#6354EB] bg-white outline-none hover:border-[#6354EB] focus:border-[#6354EB] active:border-[#6354EB] md:border-[#ccc] ${isOpen ? "py-1 pr-4 pl-12.5 text-[#333] md:shadow-none" : "cursor-pointer p-0 text-transparent transition-[box-shadow,border] duration-150 select-none md:cursor-auto md:py-1 md:pr-4 md:pl-12.5 md:text-[#333] md:shadow-[0_2px_0_#ccc] md:drop-shadow-sm md:select-auto md:hover:shadow-[0_2px_0_#6354EB]"}`}
             />
             <div
               className={`pointer-events-none absolute top-2.5 z-10 ${isOpen ? "left-3.5" : "left-2 md:left-3.5"}`}
