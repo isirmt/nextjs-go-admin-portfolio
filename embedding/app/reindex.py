@@ -11,6 +11,7 @@ class SearchChunk:
     work_id: str
     chunk_kind: str
     content: str
+    display_content: str
     content_hash: str
 
 
@@ -22,7 +23,9 @@ def hash_content(content: str) -> str:
     return hashlib.sha256(content.encode("utf-8")).hexdigest()
 
 
-def make_chunk(work_id: str, chunk_kind: str, content: str) -> SearchChunk | None:
+def make_chunk(
+    work_id: str, chunk_kind: str, content: str, display_content: str
+) -> SearchChunk | None:
     normalized = normalize_text(content)
     if not normalized:
         return None
@@ -31,6 +34,7 @@ def make_chunk(work_id: str, chunk_kind: str, content: str) -> SearchChunk | Non
         work_id=work_id,
         chunk_kind=chunk_kind,
         content=normalized,
+        display_content=normalize_text(display_content),
         content_hash=hash_content(normalized),
     )
 
@@ -43,6 +47,7 @@ def build_chunks(work: dict[str, Any]) -> list[SearchChunk]:
         work_id,
         "summary",
         f"タイトル: {work['title']}。 概要: {work['comment']}。",
+        work["comment"] or work["title"],
     )
     if summary:
         chunks.append(summary)
@@ -51,19 +56,22 @@ def build_chunks(work: dict[str, Any]) -> list[SearchChunk]:
         work_id,
         "description",
         work.get("description") or "",
+        work.get("description") or "",
     )
     if description:
         chunks.append(description)
 
     tech_stacks = work.get("tech_stacks") or []
     tech_content = "、".join(tech_stacks)
-    tech_chunk = make_chunk(
-        work_id,
-        "tech_stacks",
-        f"使用技術: {tech_content}。",
-    )
-    if tech_chunk:
-        chunks.append(tech_chunk)
+    if tech_content:
+        tech_chunk = make_chunk(
+            work_id,
+            "tech_stacks",
+            f"使用技術: {tech_content}。",
+            tech_content,
+        )
+        if tech_chunk:
+            chunks.append(tech_chunk)
 
     return chunks
 

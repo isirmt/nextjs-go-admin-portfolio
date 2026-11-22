@@ -58,9 +58,10 @@ def save_search_chunks(
                       chunk_kind,
                       content_hash,
                       content,
+                      display_content,
                       embedding_model,
                       embedding
-                  ) VALUES (%s, %s, %s, %s, %s, %s::vector)
+                  ) VALUES (%s, %s, %s, %s, %s, %s, %s::vector)
                   """,
                 [
                     (
@@ -68,6 +69,7 @@ def save_search_chunks(
                         chunk["chunk_kind"],
                         chunk["content_hash"],
                         chunk["content"],
+                        chunk["display_content"],
                         embedding_model,
                         chunk["embedding"],
                     )
@@ -118,8 +120,8 @@ def save_blog_search_chunks(article_id: str, chunks: list[dict], embedding_model
             cur.executemany(
                 """
                 INSERT INTO blog_search_chunks
-                  (article_id, chunk_index, heading, content, embedding_model, embedding)
-                VALUES (%s, %s, %s, %s, %s, %s::vector)
+                  (article_id, chunk_index, heading, content, display_content, embedding_model, embedding)
+                VALUES (%s, %s, %s, %s, %s, %s, %s::vector)
                 """,
                 [
                     (
@@ -127,6 +129,7 @@ def save_blog_search_chunks(article_id: str, chunks: list[dict], embedding_model
                         chunk["chunk_index"],
                         chunk["heading"],
                         chunk["content"],
+                        chunk["display_content"],
                         embedding_model,
                         chunk["embedding"],
                     )
