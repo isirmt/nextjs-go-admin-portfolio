@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import SegmentedControl from "./segmentedControl";
 
 type TagAndSortControlsProps<T extends string> = {
   tags: { id: string; name: string }[];
@@ -24,9 +25,6 @@ export default function TagAndSortControls<T extends string>({
   sortName,
 }: TagAndSortControlsProps<T>) {
   const [isOpeningFilter, setIsOpeningFilter] = useState(false);
-  const selectedSortIndex = sortOptions.findIndex(
-    (option) => option.value === sort,
-  );
 
   return (
     <div className="relative mt-8 mb-28 flex w-full flex-col items-center justify-center sm:items-end">
@@ -39,43 +37,12 @@ export default function TagAndSortControls<T extends string>({
             AND Filter
           </button>
         </div>
-        <fieldset
-          className="relative grid w-64 rounded-full border border-[#6354EB] bg-white p-0.5"
-          style={{
-            gridTemplateColumns: `repeat(${sortOptions.length}, minmax(0, 1fr))`,
-          }}
-        >
-          <span
-            aria-hidden
-            className="pointer-events-none absolute top-1 bottom-1 left-1 rounded-full bg-[#6354EB] transition-transform duration-150 ease-out"
-            style={{
-              width: `calc((100% - 0.5rem) / ${sortOptions.length})`,
-              transform: `translateX(${Math.max(selectedSortIndex, 0) * 100}%)`,
-            }}
-          />
-          {sortOptions.map((option) => {
-            const isSelected = sort === option.value;
-            return (
-              <label
-                key={option.value}
-                className={`group relative z-10 flex cursor-pointer items-center justify-center rounded-full px-3 py-1 text-sm transition-colors select-none ${isSelected ? "text-white" : "text-[#6354EB]"}`}
-              >
-                <span
-                  className={`absolute h-[calc(100%-0.25rem)] w-9/10 rounded-full bg-transparent transition-all group-hover:bg-[#e4e0ff] ${isSelected ? "hidden" : "block"}`}
-                />
-                <input
-                  className="sr-only"
-                  type="radio"
-                  name={sortName}
-                  value={option.value}
-                  checked={isSelected}
-                  onChange={() => onSortChange(option.value)}
-                />
-                <span className="relative z-10">{option.label}</span>
-              </label>
-            );
-          })}
-        </fieldset>
+        <SegmentedControl
+          value={sort}
+          options={sortOptions}
+          onChange={onSortChange}
+          name={sortName}
+        />
       </div>
       {isOpeningFilter ? (
         <div className="relative flex w-full flex-col space-y-2">
