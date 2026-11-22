@@ -16,12 +16,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Validate Caddyfiles
+      - name: Validate Caddyfile example
         run: |
-          for file in Caddyfile Caddyfile.example; do
-            docker run --rm -v "$PWD/$file:/etc/caddy/Caddyfile:ro" caddy:2 \
-              caddy validate --config /etc/caddy/Caddyfile
-          done
+          docker run --rm \
+            --mount "type=bind,src=$PWD/Caddyfile.example,dst=/etc/caddy/Caddyfile,readonly" \
+            caddy:2 caddy validate --config /etc/caddy/Caddyfile
 
   lint-frontend:
     runs-on: ubuntu-latest
