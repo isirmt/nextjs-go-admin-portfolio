@@ -6,7 +6,7 @@ export default function DateCard({ date }: { date: string }) {
 
   return (
     <time dateTime={date}>
-      <div title={date} className="flex items-center">
+      <div title={date} className="font-zen flex items-center text-[#093046]">
         <span
           className={`${lineSeedJp.className} w-6 translate-y-4 -rotate-90 text-sm leading-4`}
         >

@@ -6,7 +6,6 @@ import { Suspense, useMemo } from "react";
 import { useWorksContext } from "@/contexts/worksContext";
 import Link from "next/link";
 import MarqueeText from "../../public/marqueeText";
-import { kiwiMaru } from "@/lib/fonts";
 import HeroPageFrame from "../pageFrame";
 import { useCustomMediaQuery } from "@/hooks/useCustomMediaQuery";
 
