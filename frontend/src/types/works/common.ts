@@ -1,4 +1,5 @@
 import type { CommonTechStack } from "@/types/techStacks/common";
+import type { SearchMatch } from "@/types/search/common";
 
 export type WorkImage = {
   id: string;
@@ -22,10 +23,7 @@ export type Work = {
   created_at: string;
   accent_color: string;
   description: string | null;
-  search_match?: {
-    chunk_kind: string;
-    content: string;
-  };
+  search_match?: SearchMatch;
   thumbnail_image_id: string | null;
   images: WorkImage[];
   urls: WorkUrl[];

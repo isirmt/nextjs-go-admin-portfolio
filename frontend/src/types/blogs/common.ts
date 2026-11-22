@@ -1,3 +1,5 @@
+import type { SearchMatch } from "@/types/search/common";
+
 export type BlogArticleStatus = "draft" | "published";
 
 export type BlogTag = {
@@ -23,6 +25,7 @@ export type BlogArticleSummary = {
   published_at: string | null;
   updated_at: string;
   tags: BlogTag[];
+  search_match?: SearchMatch;
 };
 
 export type BlogArticle = BlogArticleSummary & {
