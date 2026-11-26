@@ -39,6 +39,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      backend:
+        condition: service_healthy
     restart: unless-stopped
 
   backend:
@@ -57,6 +59,12 @@ services:
       - ./backend:/app
       - go_mod_cache:/go/pkg/mod
       - ./uploads:/uploads
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -fsS http://127.0.0.1:4000/healthz > /dev/null" ]
+      interval: 5s
+      timeout: 3s
+      retries: 24
+      start_period: 60s
     depends_on:
       db:
         condition: service_healthy
