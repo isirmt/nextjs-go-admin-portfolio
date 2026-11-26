@@ -115,8 +115,16 @@ jobs:
             COMPOSE_FILES="$COMPOSE_FILES -f compose.vm.local.yml"
           fi
 
-          APP_SERVICES=$(docker compose $COMPOSE_FILES config --services | grep -Ev '^(db|migrate|caddy)$')
-          docker compose $COMPOSE_FILES up -d --force-recreate --no-deps $APP_SERVICES
+          docker compose $COMPOSE_FILES stop web
+          docker compose $COMPOSE_FILES up -d --wait embedding
+          docker compose $COMPOSE_FILES up -d --force-recreate --no-deps --wait backend
+
+          EXTRA_SERVICES=$(docker compose $COMPOSE_FILES config --services | grep -Ev '^(db|migrate|caddy|embedding|backend|web)$' || true)
+          if [ -n "$EXTRA_SERVICES" ]; then
+            docker compose $COMPOSE_FILES up -d --force-recreate --no-deps $EXTRA_SERVICES
+          fi
+
+          docker compose $COMPOSE_FILES up -d --force-recreate --no-deps web
           docker compose $COMPOSE_FILES ps
           docker compose $COMPOSE_FILES images
           SCRIPT
