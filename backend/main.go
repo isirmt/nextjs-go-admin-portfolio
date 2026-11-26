@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -16,7 +17,30 @@ import (
 	gormlog "gorm.io/gorm/logger"
 )
 
+func runHealthcheck(addr string) error {
+	client := &http.Client{Timeout: 3 * time.Second}
+	resp, err := client.Get("http://" + addr + "/healthz")
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("unexpected healthcheck status: %d", resp.StatusCode)
+	}
+
+	return nil
+}
+
 func main() {
+	if len(os.Args) > 1 && os.Args[1] == "healthcheck" {
+		addr := "127.0.0.1:" + getEnv("PORT", "4000")
+		if err := runHealthcheck(addr); err != nil {
+			log.Fatalf("healthcheck failed: %v", err)
+		}
+		return
+	}
+
 	dbUrl := os.Getenv("DATABASE_URL")
 	if dbUrl == "" {
 		log.Fatalf("dbUrl isn't set.")

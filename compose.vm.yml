@@ -32,6 +32,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      backend:
+        condition: service_healthy
     restart: unless-stopped
 
   backend:
@@ -46,6 +48,11 @@ services:
       INDEXNOW_ENABLED: ${INDEXNOW_ENABLED:-true}
     volumes:
       - ./uploads:/uploads
+    healthcheck:
+      test: [ "CMD", "/backend", "healthcheck" ]
+      interval: 3s
+      timeout: 3s
+      retries: 20
     restart: unless-stopped
     depends_on:
       db:

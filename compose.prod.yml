@@ -34,6 +34,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      backend:
+        condition: service_healthy
     restart: unless-stopped
 
   backend:
@@ -44,6 +46,11 @@ services:
       DATABASE_URL: ${DATABASE_URL}
       ALLOWED_ORIGIN: ${ALLOWED_ORIGIN}
       ADMIN_SECRET: ${ADMIN_SECRET}
+    healthcheck:
+      test: [ "CMD", "/backend", "healthcheck" ]
+      interval: 3s
+      timeout: 3s
+      retries: 20
     restart: unless-stopped
     depends_on:
       db:

@@ -1,8 +1,10 @@
 package main
 
 import (
+	"context"
 	"net/http"
 	"realtime/internal/query"
+	"time"
 
 	"github.com/labstack/echo/v5"
 	"gorm.io/gorm"
@@ -25,5 +27,17 @@ type server struct {
 }
 
 func (pSrv *server) handleHealth(c *echo.Context) error {
-	return c.String(200, "ok")
+	sqlDb, err := pSrv.db.DB()
+	if err != nil {
+		return c.String(http.StatusServiceUnavailable, "service unavailable")
+	}
+
+	ctx, cancel := context.WithTimeout(c.Request().Context(), 2*time.Second)
+	defer cancel()
+
+	if err := sqlDb.PingContext(ctx); err != nil {
+		return c.String(http.StatusServiceUnavailable, "service failed")
+	}
+
+	return c.String(http.StatusOK, "ok")
 }
