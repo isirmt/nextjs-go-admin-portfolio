@@ -13,7 +13,14 @@
     {
       "matchUpdateTypes": ["patch"],
       "automerge": true,
-      "prConcurrentLimit": 0
+      "prConcurrentLimit": 0,
+      "bumpVersions": [
+        {
+          "filePatterns": ["VERSION"],
+          "matchStrings": ["^(?<version>\\d+\\.\\d+\\.\\d+)$"],
+          "bumpType": "patch"
+        }
+      ]
     }
   ]
 }
